@@ -46,4 +46,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function tips()
+    {
+        return $this->hasMany(Tip::class);
+    }
 }
