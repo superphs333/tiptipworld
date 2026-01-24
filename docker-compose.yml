@@ -1,0 +1,72 @@
+services:
+  # 1) PHP 엔진: 라라벨 로직 실행 유닛임
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    # 모든 이름을 tiptipworld로 통일함
+    container_name: tiptipworld-php
+    restart: unless-stopped
+    user: "1000:1000"
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
+    environment:
+      PHP_IDE_CONFIG: "serverName=docker"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - tiptip-internal # 전용 네트워크 이름 변경함
+    ports:
+      - "5173:5173"
+
+  # 2) 웹 서버: Nginx 환경임
+  web:
+    image: nginx:1.24-alpine
+    container_name: tiptipworld-web
+    restart: unless-stopped
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - proxy-nw
+      - tiptip-internal
+
+  # 3) 데이터베이스: MariaDB 환경임
+  db:
+    image: mariadb:10.11
+    container_name: tiptipworld-db
+    restart: always
+    environment:
+      # .env 파일의 변수들도 tiptipworld 기준으로 매칭될 것임
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - tiptip_db_data:/var/lib/mysql # 데이터 저장소 이름 변경함
+    networks:
+      - tiptip-internal
+
+  # 4) Redis: 캐시 관리임
+  redis:
+    image: redis:7.2-alpine
+    container_name: tiptipworld-redis
+    restart: unless-stopped
+    networks:
+      - tiptip-internal
+
+# 영구 보관용 볼륨 정의임
+volumes:
+  tiptip_db_data:
+
+# 네트워크 설계임
+networks:
+  proxy-nw:
+    external: true
+  tiptip-internal:
+    driver: bridge
