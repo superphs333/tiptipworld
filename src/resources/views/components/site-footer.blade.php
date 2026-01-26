@@ -3,7 +3,7 @@
         <div class="space-y-6">
             <div class="space-y-1">
                 <div class="flex items-center gap-2 text-slate-900">
-                    <img src="{{ asset('images/logo-round.svg') }}" alt="팁팁월드 로고" class="h-8 w-8 rounded-full ring-1 ring-slate-200" />
+                    <x-application-logo class="h-8 w-8 rounded-full ring-1 ring-slate-200" alt="팁팁월드 로고" />
                     <span class="text-base font-semibold tracking-tight">TipTipWorld</span>
                 </div>
                 <p class="mt-2 text-sm text-slate-600">
