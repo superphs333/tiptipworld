@@ -49,6 +49,7 @@ class User extends Authenticatable
 
     public function tips()
     {
+        // A user can post many tips.
         return $this->hasMany(Tip::class);
     }
 }

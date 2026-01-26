@@ -17,8 +17,6 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - tiptip-internal # 전용 네트워크 이름 변경함
-    ports:
-      - "5173:5173"
 
   # 2) 웹 서버: Nginx 환경임
   web:
@@ -46,7 +44,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - tiptip_db_data:/var/lib/mysql # 데이터 저장소 이름 변경함
     networks:
