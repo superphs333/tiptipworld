@@ -15,6 +15,8 @@ services:
       PHP_IDE_CONFIG: "serverName=docker"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    ports:
+      - "5174:5173"
     networks:
       - tiptip-internal # 전용 네트워크 이름 변경함
 
