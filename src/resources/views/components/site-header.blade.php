@@ -1,56 +1,45 @@
-<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+<header class="sticky top-0 z-40 border-b border-gray-300 bg-white">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between gap-4">
-            <a href="{{ route('home') }}" class="flex items-center gap-3 text-slate-900">
-                <img src="{{ asset('images/logo-round.svg') }}" alt="팁팁월드 로고" class="h-9 w-9 rounded-full ring-1 ring-slate-200" />
+            <a href="{{ route('home') }}" class="flex items-center gap-3 text-gray-900">
+                <img src="{{ asset('images/logo-round.svg') }}" alt="팁팁월드 로고" class="h-9 w-9 rounded-full ring-1 ring-gray-300" />
                 <span class="text-lg font-semibold tracking-tight">TipTipWorld</span>
             </a>
 
-            <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center gap-3">
                 @auth
-                    <a href="{{ route('home') }}" class="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
-                        글쓰기
-                    </a>
-                    <a href="{{ route('profile.edit') }}" class="hidden sm:inline-flex items-center rounded-full border border-slate-200 px-3 py-2 text-sm text-slate-600 hover:border-slate-300 hover:text-slate-900">
-                        내 프로필
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}" class="hidden sm:block">
-                        @csrf
-                        <button type="submit" class="text-sm text-slate-600 hover:text-slate-900">
-                            로그아웃
+                    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900" aria-label="검색">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                        </svg>
+                    </button>
+                    <div x-data="{ open: false }" class="relative">
+                        <button type="button" @click="open = !open" aria-expanded="false" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:border-gray-400">
+                            <img src="{{ asset('images/avatar-default.svg') }}" alt="프로필 이미지" class="h-6 w-6 shrink-0 rounded-full ring-1 ring-gray-300" />
+                            <span>마이페이지</span>
                         </button>
-                    </form>
+                        <div x-show="open" @click.outside="open = false" class="absolute end-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
+                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">프로필</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">북마크</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">알림</a>
+                            <div class="border-t border-gray-200"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100">
+                                    sign out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @endauth
 
                 @guest
-                    <a href="{{ route('login') }}" class="text-sm text-slate-600 hover:text-slate-900">로그인</a>
-                    <a href="{{ route('register') }}" class="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                    <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-gray-900">로그인</a>
+                    <a href="{{ route('register') }}" class="inline-flex items-center rounded-full bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700">
                         가입하기
                     </a>
                 @endguest
-            </div>
-        </div>
-
-        <div class="border-t border-slate-100 py-3">
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <form class="relative w-full md:max-w-md" role="search">
-                    <label class="sr-only" for="site-search">검색</label>
-                    <input
-                        id="site-search"
-                        name="q"
-                        type="search"
-                        placeholder="토픽/태그/멤버 검색"
-                        class="w-full rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-200"
-                    />
-                </form>
-
-                <nav class="flex gap-4 overflow-x-auto text-sm text-slate-600 whitespace-nowrap md:flex-wrap md:overflow-visible md:whitespace-normal">
-                    <a href="{{ route('home') }}" class="shrink-0 hover:text-slate-900">홈</a>
-                    <a href="#" class="shrink-0 hover:text-slate-900">게시판</a>
-                    <a href="#" class="shrink-0 hover:text-slate-900">인기글</a>
-                    <a href="#" class="shrink-0 hover:text-slate-900">질문방</a>
-                    <a href="#" class="shrink-0 hover:text-slate-900">이벤트</a>
-                </nav>
             </div>
         </div>
     </div>
