@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return auth()->check()
-        ? redirect()->route('dashboard')
-        : redirect()->route('login');
-});
+// Route::get('/', function () {
+//     return auth()->check()
+//         ? redirect()->route('dashboard')
+//         : redirect()->route('login');
+// });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -20,3 +21,9 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+
+/**
+ * Home 화면 
+ */
+Route::get('/',[HomeController::class, 'index'])->name('home');
