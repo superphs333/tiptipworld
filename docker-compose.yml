@@ -11,6 +11,7 @@ services:
     volumes:
       - ./src:/var/www/html
       - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
+      - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/90-uploads.ini
     environment:
       PHP_IDE_CONFIG: "serverName=docker"
     extra_hosts:
