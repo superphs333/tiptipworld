@@ -71,8 +71,16 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
+
+            @if ($user->profile_image_path)
+                <form method="post" action="{{ route('profile.image.destroy') }}">
+                    @csrf
+                    @method('delete')
+                    <x-danger-button type="submit">{{ __('Remove') }}</x-danger-button>
+                </form>
+            @endif
 
             @if (session('status') === 'profile-image-updated')
                 <p
@@ -82,6 +90,14 @@
                     x-init="setTimeout(() => show = false, 2000)"
                     class="text-sm text-gray-600"
                 >{{ __('Saved.') }}</p>
+            @elseif (session('status') === 'profile-image-removed')
+                <p
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 2000)"
+                    class="text-sm text-gray-600"
+                >{{ __('Removed.') }}</p>
             @endif
         </div>
     </form>

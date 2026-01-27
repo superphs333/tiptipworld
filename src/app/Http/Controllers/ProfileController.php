@@ -62,6 +62,22 @@ class ProfileController extends Controller
     }
 
     /**
+     * Remove the user's profile image.
+     */
+    public function destroyImage(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if ($user->profile_image_path) {
+            Storage::disk('r2')->delete($user->profile_image_path);
+            $user->profile_image_path = null;
+            $user->save();
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'profile-image-removed');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
