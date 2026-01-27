@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-40 border-b border-gray-300 bg-white">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div class="flex h-16 items-center justify-between gap-4">
-            <a href="{{ route('home') }}" class="flex items-center gap-3 text-gray-900">
+            <a href="{{ url('/') }}" class="flex items-center gap-3 text-gray-900">
                 <x-application-logo class="h-9 w-9 rounded-full ring-1 ring-gray-300" alt="팁팁월드 로고" />
                 <span class="text-lg font-semibold tracking-tight">TipTipWorld</span>
             </a>
