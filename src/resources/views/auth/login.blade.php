@@ -44,4 +44,21 @@
             </x-primary-button>
         </div>
     </form>
+
+    @if (Route::has('auth.google.redirect'))
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-200"></div>
+                </div>
+                <div class="relative flex justify-center text-xs">
+                    <span class="bg-white px-2 text-gray-500">또는</span>
+                </div>
+            </div>
+
+            <a href="{{ route('auth.google.redirect') }}" class="mt-4 w-full inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                Google로 로그인
+            </a>
+        </div>
+    @endif
 </x-guest-layout>
