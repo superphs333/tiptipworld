@@ -11,7 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // 관리자 체크용 미들웨어
+        $middleware->alias(['admin' => App\Http\Middleware\CheckAdmin::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

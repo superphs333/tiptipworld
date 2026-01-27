@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminDashboard;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
@@ -29,3 +30,15 @@ require __DIR__.'/auth.php';
  * Home 화면 
  */
 Route::get('/',[HomeController::class, 'index'])->name('home');
+
+
+/**
+ * 관리자 전용 라우트 그룹
+ */
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminDashboard::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/users', [AdminDashboard::class, 'index'])->name('admin.users');
+    Route::get('/admin/categories', [AdminDashboard::class, 'index'])->name('admin.categories');
+    Route::get('/admin/tags', [AdminDashboard::class, 'index'])->name('admin.tags');
+    Route::get('/admin/tips', [AdminDashboard::class, 'index'])->name('admin.tips');
+});
