@@ -1,3 +1,299 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Category admin panel */
+.category-panel {
+    --ink: #1f1f1d;
+    --muted: #6a6760;
+    --surface: #fffdf8;
+    --surface-2: #f6f0e7;
+    --accent: #d97706;
+    --accent-soft: #fbe8cf;
+    --line: rgba(31, 31, 29, 0.1);
+    font-family: "Space Grotesk", "IBM Plex Sans", "Noto Sans KR", sans-serif;
+    color: var(--ink);
+    background:
+        radial-gradient(1100px 240px at 100% 0%, rgba(217, 119, 6, 0.15), transparent 60%),
+        linear-gradient(135deg, #fff8ef 0%, #f3efe7 60%, #f6efe3 100%);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    border-radius: 22px;
+    padding: 22px 22px 18px;
+    box-shadow: 0 18px 40px rgba(34, 29, 22, 0.08);
+    position: relative;
+    overflow: hidden;
+    animation: categoryPanelIn 0.55s ease-out both;
+}
+
+.category-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(90deg, rgba(31, 31, 29, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(31, 31, 29, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.category-panel__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.category-panel__filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+.category-panel__form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
+    align-items: center;
+}
+
+.category-panel__search {
+    display: flex;
+    gap: 10px;
+    flex: 1 1 320px;
+    min-width: 220px;
+    align-items: center;
+}
+
+.category-panel__input,
+.category-panel__select-native,
+.category-panel__select-trigger {
+    border: 1px solid transparent;
+    background: var(--surface-2);
+    color: var(--ink);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 14px;
+    min-width: 180px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-panel__input {
+    width: 100%;
+    flex: 1 1 auto;
+}
+
+.category-panel__input::placeholder {
+    color: rgba(31, 31, 29, 0.55);
+}
+
+.category-panel__input:focus,
+.category-panel__select-native:focus,
+.category-panel__select-trigger:focus {
+    outline: none;
+    border-color: rgba(217, 119, 6, 0.6);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.category-panel__select-native {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+.category-panel__select-wrap {
+    position: relative;
+    flex: 0 0 150px;
+    min-width: 130px;
+}
+
+.category-panel__select-trigger {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+    text-align: left;
+    min-width: 0;
+}
+
+.category-panel__select-label {
+    white-space: nowrap;
+}
+
+.category-panel__select-icon {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+}
+
+.category-panel__select-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: max-content;
+    min-width: 100%;
+    padding: 6px;
+    margin: 0;
+    list-style: none;
+    background: #fff8ef;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 18px 30px rgba(31, 31, 29, 0.12);
+    display: none;
+    z-index: 5;
+    overflow: hidden;
+}
+
+.category-panel__select-option {
+    padding: 8px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink);
+}
+
+.category-panel__select-option:hover,
+.category-panel__select-option.is-active {
+    background: rgba(217, 119, 6, 0.18);
+    color: var(--ink);
+}
+
+.category-panel__select-wrap.is-open .category-panel__select-menu {
+    display: block;
+}
+
+.category-panel__search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(217, 119, 6, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-panel__search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px rgba(217, 119, 6, 0.28);
+}
+
+.category-panel__search-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.25);
+}
+
+.category-panel__search-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.category-panel__table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.category-panel__table thead th {
+    background: var(--accent-soft);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+}
+
+.category-panel__table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+}
+
+.category-panel__table tbody tr:hover {
+    background: rgba(217, 119, 6, 0.08);
+}
+
+.category-panel__table tfoot td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--muted);
+    background: #fff9f2;
+}
+
+.category-panel__footer {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 6px 0;
+}
+
+@keyframes categoryPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 720px) {
+    .category-panel {
+        padding: 18px;
+    }
+
+    .category-panel__filter {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-panel__form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-panel__search {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .category-panel__input,
+    .category-panel__select-native,
+    .category-panel__select-trigger {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .category-panel__select-wrap {
+        width: 100%;
+        min-width: auto;
+    }
+}
