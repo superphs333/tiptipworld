@@ -17,8 +17,8 @@ class Category extends Model
     public function getCategories($is_active=null, $name=null)
     {
        $items = $this->query()
-       ->when($is_active, function($query, $is_active){
-            $query->where('is_active', $is_active);
+       ->when($is_active !== null && $is_active !== '', function($query) use ($is_active){
+            $query->where('is_active', (int) $is_active);
        })
        ->when($name, function($query, $name){
             $query->where('name','like', "%{$name}%");

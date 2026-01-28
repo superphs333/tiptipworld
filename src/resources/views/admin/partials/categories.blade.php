@@ -10,21 +10,21 @@
             <form class="category-panel__form" action="" method="GET">
                 <div class="category-panel__search">
                     <div class="category-panel__select-wrap" data-select>
-                        <select class="category-panel__select-native" name="status" id="status">
-                            <option value="all">전체</option>
-                            <option value="active">활성화</option>
-                            <option value="inactive">비활성화</option>
+                        <select class="category-panel__select-native" name="is_active" id="is_active">
+                            <option value="">전체</option>
+                            <option value="1">활성화</option>
+                            <option value="0">비활성화</option>
                         </select>
-                        <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
-                            <span class="category-panel__select-label">전체</span>
+                        <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" data-select-trigger>
+                            <span class="category-panel__select-label" data-select-label>전체</span>
                             <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                                 <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
-                        <ul class="category-panel__select-menu" role="listbox" tabindex="-1">
-                            <li class="category-panel__select-option" role="option" data-value="all">전체</li>
-                            <li class="category-panel__select-option" role="option" data-value="active">활성화</li>
-                            <li class="category-panel__select-option" role="option" data-value="inactive">비활성화</li>
+                        <ul class="category-panel__select-menu" role="listbox" tabindex="-1" data-select-menu>
+                            <li class="category-panel__select-option" role="option" data-value="" data-select-option>전체</li>
+                            <li class="category-panel__select-option" role="option" data-value="1" data-select-option>활성화</li>
+                            <li class="category-panel__select-option" role="option" data-value="0" data-select-option>비활성화</li>
                         </ul>
                     </div>
                     <input class="category-panel__input" type="text" name="name" placeholder="이름/슬러그 검색" />
@@ -65,14 +65,66 @@
     </div>
 </div>
 
+<div class="category-modal" data-category-modal aria-hidden="true">
+    <div class="category-modal__overlay" data-category-modal-close></div>
+    <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+        <div class="category-modal__header">
+            <h3 class="category-modal__title" id="category-modal-title">카테고리 추가</h3>
+            <button class="category-modal__close" type="button" data-category-modal-close aria-label="닫기">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <form class="category-modal__form" action="" method="POST">
+            @csrf
+            <div class="category-modal__grid">
+                <div class="category-modal__field category-modal__field--full">
+                    <label class="category-modal__label" for="category-name">이름</label>
+                    <input class="category-modal__input" type="text" id="category-name" name="name" required data-category-modal-focus />
+                </div>
+                <div class="category-modal__field category-modal__field--full">
+                    <label class="category-modal__label" for="category-description">설명</label>
+                    <textarea class="category-modal__textarea" id="category-description" name="description" rows="3"></textarea>
+                </div>
+                <div class="category-modal__field">
+                    <label class="category-modal__label" for="category-slug">슬러그</label>
+                    <input class="category-modal__input" type="text" id="category-slug" name="slug" placeholder="자동 생성" />
+                </div>
+                <div class="category-modal__field">
+                    <label class="category-modal__label" for="category-is-active">상태</label>
+                    <div class="category-modal__select-wrap" data-select>
+                        <select class="category-modal__select-native" id="category-is-active" name="is_active">
+                            <option value="1">활성화</option>
+                            <option value="0">비활성화</option>
+                        </select>
+                        <button class="category-modal__select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" data-select-trigger>
+                            <span class="category-modal__select-label" data-select-label>활성화</span>
+                            <svg class="category-modal__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <ul class="category-modal__select-menu" role="listbox" tabindex="-1" data-select-menu>
+                            <li class="category-modal__select-option" role="option" data-value="1" data-select-option>활성화</li>
+                            <li class="category-modal__select-option" role="option" data-value="0" data-select-option>비활성화</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="category-modal__actions">
+                <button class="category-modal__btn" type="button" data-category-modal-close>취소</button>
+                <button class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     document.querySelectorAll("[data-select]").forEach(function (wrap) {
         var select = wrap.querySelector("select");
-        var trigger = wrap.querySelector(".category-panel__select-trigger");
-        var label = wrap.querySelector(".category-panel__select-label");
-        var menu = wrap.querySelector(".category-panel__select-menu");
+        var trigger = wrap.querySelector("[data-select-trigger]");
+        var label = wrap.querySelector("[data-select-label]");
+        var menu = wrap.querySelector("[data-select-menu]");
         var options = Array.prototype.slice.call(
-            wrap.querySelectorAll(".category-panel__select-option")
+            wrap.querySelectorAll("[data-select-option]")
         );
 
         if (!select || !trigger || !label || !menu) {
@@ -134,4 +186,47 @@
             }
         });
     });
+
+    (function () {
+        var addButton = document.querySelector(".category-panel__add-btn");
+        var modal = document.querySelector("[data-category-modal]");
+
+        if (!addButton || !modal) {
+            return;
+        }
+
+        var closeButtons = Array.prototype.slice.call(
+            modal.querySelectorAll("[data-category-modal-close]")
+        );
+        var focusTarget = modal.querySelector("[data-category-modal-focus]");
+
+        var openModal = function () {
+            modal.classList.add("is-open");
+            modal.setAttribute("aria-hidden", "false");
+            document.body.classList.add("is-modal-open");
+            if (focusTarget) {
+                setTimeout(function () {
+                    focusTarget.focus();
+                }, 50);
+            }
+        };
+
+        var closeModal = function () {
+            modal.classList.remove("is-open");
+            modal.setAttribute("aria-hidden", "true");
+            document.body.classList.remove("is-modal-open");
+            addButton.focus();
+        };
+
+        addButton.addEventListener("click", openModal);
+        closeButtons.forEach(function (button) {
+            button.addEventListener("click", closeModal);
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && modal.classList.contains("is-open")) {
+                closeModal();
+            }
+        });
+    })();
 </script>
