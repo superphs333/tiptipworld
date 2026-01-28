@@ -65,6 +65,8 @@
     </div>
 </div>
 
+@vite('resources/js/admin/category-panel.js')
+
 <div class="category-modal" data-category-modal aria-hidden="true">
     <div class="category-modal__overlay" data-category-modal-close></div>
     <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
@@ -116,117 +118,3 @@
         </form>
     </div>
 </div>
-
-<script>
-    document.querySelectorAll("[data-select]").forEach(function (wrap) {
-        var select = wrap.querySelector("select");
-        var trigger = wrap.querySelector("[data-select-trigger]");
-        var label = wrap.querySelector("[data-select-label]");
-        var menu = wrap.querySelector("[data-select-menu]");
-        var options = Array.prototype.slice.call(
-            wrap.querySelectorAll("[data-select-option]")
-        );
-
-        if (!select || !trigger || !label || !menu) {
-            return;
-        }
-
-        var sync = function () {
-            var selected = select.options[select.selectedIndex];
-            label.textContent = selected ? selected.textContent : "";
-            options.forEach(function (option) {
-                var isActive = option.getAttribute("data-value") === select.value;
-                option.classList.toggle("is-active", isActive);
-                option.setAttribute("aria-selected", isActive ? "true" : "false");
-            });
-        };
-
-        var closeMenu = function () {
-            wrap.classList.remove("is-open");
-            trigger.setAttribute("aria-expanded", "false");
-        };
-
-        sync();
-
-        trigger.addEventListener("click", function () {
-            var willOpen = !wrap.classList.contains("is-open");
-            wrap.classList.toggle("is-open", willOpen);
-            trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-            if (!willOpen) {
-                return;
-            }
-            menu.focus();
-        });
-
-        options.forEach(function (option) {
-            option.addEventListener("click", function () {
-                var value = option.getAttribute("data-value");
-                if (value !== null) {
-                    select.value = value;
-                    sync();
-                    select.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-                closeMenu();
-            });
-        });
-
-        document.addEventListener("click", function (event) {
-            if (!wrap.contains(event.target)) {
-                closeMenu();
-            }
-        });
-
-        document.addEventListener("keydown", function (event) {
-            if (!wrap.classList.contains("is-open")) {
-                return;
-            }
-            if (event.key === "Escape") {
-                closeMenu();
-                trigger.focus();
-            }
-        });
-    });
-
-    (function () {
-        var addButton = document.querySelector(".category-panel__add-btn");
-        var modal = document.querySelector("[data-category-modal]");
-
-        if (!addButton || !modal) {
-            return;
-        }
-
-        var closeButtons = Array.prototype.slice.call(
-            modal.querySelectorAll("[data-category-modal-close]")
-        );
-        var focusTarget = modal.querySelector("[data-category-modal-focus]");
-
-        var openModal = function () {
-            modal.classList.add("is-open");
-            modal.setAttribute("aria-hidden", "false");
-            document.body.classList.add("is-modal-open");
-            if (focusTarget) {
-                setTimeout(function () {
-                    focusTarget.focus();
-                }, 50);
-            }
-        };
-
-        var closeModal = function () {
-            modal.classList.remove("is-open");
-            modal.setAttribute("aria-hidden", "true");
-            document.body.classList.remove("is-modal-open");
-            addButton.focus();
-        };
-
-        addButton.addEventListener("click", openModal);
-        closeButtons.forEach(function (button) {
-            button.addEventListener("click", closeModal);
-        });
-
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape" && modal.classList.contains("is-open")) {
-                closeModal();
-            }
-        });
-    })();
-</script>
