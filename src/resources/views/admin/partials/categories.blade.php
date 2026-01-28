@@ -1,5 +1,10 @@
 <div class="category-panel">
     <div class="category-panel__content">
+        <div class="category-panel__top-actions">
+            <button class="category-panel__add-btn" type="button" aria-label="카테고리 추가">
+                <span class="category-panel__add-icon" aria-hidden="true">+</span>
+            </button>
+        </div>
         {{-- 카테고리 필터링 --}}
         <div class="category-panel__filter">
             <form class="category-panel__form" action="" method="GET">
