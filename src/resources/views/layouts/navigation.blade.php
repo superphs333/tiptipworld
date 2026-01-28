@@ -1,4 +1,14 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+    @php
+        $adminTabs = config('admin.tabs', []);
+        $defaultAdminTab = array_key_first($adminTabs) ?? 'users';
+        $adminTab = request()->route('tab') ?? request()->query('tab', $defaultAdminTab);
+        if (!array_key_exists($adminTab, $adminTabs)) {
+            $adminTab = $defaultAdminTab;
+        }
+        $isAdminArea = request()->routeIs('admin');
+    @endphp
+
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -15,12 +25,6 @@
                     @auth
                         @php
                             $isAdmin = Auth::user()->is_admin;
-                            $isAdminArea = request()->routeIs('admin.*');
-                            $adminTabs = ['users', 'categories', 'tags', 'tips'];
-                            $adminTab = request()->query('tab', 'users');
-                            if (!in_array($adminTab, $adminTabs, true)) {
-                                $adminTab = 'users';
-                            }
                         @endphp
                         @if (!$isAdmin || !$isAdminArea)
                             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -28,18 +32,12 @@
                             </x-nav-link>
                         @endif
                         @if ($isAdmin)
-                            <x-nav-link :href="route('admin.index', ['tab' => 'users'])" :active="$isAdminArea && $adminTab === 'users'">
-                                User
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.index', ['tab' => 'categories'])" :active="$isAdminArea && $adminTab === 'categories'">
-                                Categories
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.index', ['tab' => 'tags'])" :active="$isAdminArea && $adminTab === 'tags'">
-                                Tags
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.index', ['tab' => 'tips'])" :active="$isAdminArea && $adminTab === 'tips'">
-                                Tips
-                            </x-nav-link>
+                            <x-admin-nav-links
+                                link-component="nav-link"
+                                :tabs="$adminTabs"
+                                :admin-tab="$adminTab"
+                                :is-admin-area="$isAdminArea"
+                            />
                         @endif
                     @endauth
                 </div>
@@ -97,12 +95,6 @@
             @auth
                 @php
                     $isAdmin = Auth::user()->is_admin;
-                    $isAdminArea = request()->routeIs('admin.*');
-                    $adminTabs = ['users', 'categories', 'tags', 'tips'];
-                    $adminTab = request()->query('tab', 'users');
-                    if (!in_array($adminTab, $adminTabs, true)) {
-                        $adminTab = 'users';
-                    }
                 @endphp
                 @if (!$isAdmin || !$isAdminArea)
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -110,18 +102,12 @@
                     </x-responsive-nav-link>
                 @endif
                 @if ($isAdmin)
-                    <x-responsive-nav-link :href="route('admin.index', ['tab' => 'users'])" :active="$isAdminArea && $adminTab === 'users'">
-                        User
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.index', ['tab' => 'categories'])" :active="$isAdminArea && $adminTab === 'categories'">
-                        Categories
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.index', ['tab' => 'tags'])" :active="$isAdminArea && $adminTab === 'tags'">
-                        Tags
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.index', ['tab' => 'tips'])" :active="$isAdminArea && $adminTab === 'tips'">
-                        Tips
-                    </x-responsive-nav-link>
+                    <x-admin-nav-links
+                        link-component="responsive-nav-link"
+                        :tabs="$adminTabs"
+                        :admin-tab="$adminTab"
+                        :is-admin-area="$isAdminArea"
+                    />
                 @endif
             @endauth
         </div>
