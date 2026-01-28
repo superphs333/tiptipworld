@@ -92,10 +92,10 @@
                     <label class="category-modal__label" for="category-description">설명</label>
                     <textarea class="category-modal__textarea" id="category-description" name="description" rows="3"></textarea>
                 </div>
-                <div class="category-modal__field">
+                {{-- <div class="category-modal__field">
                     <label class="category-modal__label" for="category-slug">슬러그</label>
                     <input class="category-modal__input" type="text" id="category-slug" name="slug" placeholder="자동 생성" />
-                </div>
+                </div> --}}
                 <div class="category-modal__field">
                     <label class="category-modal__label" for="category-is-active">상태</label>
                     <div
