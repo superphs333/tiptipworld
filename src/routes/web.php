@@ -36,9 +36,20 @@ Route::get('/',[HomeController::class, 'index'])->name('home');
  * 관리자 전용 라우트 그룹
  */
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboard::class, 'index'])->name('admin.dashboard');
-    Route::get('/admin/users', [AdminDashboard::class, 'index'])->name('admin.users');
-    Route::get('/admin/categories', [AdminDashboard::class, 'index'])->name('admin.categories');
-    Route::get('/admin/tags', [AdminDashboard::class, 'index'])->name('admin.tags');
-    Route::get('/admin/tips', [AdminDashboard::class, 'index'])->name('admin.tips');
+    Route::get('/admin', [AdminDashboard::class, 'index'])->name('admin.index');
+    Route::get('/admin/dashboard', function () {
+        return redirect()->route('admin.index');
+    })->name('admin.dashboard');
+    Route::get('/admin/users', function () {
+        return redirect()->route('admin.index', ['tab' => 'users']);
+    })->name('admin.users');
+    Route::get('/admin/categories', function () {
+        return redirect()->route('admin.index', ['tab' => 'categories']);
+    })->name('admin.categories');
+    Route::get('/admin/tags', function () {
+        return redirect()->route('admin.index', ['tab' => 'tags']);
+    })->name('admin.tags');
+    Route::get('/admin/tips', function () {
+        return redirect()->route('admin.index', ['tab' => 'tips']);
+    })->name('admin.tips');
 });
