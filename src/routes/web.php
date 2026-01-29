@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboard;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -39,4 +40,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/{tab?}', [AdminDashboard::class, 'index'])
         ->whereIn('tab', array_keys(config('admin.tabs', [])))
         ->name('admin');
+    
+    Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store');
 });

@@ -3,10 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use App\Models\Tip;
+use Cocur\Slugify\Slugify;
 
 class Category extends Model
 {
+    protected $fillable = ['name', 'slug', 'description', 'is_active'];
+    protected $casts = ['is_active' => 'boolean'];
+    
     // tip과의 관계 : 1개의 팁은 1개의 카테고리에 속한다.
     public function tips()
     {
@@ -25,4 +30,5 @@ class Category extends Model
        });
        return $items->get();
     }
+
 }

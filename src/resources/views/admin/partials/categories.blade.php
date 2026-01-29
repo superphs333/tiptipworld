@@ -81,7 +81,7 @@
                 <span aria-hidden="true">×</span>
             </button>
         </div>
-        <form class="category-modal__form" action="" method="POST">
+        <form class="category-modal__form" action="{{ route('admin.categories.store') }}" method="POST">
             @csrf
             <div class="category-modal__grid">
                 <div class="category-modal__field category-modal__field--full">
@@ -124,7 +124,7 @@
             </div>
             <div class="category-modal__actions">
                 <button class="category-modal__btn" type="button" @click="closeModal()">취소</button>
-                <button class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
+                <button  class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
             </div>
         </form>
     </div>
