@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use App\Models\Tip;
-use Cocur\Slugify\Slugify;
 
 class Category extends Model
 {
@@ -18,17 +17,16 @@ class Category extends Model
         return $this->hasMany(Tip::class);        
     }
 
-    // 카테고리 목록 가져오기 
-    public function getCategories($is_active=null, $name=null)
+    // 카테고리 목록 필터링용 스코프
+    public function scopeFilter(Builder $query, ?string $isActive, ?string $name): Builder
     {
-       $items = $this->query()
-       ->when($is_active !== null && $is_active !== '', function($query) use ($is_active){
-            $query->where('is_active', (int) $is_active);
-       })
-       ->when($name, function($query, $name){
-            $query->where('name','like', "%{$name}%");
-       });
-       return $items->get();
+        return $query
+            ->when($isActive !== null && $isActive !== '', function (Builder $query) use ($isActive) {
+                $query->where('is_active', (int) $isActive);
+            })
+            ->when($name !== null && $name !== '', function (Builder $query) use ($name) {
+                $query->where('name', 'like', "%{$name}%");
+            });
     }
 
 }

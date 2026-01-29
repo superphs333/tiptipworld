@@ -18,9 +18,9 @@
                         @keydown.escape.stop="close()"
                     >
                         <select class="category-panel__select-native" name="is_active" id="is_active" x-ref="select" x-model="value">
-                            <option value="">전체</option>
-                            <option value="1">활성화</option>
-                            <option value="0">비활성화</option>
+                            <option value="" {{ request('is_active') === null || request('is_active') === '' ? 'selected' : '' }}>전체</option>
+                            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>활성화</option>
+                            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>비활성화</option>
                         </select>
                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                             <span class="category-panel__select-label" x-text="label">전체</span>
@@ -49,24 +49,39 @@
             <table class="category-panel__table">
                 <thead>
                     <tr>
+                        <th>체크</th>
                         <th>이름</th>
-                        <th>슬러그</th>
                         <th>상태</th>
-                        <th>정렬</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{-- 카테고리 데이터 --}}
+                    @forelse (($datas ?? collect()) as $category)
+                        <tr>    
+                            <td>
+                                <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" />
+                            </td>
+                            <td>{{ $category->name }}</td>
+                            <td>{{ $category->is_active ? '활성화' : '비활성화' }}</td>
+                            <td>                                
+                                <a href="" class="category-panel__edit-link">편집</a>                            
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5">데이터가 없습니다.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
                 <tfoot>
                     <tr>
                         <td>합계</td>
-                        <td>개</td>
+                        <td>{{ $datas->count() }}개</td>
                     </tr>
                 </tfoot>
             </table>
             <div class="category-panel__footer">
-                목록은 최신순으로 정렬됩니다.
+                목록은 선택 정렬순으로 표시됩니다.
             </div>
         </div>
         </div>

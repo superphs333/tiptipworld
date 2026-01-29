@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
-use PDO;
 
 class AdminDashboard extends Controller
 {
@@ -32,23 +31,15 @@ class AdminDashboard extends Controller
         return $tab;
     }
 
-    private function getDatas($tab,$request) : mixed{
-
-        $returnData = null;
-
-        switch($tab){
-            case 'categories' :
-                $categoryModel = new Category();
-                $returnData = $categoryModel->getCategories(
-                    $request->query('is_active',null),
-                    $request->query('name',null)
-                );
-            default : 
-                $returnData = null;
-        }
-
-        return $returnData;
+    private function getDatas(string $tab, Request $request): mixed
+    {
+        return match ($tab) {
+            'categories' => Category::query()
+                ->filter($request->query('is_active'), $request->query('name'))
+                ->latest()
+                ->get(),
+            default => null,
+        };
     }
 
 }
-
