@@ -1,5 +1,5 @@
 <div x-data="categoryPanel()" @keydown.escape.window="closeModal()">
-    <div class="category-panel">
+    <div class="category-panel" x-data="{selected:[]}">
         <div class="category-panel__content">
         <div class="category-panel__top-actions">
             <button class="category-panel__add-btn" type="button" aria-label="카테고리 추가" @click="openModal()">
@@ -44,12 +44,28 @@
             </form>
         </div>
 
+        {{-- 카테고리 선택 조절 --}}
+        <div class="category-panel__bulk-actions" x-show="selected.length > 0" x-cloak>
+            <button class="category-panel__bulk-btn" type="button">삭제</button>
+            <div class="category-panel__bulk-count" x-text="`${selected.length}개 선택됨`"></div>
+        </div>
+
         {{-- 카테고리 목록 --}}
         <div>
             <table class="category-panel__table">
                 <thead>
                     <tr>
-                        <th>체크</th>
+                        <th>
+                            <input type="checkbox"
+                            @change="
+                                selected = $event.target.checked
+                                ? [...$el.closest('table')
+                                    .querySelectorAll('input[name=&quot;category_ids[]&quot;]')]
+                                    .map(el => el.value)
+                                : [];
+                            "
+                            />
+                        </th>
                         <th>이름</th>
                         <th>상태</th>
                         <th>관리</th>
@@ -59,7 +75,7 @@
                     @forelse (($datas ?? collect()) as $category)
                         <tr>    
                             <td>
-                                <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" />
+                                <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" x-model="selected" />
                             </td>
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->is_active ? '활성화' : '비활성화' }}</td>
@@ -87,63 +103,63 @@
         </div>
     </div>
 
-<div class="category-modal" :class="{ 'is-open': modalOpen }" :aria-hidden="(!modalOpen).toString()">
-    <div class="category-modal__overlay" @click="closeModal()"></div>
-    <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
-        <div class="category-modal__header">
-            <h3 class="category-modal__title" id="category-modal-title">카테고리 추가</h3>
-            <button class="category-modal__close" type="button" aria-label="닫기" @click="closeModal()">
-                <span aria-hidden="true">×</span>
-            </button>
-        </div>
-        <form class="category-modal__form" action="{{ route('admin.categories.store') }}" method="POST">
-            @csrf
-            <div class="category-modal__grid">
-                <div class="category-modal__field category-modal__field--full">
-                    <label class="category-modal__label" for="category-name">이름</label>
-                    <input class="category-modal__input" type="text" id="category-name" name="name" required x-ref="modalFocus" />
-                </div>
-                <div class="category-modal__field category-modal__field--full">
-                    <label class="category-modal__label" for="category-description">설명</label>
-                    <textarea class="category-modal__textarea" id="category-description" name="description" rows="3"></textarea>
-                </div>
-                {{-- <div class="category-modal__field">
-                    <label class="category-modal__label" for="category-slug">슬러그</label>
-                    <input class="category-modal__input" type="text" id="category-slug" name="slug" placeholder="자동 생성" />
-                </div> --}}
-                <div class="category-modal__field">
-                    <label class="category-modal__label" for="category-is-active">상태</label>
-                    <div
-                        class="category-modal__select-wrap"
-                        x-data="selectBox()"
-                        :class="{ 'is-open': open }"
-                        @click.outside="close()"
-                        @keydown.escape.stop="close()"
-                    >
-                        <select class="category-modal__select-native" id="category-is-active" name="is_active" x-ref="select" x-model="value">
-                            <option value="1">활성화</option>
-                            <option value="0">비활성화</option>
-                        </select>
-                        <button class="category-modal__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                            <span class="category-modal__select-label" x-text="label">활성화</span>
-                            <svg class="category-modal__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </button>
-                        <ul class="category-modal__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                            <li class="category-modal__select-option" role="option" @click="choose('1')" :class="{ 'is-active': value === '1' }" :aria-selected="value === '1'">활성화</li>
-                            <li class="category-modal__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">비활성화</li>
-                        </ul>
+    <div class="category-modal" :class="{ 'is-open': modalOpen }" :aria-hidden="(!modalOpen).toString()">
+        <div class="category-modal__overlay" @click="closeModal()"></div>
+        <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+            <div class="category-modal__header">
+                <h3 class="category-modal__title" id="category-modal-title">카테고리 추가</h3>
+                <button class="category-modal__close" type="button" aria-label="닫기" @click="closeModal()">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <form class="category-modal__form" action="{{ route('admin.categories.store') }}" method="POST">
+                @csrf
+                <div class="category-modal__grid">
+                    <div class="category-modal__field category-modal__field--full">
+                        <label class="category-modal__label" for="category-name">이름</label>
+                        <input class="category-modal__input" type="text" id="category-name" name="name" required x-ref="modalFocus" />
+                    </div>
+                    <div class="category-modal__field category-modal__field--full">
+                        <label class="category-modal__label" for="category-description">설명</label>
+                        <textarea class="category-modal__textarea" id="category-description" name="description" rows="3"></textarea>
+                    </div>
+                    {{-- <div class="category-modal__field">
+                        <label class="category-modal__label" for="category-slug">슬러그</label>
+                        <input class="category-modal__input" type="text" id="category-slug" name="slug" placeholder="자동 생성" />
+                    </div> --}}
+                    <div class="category-modal__field">
+                        <label class="category-modal__label" for="category-is-active">상태</label>
+                        <div
+                            class="category-modal__select-wrap"
+                            x-data="selectBox()"
+                            :class="{ 'is-open': open }"
+                            @click.outside="close()"
+                            @keydown.escape.stop="close()"
+                        >
+                            <select class="category-modal__select-native" id="category-is-active" name="is_active" x-ref="select" x-model="value">
+                                <option value="1">활성화</option>
+                                <option value="0">비활성화</option>
+                            </select>
+                            <button class="category-modal__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
+                                <span class="category-modal__select-label" x-text="label">활성화</span>
+                                <svg class="category-modal__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </button>
+                            <ul class="category-modal__select-menu" role="listbox" tabindex="-1" x-ref="menu">
+                                <li class="category-modal__select-option" role="option" @click="choose('1')" :class="{ 'is-active': value === '1' }" :aria-selected="value === '1'">활성화</li>
+                                <li class="category-modal__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">비활성화</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="category-modal__actions">
-                <button class="category-modal__btn" type="button" @click="closeModal()">취소</button>
-                <button  class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
-            </div>
-        </form>
+                <div class="category-modal__actions">
+                    <button class="category-modal__btn" type="button" @click="closeModal()">취소</button>
+                    <button  class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 </div>
 
 @once
