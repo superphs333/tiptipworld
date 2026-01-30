@@ -35,9 +35,10 @@ class AdminDashboard extends Controller
     {
         return match ($tab) {
             'categories' => Category::query()
-                ->filter($request->query('is_active'), $request->query('name'))
-                ->latest()
-                ->get(),
+            ->filter($request->query('is_active'), $request->query('name'))
+            ->orderBy('sort_order','asc')
+            ->orderBy('id')
+            ->get(),
             default => null,
         };
     }
