@@ -41,5 +41,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->whereIn('tab', array_keys(config('admin.tabs', [])))
         ->name('admin');
     
-    Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store');
+    Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store'); // 저장 
+    Route::delete('/admin/categories/delete/{category_ids}',[CategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
 });

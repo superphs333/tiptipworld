@@ -54,7 +54,11 @@
             <div class="category-panel__bulk-right">
                 <button class="category-panel__bulk-btn" type="button">비활성화</button>
                 <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="button">활성화</button>
-                <button class="category-panel__bulk-btn category-panel__bulk-btn--danger" type="button">삭제</button>
+                <form method="POST" :action="`{{ route('admin.categories.delete', ['category_ids' => '__IDS__']) }}`.replace('__IDS__', selected.join(','))" onsubmit="return confirm('정말 삭제할까요?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="category-panel__bulk-btn category-panel__bulk-btn--danger" type="submit">삭제</button>
+                </form>                
             </div>
         </div>
 
@@ -89,7 +93,28 @@
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->is_active ? '활성화' : '비활성화' }}</td>
                             <td>                                
-                                <a href="" class="category-panel__edit-link">편집</a>                            
+                                <div class="category-panel__actions">
+                                    <form action="{{ route('admin.categories.delete', ['category_ids' => $category->id]) }}" method="POST" onsubmit="return confirm('정말 삭제할까요?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="category-panel__action category-panel__action--delete category-panel__delete-link" type="submit">
+                                            <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
+                                                <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M7 7l1 12h8l1-12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-linecap="round"/>
+                                            </svg>
+                                            <span>삭제</span>
+                                        </button>
+                                    </form>
+                                    <a href="" class="category-panel__action category-panel__action--edit category-panel__edit-link">
+                                        <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-linejoin="round"/>
+                                            <path d="M14 6l4 4" stroke="currentColor" stroke-linecap="round"/>
+                                        </svg>
+                                        <span>편집</span>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty

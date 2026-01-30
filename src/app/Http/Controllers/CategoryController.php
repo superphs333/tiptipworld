@@ -27,4 +27,11 @@ class CategoryController extends Controller
             ->get();
         return $returnData;
     }
+
+    // 데이터 삭제하기
+    public function destroy($category_ids){
+        $categories = explode(',', $category_ids);
+        Category::whereIn('id', $categories)->delete();
+        return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리들이 성공적으로 삭제되었습니다.');
+    }
 }
