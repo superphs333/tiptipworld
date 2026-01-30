@@ -209,6 +209,7 @@
 </div>
 
 @once
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
     document.addEventListener("alpine:init", () => {
         // 화면 전체 상태 컨트롤러 (모달 열기/닫기 + 배경 스크롤 잠금).
