@@ -2,7 +2,7 @@
     <div class="category-panel" x-data="{selected:[]}">
         <div class="category-panel__content">
         <div class="category-panel__top-actions">
-            <button class="category-panel__add-btn" type="button" aria-label="카테고리 추가" @click="openModal()">
+            <button class="category-panel__add-btn" type="button" aria-label="카테고리 추가" @click="openModal('add')">
                 <span class="category-panel__add-icon" aria-hidden="true">+</span>
             </button>
         </div>
@@ -107,13 +107,14 @@
                                             <span>삭제</span>
                                         </button>
                                     </form>
-                                    <a href="" class="category-panel__action category-panel__action--edit category-panel__edit-link">
+                                    {{-- 편집 클릭시 ->  category-modal 버튼이 열림 -> 선택된 항목에 대한거 모달에 넣기 / 카테고리 추가+저장 부분을 카테고리 수정+수정 으로 변경하기 -> 수정  --}}
+                                    <button type="button" class="category-panel__action category-panel__action--edit category-panel__edit-link"  @click="openModal('edit',@js($category))">
                                         <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-linejoin="round"/>
                                             <path d="M14 6l4 4" stroke="currentColor" stroke-linecap="round"/>
                                         </svg>
                                         <span>편집</span>
-                                    </a>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -137,25 +138,32 @@
         </div>
     </div>
 
+    {{-- 모달 --}}
     <div class="category-modal" :class="{ 'is-open': modalOpen }" :aria-hidden="(!modalOpen).toString()">
         <div class="category-modal__overlay" @click="closeModal()"></div>
         <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
             <div class="category-modal__header">
-                <h3 class="category-modal__title" id="category-modal-title">카테고리 추가</h3>
+                <h3 class="category-modal__title" id="category-modal-title">카테고리
+                    <span x-text="modalTitle"></span>
+                </h3>
                 <button class="category-modal__close" type="button" aria-label="닫기" @click="closeModal()">
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form class="category-modal__form" action="{{ route('admin.categories.store') }}" method="POST">
+            <form class="category-modal__form" :action="modeAction" 
+                method="POST">
                 @csrf
+                <template x-if="isEdit">
+                    <input type="hidden" name="_method" value="PATCH" />
+                </template>
                 <div class="category-modal__grid">
                     <div class="category-modal__field category-modal__field--full">
                         <label class="category-modal__label" for="category-name">이름</label>
-                        <input class="category-modal__input" type="text" id="category-name" name="name" required x-ref="modalFocus" />
+                        <input class="category-modal__input" type="text" id="category-name" name="name" required x-ref="modalFocus" :value="data?.name ?? ''" />
                     </div>
                     <div class="category-modal__field category-modal__field--full">
                         <label class="category-modal__label" for="category-description">설명</label>
-                        <textarea class="category-modal__textarea" id="category-description" name="description" rows="3"></textarea>
+                        <textarea class="category-modal__textarea" id="category-description" name="description" rows="3" :value="data?.description ?? ''"></textarea>
                     </div>
                     {{-- <div class="category-modal__field">
                         <label class="category-modal__label" for="category-slug">슬러그</label>
@@ -166,6 +174,8 @@
                         <div
                             class="category-modal__select-wrap"
                             x-data="selectBox()"
+                            x-modelable="value"
+                            x-model="data.is_active"
                             :class="{ 'is-open': open }"
                             @click.outside="close()"
                             @keydown.escape.stop="close()"
@@ -189,7 +199,9 @@
                 </div>
                 <div class="category-modal__actions">
                     <button class="category-modal__btn" type="button" @click="closeModal()">취소</button>
-                    <button  class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
+                    <button  class="category-modal__btn category-modal__btn--primary" type="submit">
+                        <span x-text="submitLabel"></span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -202,6 +214,26 @@
         // 화면 전체 상태 컨트롤러 (모달 열기/닫기 + 배경 스크롤 잠금).
         Alpine.data("categoryPanel", () => ({
             modalOpen: false,
+            modalMode : 'add',
+            initData : {
+                id : null,
+                name : "",
+                description : "",
+                is_active : "1"
+            },
+            storeUrl : @js(route('admin.categories.store')),
+            updateUrl: @js(route('admin.category.update', ['category_id' => '__ID__'])),
+            get modeAction(){
+                console.log('id->'+this.data?.id)
+                
+                return this.isEdit
+                ? this.updateUrl.replace('__ID__',this.data?.id??'')
+                : this.storeUrl
+            },
+            data : {},
+            get isEdit() {return this.modalMode === 'edit';},
+            get modalTitle() {return this.isEdit ? '수정' : '추가';},
+            get submitLabel() {return this.isEdit ? '수정' : '저장';},
             init() {
                 // 모달이 열려 있는 동안 배경 스크롤을 막고, 첫 입력칸에 포커스를 준다.
                 this.$watch("modalOpen", (value) => {
@@ -210,9 +242,25 @@
                         this.$nextTick(() => this.$refs.modalFocus?.focus());
                     }
                 });
+                this.data = this.normalizeData();
+                
             },
-            openModal() {
+            normalizeData(data = null) {
+                const normalized = { ...this.initData, ...(data ?? {}) };
+                const active = normalized.is_active;
+                if (active === true || active === 1 || active === "1") {
+                    normalized.is_active = "1";
+                } else if (active === false || active === 0 || active === "0") {
+                    normalized.is_active = "0";
+                } else {
+                    normalized.is_active = "1";
+                }
+                return normalized;
+            },
+            openModal(mode, data=null) {
                 // 추가 버튼으로 모달을 연다.
+                this.modalMode = mode; // add | edit
+                this.data = this.normalizeData(mode === "edit" ? data : null);
                 this.modalOpen = true;
             },
             closeModal() {
@@ -228,7 +276,9 @@
             label: "",
             init() {
                 // 네이티브 select 값으로 초기화한 뒤, 라벨과 값을 계속 동기화한다.
-                this.value = this.$refs.select?.value ?? "";
+                if (this.value === "" || this.value === null) {
+                    this.value = this.$refs.select?.value ?? "";
+                }
                 this.setLabel();
                 this.$watch("value", () => this.setLabel());
             },

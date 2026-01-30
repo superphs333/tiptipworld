@@ -43,4 +43,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store'); // 저장 
     Route::delete('/admin/categories/delete/{category_ids}',[CategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
+    Route::patch('/admin/category/update/{category_id}',[CategoryController::class, 'update'])->name('admin.category.update'); // 수정
 });
