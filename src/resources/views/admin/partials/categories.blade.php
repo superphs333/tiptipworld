@@ -79,6 +79,7 @@
                             "
                             />
                         </th>
+                        <th class="w-10 text-center" aria-label="정렬">↕</th>
                         <th>이름</th>
                         <th>상태</th>
                         <th>관리</th>
@@ -86,9 +87,12 @@
                 </thead>
                 <tbody>
                     @forelse (($datas ?? collect()) as $category)
-                        <tr>    
+                        <tr data-order={{ $category->sort_order }} >    
                             <td>
                                 <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" x-model="selected" />
+                            </td>
+                            <td class="category-panel__drag-cell w-10 text-center">
+                                <span class="category-panel__drag-handle" aria-hidden="true">≡</span>
                             </td>
                             <td>{{ $category->name }}</td>
                             <td>{{ $category->is_active ? '활성화' : '비활성화' }}</td>
@@ -127,12 +131,19 @@
                 <tfoot>
                     <tr>
                         <td>합계</td>
+                        <td></td>
                         <td>{{ $datas->count() }}개</td>
+                        <td></td>
+                        <td></td>
                     </tr>
                 </tfoot>
             </table>
             <div class="category-panel__footer">
-                목록은 선택 정렬순으로 표시됩니다.
+                <span class="category-panel__footer-note">목록은 선택 정렬순으로 표시됩니다.</span>
+            </div>
+            <!-- 정렬완료버튼 -->
+            <div class="category-panel__footer-actions">
+                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent category-panel__footer-btn" type="button">정렬완료</button>
             </div>
         </div>
         </div>
