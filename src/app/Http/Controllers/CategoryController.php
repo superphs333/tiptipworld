@@ -19,14 +19,6 @@ class CategoryController extends Controller
         return redirect()->route('admin',['tab'=>'categories'])->with('success','카테고리가 성공적으로 생성되었습니다.');         
     }
 
-    // 데이터 가져오기
-    public function getCategories(Request $request){
-        $returnData = Category::query()
-            ->filter($request->query('is_active'), $request->query('name'))
-            ->latest()
-            ->get();
-        return $returnData;
-    }
 
     // 데이터 삭제하기
     public function destroy($category_ids){
