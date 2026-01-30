@@ -46,8 +46,16 @@
 
         {{-- 카테고리 선택 조절 --}}
         <div class="category-panel__bulk-actions" x-show="selected.length > 0" x-cloak>
-            <button class="category-panel__bulk-btn" type="button">삭제</button>
-            <div class="category-panel__bulk-count" x-text="`${selected.length}개 선택됨`"></div>
+            <div class="category-panel__bulk-left">
+                <span class="category-panel__bulk-dot" aria-hidden="true"></span>
+                <span class="category-panel__bulk-count" x-text="`${selected.length}개 선택됨`"></span>
+                <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="selected = []; if ($refs.selectAll) { $refs.selectAll.checked = false; }">선택 해제</button>
+            </div>
+            <div class="category-panel__bulk-right">
+                <button class="category-panel__bulk-btn" type="button">비활성화</button>
+                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="button">활성화</button>
+                <button class="category-panel__bulk-btn category-panel__bulk-btn--danger" type="button">삭제</button>
+            </div>
         </div>
 
         {{-- 카테고리 목록 --}}
@@ -57,6 +65,7 @@
                     <tr>
                         <th>
                             <input type="checkbox"
+                            x-ref="selectAll"
                             @change="
                                 selected = $event.target.checked
                                 ? [...$el.closest('table')
