@@ -22,6 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile/image', [ProfileController::class, 'updateImage'])->name('profile.image.update');
     Route::delete('/profile/image', [ProfileController::class, 'destroyImage'])->name('profile.image.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::delete('/profile', [ProfileController::class, 'destroySocial'])->name('profile.destroySocial');
 });
 
 require __DIR__.'/auth.php';

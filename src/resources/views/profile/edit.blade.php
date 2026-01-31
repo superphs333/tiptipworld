@@ -25,9 +25,16 @@
                 </div>
             </div>
 
+            {{-- Delete Account --}}
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                    @if($user->provider=='email')
+                        @include('profile.partials.delete-user-form')
+                    @else
+                        @include('profile.partials.delete-social-user-form')
+                    @endif
+
+                    
                 </div>
             </div>
         </div>

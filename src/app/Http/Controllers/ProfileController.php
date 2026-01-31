@@ -97,4 +97,29 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    /**
+     * Delete the user's social account.
+     */
+    public function destroySocial(Request $request): RedirectResponse
+    { 
+        $user = $request->uesr();
+
+        if($user->provider==='email'){
+            abort(403);
+        }
+
+        $request->validateWithBag('socialDeletion', [
+            'confirmation' => ['required', 'in:DELETE'],
+        ]);
+
+        if($user->google_access){
+            
+        }
+
+
+            
+
+        return Redirect::to('/');
+    }
 }
