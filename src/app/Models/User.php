@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -23,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // 필요하면 여기에 profile_image_path 같은 컬럼도 추가
     ];
 
     /**
@@ -48,53 +48,132 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * 프로필 이미지 URL 접근자
+     */
     public function getProfileImageUrlAttribute(): string
     {
-        if (! $this->profile_image_path) {
+        if (!$this->profile_image_path) {
             return asset('images/avatar-default.svg');
         }
 
         return Storage::disk('r2')->url($this->profile_image_path);
     }
 
-    public function roles() : BelongsToMany{
-        return $this->belongToMany(Role::class, 'role_user')->withTimestamps();
+    /**
+     * User ↔ Role (pivot: role_user)
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'role_user')
+            ->withTimestamps();
     }
 
-    /*
-    Member 역할 고정
-    */
-    // role이 하나도 없으면 member
-    public function isMember() : bool{
+    /**
+     * role이 하나도 없으면 member로 간주
+     */
+    public function isMember(): bool
+    {
         return !$this->roles()->exists();
     }
-    public function hasRole(String $key):bool{
-        return $this->roles()->where('key',$key)->exists();
+
+    /**
+     * 특정 role key 보유 여부
+     */
+    public function hasRole(string $key): bool
+    {
+        // exists()는 boolean만 빠르게 확인 (roles를 통째로 로드하지 않음)
+        return $this->roles()->where('key', $key)->exists();
     }
-    public function isAdmin() : bool{
+
+    /**
+     * 관리자 여부
+     */
+    public function isAdmin(): bool
+    {
         return $this->hasRole('admin');
     }
-    public function isEditor() :bool{
+
+    /**
+     * 에디터 여부
+     */
+    public function isEditor(): bool
+    {
         return $this->hasRole('editor');
     }
 
-    /*
-    부여/회수 메서드
-    */
-    public function assignRole(string $key) : void {
-        $roleId = Role::where('key',$key)->value('id');
-        if($roleId){
-            $this->roles()->syncWithoutDetaching([$roleId]);        
-        }
+    /**
+     * 모더레이터 여부
+     */
+    public function isModerator(): bool
+    {
+        return $this->hasRole('moderator');
     }
+
+    /**
+     * Role 부여 (중복 없이)
+     */
+    public function assignRole(string $key): void
+    {
+        $roleId = Role::query()->where('key', $key)->value('id');
+
+        if (!$roleId) {
+            return;
+        }
+
+        // 기존 role 유지 + 없는 것만 추가
+        $this->roles()->syncWithoutDetaching([$roleId]);
+    }
+
+    /**
+     * Role 회수
+     */
     public function removeRole(string $key): void
     {
-        $roleId = \App\Models\Role::where('key', $key)->value('id');
-        if ($roleId) {
-            $this->roles()->detach($roleId);
+        $roleId = Role::query()->where('key', $key)->value('id');
+
+        if (!$roleId) {
+            return;
         }
+
+        $this->roles()->detach($roleId);
     }
 
+    /**
+     * 여러 role을 한 번에 부여 (중복 없이)
+     *
+     * @param array<int, string> $keys 예: ['admin', 'editor']
+     */
+    public function assignRoles(array $keys): void
+    {
+        $roleIds = Role::query()
+            ->whereIn('key', $keys)
+            ->pluck('id')
+            ->all();
 
-    
+        if (empty($roleIds)) {
+            return;
+        }
+
+        $this->roles()->syncWithoutDetaching($roleIds);
+    }
+
+    /**
+     * 여러 role을 한 번에 회수
+     *
+     * @param array<int, string> $keys 예: ['editor', 'moderator']
+     */
+    public function removeRoles(array $keys): void
+    {
+        $roleIds = Role::query()
+            ->whereIn('key', $keys)
+            ->pluck('id')
+            ->all();
+
+        if (empty($roleIds)) {
+            return;
+        }
+
+        $this->roles()->detach($roleIds);
+    }
 }

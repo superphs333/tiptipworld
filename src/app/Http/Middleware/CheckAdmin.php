@@ -15,10 +15,13 @@ class CheckAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // 유저가 로그인이 되어있고, 관리자여야 통과
-        if (!auth()->check() || !auth()->user()->is_admin) {
+        $user = $request->user(); // auth()->user()와 동일한 의미(인증 안 됐으면 null)
+
+        // 로그인 되어있고 admin 역할이어야 통과
+        if (!$user || !$user->isAdmin()) {
             abort(403, 'Unauthorized');
         }
+
         return $next($request);
     }
 }
