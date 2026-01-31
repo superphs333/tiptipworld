@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
@@ -45,7 +47,7 @@ class GoogleLoginController extends Controller
                 ->withErrors(['email' => '구글 계정 이메일을 가져올 수 없습니다.']);
         }
 
-        $user = User::where('google_id', $googleUser->getId())->first();
+        $user = User::where('social_id', $googleUser->getId())->first();
 
         if (! $user) {
             $user = User::where('email', $email)->first();
@@ -58,7 +60,17 @@ class GoogleLoginController extends Controller
         }
 
         $user->name = $googleUser->getName() ?: $user->name ?: $email;
-        $user->google_id = $googleUser->getId();
+        $user->social_id = $googleUser->getId();
+        $user->provider = 'google';
+        $googleAvatarUrl = $googleUser->getAvatar();
+
+        if (! $user->profile_image_path && $googleAvatarUrl) {
+            $downloadedPath = $this->downloadGoogleProfileImage($googleAvatarUrl);
+
+            if ($downloadedPath) {
+                $user->profile_image_path = $downloadedPath;
+            }
+        }
 
         if (! $user->email_verified_at) {
             $user->email_verified_at = now();
@@ -70,5 +82,49 @@ class GoogleLoginController extends Controller
         request()->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    private function downloadGoogleProfileImage(string $avatarUrl): ?string
+    {
+        try {
+            $response = Http::timeout(10)->get($avatarUrl);
+        } catch (Throwable) {
+            return null;
+        }
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $contentType = $response->header('Content-Type', '');
+
+        if (! str_starts_with($contentType, 'image/')) {
+            return null;
+        }
+
+        $extension = $this->resolveImageExtension($contentType);
+
+        if (! $extension) {
+            return null;
+        }
+
+        $path = 'profile-images/google/' . Str::uuid() . '.' . $extension;
+        $stored = Storage::disk('r2')->put($path, $response->body());
+
+        return $stored ? $path : null;
+    }
+
+    private function resolveImageExtension(string $contentType): ?string
+    {
+        $mime = strtolower(trim(explode(';', $contentType, 2)[0] ?? $contentType));
+
+        return match ($mime) {
+            'image/jpeg', 'image/jpg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/gif' => 'gif',
+            'image/avif' => 'avif',
+            default => null,
+        };
     }
 }
