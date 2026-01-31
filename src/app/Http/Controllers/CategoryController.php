@@ -38,6 +38,14 @@ class CategoryController extends Controller
         return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리가 성공적으로 수정되었습니다.');
     }
 
+    // 데이터 활성화/비활성화 수정
+    public function updateIsActive($category_ids,Request $request){
+        $isActive = $request->input('is_active_action');
+        $categories = explode(',', $category_ids);
+        Category::whereIn('id', $categories)->update(['is_active' => $isActive]);
+        return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리들이 성공적으로 수정되었습니다.');
+    }
+
     // 데이터 순서 정렬하기
     public function updateSort(Request $request){
         // 순서 배열 받기

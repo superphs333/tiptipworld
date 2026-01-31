@@ -45,4 +45,5 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/categories/delete/{category_ids}',[CategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
     Route::patch('/admin/category/update/{category_id}',[CategoryController::class, 'update'])->name('admin.category.update'); // 수정
     Route::patch('/admin/categories/updateSort', [CategoryController::class, 'updateSort'])->name('admin.category.updateSort'); // 정렬 순서 변경
+    Route::patch('/admin/categories/updateIsActive/{category_ids}', [CategoryController::class, 'updateIsActive'])->name('admin.categories.updateIsActive'); // 활성화/비활성화
 });

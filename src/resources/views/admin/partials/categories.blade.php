@@ -34,7 +34,7 @@
                             <li class="category-panel__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">비활성화</li>
                         </ul>
                     </div>
-                    <input class="category-panel__input" type="text" name="name" placeholder="이름/슬러그 검색" />
+                    <input class="category-panel__input" type="text" name="name" placeholder="이름 검색" />
                     <button class="category-panel__search-btn" type="submit" aria-label="검색">
                         <svg class="category-panel__search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M11 19a8 8 0 1 1 5.657-2.343L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -52,8 +52,13 @@
                 <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="selected = []; if ($refs.selectAll) { $refs.selectAll.checked = false; }">선택 해제</button>
             </div>
             <div class="category-panel__bulk-right">
-                <button class="category-panel__bulk-btn" type="button">비활성화</button>
-                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="button">활성화</button>
+                <form method="POST" :action="`{{ route('admin.categories.updateIsActive', ['category_ids' => '__IDS__']) }}`.replace('__IDS__', selected.join(','))" >
+                    @csrf
+                    @method('PATCH')
+                    <button class="category-panel__bulk-btn" name="is_active_action" value="0" type="submit">비활성화</button>
+                    <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" name="is_active_action" value="1" type="submit">활성화</button>
+                </form>
+
                 <form method="POST" :action="`{{ route('admin.categories.delete', ['category_ids' => '__IDS__']) }}`.replace('__IDS__', selected.join(','))" onsubmit="return confirm('정말 삭제할까요?')">
                     @csrf
                     @method('DELETE')
