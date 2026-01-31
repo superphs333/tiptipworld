@@ -39,9 +39,10 @@ Route::get('/',[HomeController::class, 'index'])->name('home');
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/{tab?}', [AdminDashboard::class, 'index'])
         ->whereIn('tab', array_keys(config('admin.tabs', [])))
-        ->name('admin');
+        ->name('admin');                    
     
     Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store'); // 저장 
     Route::delete('/admin/categories/delete/{category_ids}',[CategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
     Route::patch('/admin/category/update/{category_id}',[CategoryController::class, 'update'])->name('admin.category.update'); // 수정
+    Route::patch('/admin/categories/updateSort', [CategoryController::class, 'updateSort'])->name('admin.category.updateSort'); // 정렬 순서 변경
 });

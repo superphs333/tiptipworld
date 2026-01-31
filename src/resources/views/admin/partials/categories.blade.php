@@ -87,7 +87,7 @@
                 </thead>
                 <tbody id="category_table_body">
                     @forelse (($datas ?? collect()) as $category)
-                        <tr data-order={{ $category->sort_order }} >    
+                        <tr data-order={{ $category->sort_order }}  data-id={{ $category->id }}> 
                             <td>
                                 <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" x-model="selected" />
                             </td>
@@ -143,7 +143,12 @@
             </div>
             <!-- 정렬완료버튼 -->
             <div class="category-panel__footer-actions" style="display: none">
-                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent category-panel__footer-btn" type="button" >정렬완료</button>
+                <form method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" id="forSortOrderSubmit" name="ordered_ids">
+                    <button class="category-panel__bulk-btn category-panel__bulk-btn--accent category-panel__footer-btn" type="submit" >정렬완료</button>
+                </form>
             </div>
         </div>
         </div>
@@ -337,6 +342,35 @@
             
         }
     });
+
+    
+    /**
+     * 정렬완료시 데이터 보내기
+     */ 
+    const sortForm = document.querySelector('.category-panel__footer-actions form');
+    if(sortForm){
+        sortForm.addEventListener('submit', function(e){
+            // 기본 제출 동작 막기
+            e.preventDefault();
+
+            // 현재 화면에 보이는 테이블 행(tr)의 순서대로 ID를 추출 
+            const rows = document.querySelectorAll("#category_table_body tr");
+            const ids = Array.from(rows).map(row => {
+                return row.querySelector('input[name="category_ids[]"]').value
+            });
+
+            // 추출한 ID 목록을 담을 hidden input 에 넣기 (#forSortOrderSubmit)
+            let input = document.querySelector('#forSortOrderSubmit');
+            input.value = ids.join(',');
+            
+            // 폼의 전송 주소 설정
+            this.action = "{{ route('admin.category.updateSort') }}";
+
+            // 폼 전송
+            this.submit();
+
+        });
+    }
 
 </script>
 @endonce
