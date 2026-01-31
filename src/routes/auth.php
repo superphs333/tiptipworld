@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\GoogleLoginController;
+use App\Http\Controllers\Auth\KakaoController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -18,6 +19,10 @@ Route::middleware('guest')->group(function () {
 
     Route::get('auth/google/callback', [GoogleLoginController::class, 'callback'])
         ->name('auth.google.callback');
+
+    Route::get('/auth/kakao/redirect',[KakaoController::class, 'redirect'])->name('kakao.redirect');
+    Route::get('/auth/kakao/callback',[KakaoController::class, 'callback'])->name('kakao.callback');
+
 
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
