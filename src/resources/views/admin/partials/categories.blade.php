@@ -85,7 +85,7 @@
                         <th>관리</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="category_table_body">
                     @forelse (($datas ?? collect()) as $category)
                         <tr data-order={{ $category->sort_order }} >    
                             <td>
@@ -142,8 +142,8 @@
                 <span class="category-panel__footer-note">목록은 선택 정렬순으로 표시됩니다.</span>
             </div>
             <!-- 정렬완료버튼 -->
-            <div class="category-panel__footer-actions">
-                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent category-panel__footer-btn" type="button">정렬완료</button>
+            <div class="category-panel__footer-actions" style="display: none">
+                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent category-panel__footer-btn" type="button" >정렬완료</button>
             </div>
         </div>
         </div>
@@ -318,5 +318,25 @@
             },
         }));
     });
+
+    /*
+    드래그 앤 드롭
+    */
+    let dragCount = 0;
+    const el = document.getElementById('category_table_body');
+    new Sortable(el, {
+        animation: 150,
+        handle: '.category-panel__drag-handle',
+        onEnd : function(evt){
+            dragCount++;
+            
+            // category-panel__footer-actions의 display속성을 보이도록 변경
+            if(document.querySelector('.category-panel__footer-actions').style.display == 'none'){
+                document.querySelector('.category-panel__footer-actions').style.display = 'block';
+            }
+            
+        }
+    });
+
 </script>
 @endonce
