@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use App\Models\User;
 
 class AdminDashboard extends Controller
 {
@@ -39,8 +40,12 @@ class AdminDashboard extends Controller
             ->orderBy('sort_order','asc')
             ->orderBy('id')
             ->get(),
+            'users' => 
+                User::getUsers($request->only(['provider', 'query', 'status', 'role'])),
             default => null,
         };
     }
+
+  
 
 }

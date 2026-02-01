@@ -941,6 +941,15 @@ body.is-modal-open {
     background: rgba(217, 119, 6, 0.08);
 }
 
+.user-panel__table tbody tr.user-panel__empty-row td {
+    text-align: center;
+}
+
+.user-panel__table tbody td.user-panel__empty {
+    text-align: center;
+    color: var(--muted);
+}
+
 .user-panel__table tfoot td {
     padding: 12px;
     font-weight: 600;

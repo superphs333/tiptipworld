@@ -176,4 +176,31 @@ class User extends Authenticatable
 
         $this->roles()->detach($roleIds);
     }
+
+
+    /**
+     * User 검색
+     */
+    public static function getUsers(array $filters = []){
+        $q = User::query()->with('roles');
+
+        if(!empty($filters['provider'])){
+            $q->where('provider', $filters['provider']);
+        }
+        if(!empty($filters['status'])){
+            $q->where('status',$filters['status']);
+        }
+        if(!empty($filters['query'])){
+            $keyword = trim($filters['query']);
+            $q->where(function ($q2) use($keyword){
+                $q2->where('name', 'like', '%'.$keyword.'%')
+                    ->orWhere('email', 'like', '%'.$keyword.'%');            
+            });
+        }
+        if(!empty($filters['role'])){
+            $q->whereHas('roles', fn ($r) => $r->where('key',$filters['role']));
+        }
+
+        return $q->orderBy('id')->get();
+    }
 }

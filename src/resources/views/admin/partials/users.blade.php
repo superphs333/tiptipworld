@@ -1,51 +1,17 @@
 @php
-    $useSamples = $datas === null;
-    $users = $useSamples
-        ? collect([
-            [
-                'id' => 1,
-                'name' => '소연',
-                'email' => 'soyeon@test.com',
-                'provider' => 'email',
-                'social_id' => null,
-                'status' => 'active',
-                'roles' => ['admin'],
-                'social_meta' => '-',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-            [
-                'id' => 2,
-                'name' => '민우',
-                'email' => 'minwoo@test.com',
-                'provider' => 'google',
-                'social_id' => '10392939',
-                'status' => 'active',
-                'roles' => ['moderator'],
-                'social_meta' => json_encode(['token' => '...'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-            [
-                'id' => 3,
-                'name' => '지수',
-                'email' => 'jisu@test.com',
-                'provider' => 'kakao',
-                'social_id' => '998877',
-                'status' => 'suspended',
-                'roles' => [],
-                'social_meta' => json_encode(['access_token' => '...'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ])
-        : collect($datas);
+    $users = $datas;
 @endphp
 
 <div x-data="userPanel()" @keydown.escape.window="closeModal()">
     <div class="category-panel user-panel">
         <div class="category-panel__content">
+            {{-- 필터부분 --}}
             <div class="category-panel__filter user-panel__filter">
                 <form class="category-panel__form user-panel__form" action="" method="GET">
                     <div class="user-panel__filters">
                         <div class="user-panel__filter-row">
+
+                            {{-- 가입방식 --}}
                             <div class="user-panel__filter-group">
                                 <span class="user-panel__filter-label">가입방식</span>
                                 <div
@@ -55,11 +21,12 @@
                                     @click.outside="close()"
                                     @keydown.escape.stop="close()"
                                 >
+                                    
                                     <select class="category-panel__select-native" name="provider" x-ref="select" x-model="value">
-                                        <option value="" selected>전체</option>
-                                        <option value="email">email</option>
-                                        <option value="google">google</option>
-                                        <option value="kakao">kakao</option>
+                                        <option value="" @selected(blank(request('provider')))>전체</option>
+                                        <option value="email" @selected(request('provider')==='email')>email</option>
+                                        <option value="google" @selected(request('provider')==='google')>google</option>
+                                        <option value="kakao" @selected(request('provider')==='kakao')>kakao</option>
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">전체</span>
@@ -76,6 +43,7 @@
                                 </div>
                             </div>
 
+                            {{-- 상태 --}}
                             <div class="user-panel__filter-group">
                                 <span class="user-panel__filter-label">상태</span>
                                 <div
@@ -86,9 +54,9 @@
                                     @keydown.escape.stop="close()"
                                 >
                                     <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
-                                        <option value="" selected>전체</option>
-                                        <option value="active">active</option>
-                                        <option value="suspended">suspended</option>
+                                        <option value="" @selected(blank(request('status')))>전체</option>
+                                        <option value="active" @selected(request('status')==='active')>active</option>
+                                        <option value="suspended" @selected(request('status')==='suspended')>suspended</option>
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">전체</span>
@@ -104,6 +72,7 @@
                                 </div>
                             </div>
 
+                            {{-- 역할 --}}
                             <div class="user-panel__filter-group">
                                 <span class="user-panel__filter-label">역할</span>
                                 <div
@@ -114,11 +83,10 @@
                                     @keydown.escape.stop="close()"
                                 >
                                     <select class="category-panel__select-native" name="role" x-ref="select" x-model="value">
-                                        <option value="" selected>전체</option>
-                                        <option value="admin">admin</option>
-                                        <option value="editor">editor</option>
-                                        <option value="moderator">moderator</option>
-                                        <option value="member">member</option>
+                                        <option value="" @selected(blank(request('role')))>전체</option>
+                                        <option value="admin" @selected(request('role')==='admin')>admin</option>
+                                        <option value="editor" @selected(request('role')==='editor')>editor</option>
+                                        <option value="moderator" @selected(request('role')==='moderator')>moderator</option>
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">전체</span>
@@ -131,14 +99,13 @@
                                         <li class="category-panel__select-option" role="option" @click="choose('admin')" :class="{ 'is-active': value === 'admin' }" :aria-selected="value === 'admin'">admin</li>
                                         <li class="category-panel__select-option" role="option" @click="choose('editor')" :class="{ 'is-active': value === 'editor' }" :aria-selected="value === 'editor'">editor</li>
                                         <li class="category-panel__select-option" role="option" @click="choose('moderator')" :class="{ 'is-active': value === 'moderator' }" :aria-selected="value === 'moderator'">moderator</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('member')" :class="{ 'is-active': value === 'member' }" :aria-selected="value === 'member'">member</li>
                                     </ul>
                                 </div>
                             </div>
                         </div>
 
                         <div class="user-panel__filter-row user-panel__filter-row--search">
-                            <input class="category-panel__input user-panel__search-input" type="text" name="query" placeholder="이름/이메일/소셜ID 검색" />
+                            <input class="category-panel__input user-panel__search-input" type="text" name="query" placeholder="이름/이메일 검색" value="{{ request('query') }}" />
                             <button class="category-panel__search-btn" type="submit" aria-label="검색">
                                 <svg class="category-panel__search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M11 19a8 8 0 1 1 5.657-2.343L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -149,6 +116,7 @@
                 </form>
             </div>
 
+            {{-- 리스트 부분  --}}
             <div class="user-panel__list">
                 <table class="user-panel__table">
                     <thead>
@@ -212,13 +180,9 @@
                                 </td>
                                 <td>
                                     <div class="user-panel__roles">
-                                        @if ($roleEntries->isEmpty())
-                                            <span class="user-panel__pill user-panel__pill--role user-panel__pill--member">member</span>
-                                        @else
                                             @foreach ($roleEntries as $role)
                                                 <span class="user-panel__pill user-panel__pill--role user-panel__pill--{{ $role }}">{{ $role }}</span>
                                             @endforeach
-                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -232,8 +196,8 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
-                                <td colspan="5">데이터가 없습니다.</td>
+                            <tr class="user-panel__empty-row">
+                                <td class="user-panel__empty" colspan="5">데이터가 없습니다.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -251,6 +215,7 @@
         </div>
     </div>
 
+    {{-- 모달부분 --}}
     <div class="category-modal user-modal" :class="{ 'is-open': modalOpen }" :aria-hidden="(!modalOpen).toString()">
         <div class="category-modal__overlay" @click="closeModal()"></div>
         <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="user-modal-title">
