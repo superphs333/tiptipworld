@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Services\SocialAccountRevoker;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,6 +13,16 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+
+    private SocialAccountRevoker $revoker;
+
+    public function __construct(SocialAccountRevoker $revoker)
+    {
+        $this->revoker = $revoker;
+    }
+
+
+
     /**
      * Display the user's profile form.
      */
@@ -102,23 +113,25 @@ class ProfileController extends Controller
      * Delete the user's social account.
      */
     public function destroySocial(Request $request): RedirectResponse
-    { 
-        $user = $request->uesr();
+    {
 
-        if($user->provider==='email'){
+        $user = $request->user();
+
+        if ($user->provider === 'email') {
             abort(403);
         }
 
-        $request->validateWithBag('socialDeletion', [
-            'confirmation' => ['required', 'in:DELETE'],
-        ]);
-
-        if($user->google_access){
-            
+        if (!$this->revoker->revoke($user)) {
+            return Redirect::route('profile.edit')
+                ->withErrors(['confirmation' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'socialDeletion');
         }
 
+        Auth::logout();
 
-            
+        $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
         return Redirect::to('/');
     }
