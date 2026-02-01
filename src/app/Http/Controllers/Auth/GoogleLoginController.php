@@ -53,39 +53,44 @@ class GoogleLoginController extends Controller
             $user = User::where('email', $email)->first();
         }
 
+        $isRegistration = false;
+
         if (! $user) {
+            $isRegistration = true;
             $user = new User();
             $user->email = $email;
             $user->password = Hash::make(Str::random(32));
         }
 
-        $user->name = $googleUser->getName() ?: $user->name ?: $email;
-        $user->social_id = $googleUser->getId();
+        if ($isRegistration) {
+            $user->name = $googleUser->getName() ?: $user->name ?: $email;
+            $user->social_id = $googleUser->getId();
 
-        /**
-         * Social 관련 데이터
-         */
-        $user->provider = 'google';
-        $user->social_meta = json_encode(['token' => $googleUser->token]);
+            /**
+             * Social 관련 데이터
+             */
+            $user->provider = 'google';
+            $user->social_meta = json_encode(['token' => $googleUser->token]);
 
-        /**
-         * 프로필 이미지 등록
-         */
-        $googleAvatarUrl = $googleUser->getAvatar();
+            /**
+             * 프로필 이미지 등록
+             */
+            $googleAvatarUrl = $googleUser->getAvatar();
 
-        if (! $user->profile_image_path && $googleAvatarUrl) {
-            $downloadedPath = $this->downloadGoogleProfileImage($googleAvatarUrl);
+            if (! $user->profile_image_path && $googleAvatarUrl) {
+                $downloadedPath = $this->downloadGoogleProfileImage($googleAvatarUrl);
 
-            if ($downloadedPath) {
-                $user->profile_image_path = $downloadedPath;
+                if ($downloadedPath) {
+                    $user->profile_image_path = $downloadedPath;
+                }
             }
-        }
 
-        if (! $user->email_verified_at) {
-            $user->email_verified_at = now();
-        }
+            if (! $user->email_verified_at) {
+                $user->email_verified_at = now();
+            }
 
-        $user->save();
+            $user->save();
+        }
 
         Auth::login($user, true); // 로그인 유지
         request()->session()->regenerate();
