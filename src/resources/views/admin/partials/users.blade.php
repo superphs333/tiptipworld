@@ -230,10 +230,6 @@
                     <div class="user-modal__avatar">
                         <img :src="data.profile_image_url || data.avatar || avatarFallback" alt="" />
                     </div>
-                    <div class="user-modal__profile-actions">
-                        <button class="user-modal__upload" type="button">업로드/변경</button>
-                        <span class="user-modal__hint">프로필 이미지는 선택 항목입니다.</span>
-                    </div>
                 </div>
 
                 <div class="category-modal__grid user-modal__grid">
@@ -242,7 +238,7 @@
                         <input class="category-modal__input" type="text" id="user-name" x-ref="modalFocus" x-model="data.name" />
                     </div>
                     <div class="category-modal__field">
-                        <label class="category-modal__label" for="user-email">이메일 <span class="user-modal__label-hint">(읽기전용 권장)</span></label>
+                        <label class="category-modal__label" for="user-email">이메일 </label>
                         <input class="category-modal__input user-modal__input--readonly" type="email" id="user-email" x-model="data.email" readonly />
                     </div>
                     <div class="category-modal__field">
