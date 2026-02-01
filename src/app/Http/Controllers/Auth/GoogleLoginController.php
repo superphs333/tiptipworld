@@ -61,7 +61,16 @@ class GoogleLoginController extends Controller
 
         $user->name = $googleUser->getName() ?: $user->name ?: $email;
         $user->social_id = $googleUser->getId();
+
+        /**
+         * Social 관련 데이터
+         */
         $user->provider = 'google';
+        $user->social_meta = json_encode(['token' => $googleUser->token]);
+
+        /**
+         * 프로필 이미지 등록
+         */
         $googleAvatarUrl = $googleUser->getAvatar();
 
         if (! $user->profile_image_path && $googleAvatarUrl) {
