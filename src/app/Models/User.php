@@ -36,6 +36,15 @@ class User extends Authenticatable
     ];
 
     /**
+     * Accessors to append for array / JSON serialization.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'profile_image_url',
+    ];
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
