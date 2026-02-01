@@ -34,7 +34,7 @@
                             <li class="category-panel__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">비활성화</li>
                         </ul>
                     </div>
-                    <input class="category-panel__input" type="text" name="name" placeholder="이름 검색" />
+                    <input class="category-panel__input" type="text" name="name" placeholder="이름 검색"  value="{{ request('name') }}"/>
                     <button class="category-panel__search-btn" type="submit" aria-label="검색">
                         <svg class="category-panel__search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M11 19a8 8 0 1 1 5.657-2.343L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
