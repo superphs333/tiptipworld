@@ -24,7 +24,7 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @auth
                         @php
-                            $isAdmin = Auth::user()->is_admin;
+                            $isAdmin = Auth::user()->isAdmin();
                         @endphp
                         @if (!$isAdmin || !$isAdminArea)
                             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -94,7 +94,7 @@
         <div class="pt-2 pb-3 space-y-1">
             @auth
                 @php
-                    $isAdmin = Auth::user()->is_admin;
+                    $isAdmin = Auth::user()->isAdmin();
                 @endphp
                 @if (!$isAdmin || !$isAdminArea)
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
