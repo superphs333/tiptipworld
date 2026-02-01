@@ -18,9 +18,9 @@
                         @keydown.escape.stop="close()"
                     >
                         <select class="category-panel__select-native" name="is_active" id="is_active" x-ref="select" x-model="value">
-                            <option value="" {{ request('is_active') === null || request('is_active') === '' ? 'selected' : '' }}>전체</option>
-                            <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>활성화</option>
-                            <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>비활성화</option>
+                            <option value="" @selected(blank(request('is_active')))>전체</option>
+                            <option value="1" @selected(request('is_active') === '1')>활성화</option>
+                            <option value="0" @selected(request('is_active') === '0')>비활성화</option>
                         </select>
                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                             <span class="category-panel__select-label" x-text="label">전체</span>
