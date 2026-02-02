@@ -190,7 +190,7 @@ class User extends Authenticatable
     /**
      * User 검색
      */
-    public static function getUsers(array $filters = []){
+    public static function getUsers(array $filters = [], int $perPage = 20){
         $q = User::query()->with('roles');
 
         if(!empty($filters['provider'])){
@@ -210,6 +210,6 @@ class User extends Authenticatable
             $q->whereHas('roles', fn ($r) => $r->where('key',$filters['role']));
         }
 
-        return $q->orderBy('id')->get();
+        return $q->orderBy('id')->paginate($perPage)->withQueryString();
     }
 }

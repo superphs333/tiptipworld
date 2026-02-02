@@ -40,12 +40,24 @@ class AdminDashboard extends Controller
             ->orderBy('sort_order','asc')
             ->orderBy('id')
             ->get(),
-            'users' => 
-                User::getUsers($request->only(['provider', 'query', 'status', 'role'])),
+            'users' => User::getUsers(
+                $request->only(['provider', 'query', 'status', 'role']),
+                $this->resolvePerPage($request),
+            ),
             default => null,
         };
     }
 
+    private function resolvePerPage(Request $request): int
+    {
+        $perPage = (int) $request->query('per_page', 20);
+
+        if ($perPage < 1) {
+            return 20;
+        }
+
+        return min($perPage, 100);
+    }
   
 
 }

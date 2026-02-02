@@ -1,5 +1,7 @@
 @php
     $users = $datas;
+    $totalCount = method_exists($users, 'total') ? $users->total() : $users->count();
+    $showPagination = method_exists($users, 'links');
 @endphp
 
 <div x-data="userPanel()" @keydown.escape.window="closeModal()">
@@ -8,9 +10,11 @@
             {{-- 필터부분 --}}
             <div class="category-panel__filter user-panel__filter">
                 <form class="category-panel__form user-panel__form" action="" method="GET">
+                    @if (request()->has('per_page'))
+                        <input type="hidden" name="per_page" value="{{ request('per_page') }}" />
+                    @endif
                     <div class="user-panel__filters">
                         <div class="user-panel__filter-row">
-
                             {{-- 가입방식 --}}
                             <div class="user-panel__filter-group">
                                 <span class="user-panel__filter-label">가입방식</span>
@@ -116,6 +120,35 @@
                 </form>
             </div>
 
+            <div class="user-panel__list-header">
+                <div class="user-panel__list-title">목록</div>
+                <form class="user-panel__display-form" action="" method="GET">
+                    @php
+                        $displayParams = ['tab', 'provider', 'status', 'role', 'query'];
+                    @endphp
+                    @foreach ($displayParams as $param)
+                        @if (request()->has($param))
+                            <input type="hidden" name="{{ $param }}" value="{{ request($param) }}" />
+                        @endif
+                    @endforeach
+                    <span class="user-panel__display-label">표시설정</span>
+                    <label class="user-panel__display-control" for="users-per-page">
+                        <span>페이지당</span>
+                        <input
+                            class="category-panel__input user-panel__per-page-input"
+                            type="number"
+                            id="users-per-page"
+                            name="per_page"
+                            min="1"
+                            max="100"
+                            step="1"
+                            value="{{ request('per_page', 20) }}"
+                        />
+                    </label>
+                    <button class="category-panel__bulk-btn" type="submit">적용</button>
+                </form>
+            </div>
+
             {{-- 리스트 부분  --}}
             <div class="user-panel__list">
                 <table class="user-panel__table">
@@ -205,11 +238,17 @@
                         <tr>
                             <td>합계</td>
                             <td colspan="3"></td>
-                            <td class="user-panel__total">{{ $users->count() }}명</td>
+                            <td class="user-panel__total">{{ $totalCount }}명</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
+            @if ($showPagination)
+                <div class="app-pagination">
+                    {{ $users->onEachSide(1)->links('vendor.pagination.app') }}
+                </div>
+            @endif
 
             <div class="user-panel__note">* 사용자는 가입으로 생성됩니다. 관리는 편집에서 상태/역할을 변경합니다.</div>
         </div>
