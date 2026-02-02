@@ -16,7 +16,10 @@ class CategoryController extends Controller
         ]);
         Category::create($validated);
         
-        return redirect()->route('admin',['tab'=>'categories'])->with('success','카테고리가 성공적으로 생성되었습니다.');         
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'categories'], session('categories.query', []))
+        )->with('success','카테고리가 성공적으로 생성되었습니다.');         
     }
 
 
@@ -24,7 +27,10 @@ class CategoryController extends Controller
     public function destroy($category_ids){
         $categories = explode(',', $category_ids);
         Category::whereIn('id', $categories)->delete();
-        return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리들이 성공적으로 삭제되었습니다.');
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'categories'], session('categories.query', []))
+        )->with('success','선택한 카테고리들이 성공적으로 삭제되었습니다.');
     }
 
     // 데이터 수정하기
@@ -35,7 +41,10 @@ class CategoryController extends Controller
             'is_active' => 'required|boolean'
         ]);
         Category::where('id',$category_id)->update($validated);
-        return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리가 성공적으로 수정되었습니다.');
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'categories'], session('categories.query', []))
+        )->with('success','선택한 카테고리가 성공적으로 수정되었습니다.');
     }
 
     // 데이터 활성화/비활성화 수정
@@ -43,7 +52,10 @@ class CategoryController extends Controller
         $isActive = $request->input('is_active_action');
         $categories = explode(',', $category_ids);
         Category::whereIn('id', $categories)->update(['is_active' => $isActive]);
-        return redirect()->route('admin',['tab'=>'categories'])->with('success','선택한 카테고리들이 성공적으로 수정되었습니다.');
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'categories'], session('categories.query', []))
+        )->with('success','선택한 카테고리들이 성공적으로 수정되었습니다.');
     }
 
     // 데이터 순서 정렬하기
@@ -58,6 +70,9 @@ class CategoryController extends Controller
             }
         }
 
-        return redirect()->route('admin', ['tab' => 'categories'])->with('success', '순서가 변경되었습니다.');
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'categories'], session('categories.query', []))
+        )->with('success', '순서가 변경되었습니다.');
     }
 }

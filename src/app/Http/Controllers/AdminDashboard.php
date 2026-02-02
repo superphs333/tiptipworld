@@ -17,6 +17,10 @@ class AdminDashboard extends Controller
         $tab = $this->resolveTab($request, $tab, $tabs, $defaultTab);
         $datas = $this->getDatas($tab, $request);
 
+        if ($tab === 'categories') {
+            session(['categories.query' => $request->query()]);
+        }
+
         $viewArray = [
             'tab' => $tab,
             'headerTitle' => $tabs[$tab] ?? 'Admin',
