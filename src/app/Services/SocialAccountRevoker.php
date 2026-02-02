@@ -51,7 +51,8 @@ final class SocialAccountRevoker
 
     private function revokeGoogle(array $payload): bool
     {
-        $token = $payload['token'] ?? $payload['access_token'] ?? null;
+        // Access Token은 1시간이면 만료되므로, Refresh Token이 있다면 우선 사용
+        $token = $payload['refreshToken'] ?? $payload['token'] ?? $payload['access_token'] ?? null;
 
         if (!$token) {
             return false;

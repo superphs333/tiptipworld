@@ -60,6 +60,14 @@ class KakaoController extends Controller
             }
 
             $user->save();
+        } else {
+            // 기존 회원 로그인 시 토큰 정보 갱신
+            $currentMeta = json_decode($user->social_meta ?? '{}', true);
+            $user->social_meta = json_encode([
+                'token' => $kakaoUser->token,
+                'refreshToken' => $kakaoUser->refreshToken ?? $currentMeta['refreshToken'] ?? null,
+            ]);
+            $user->save();
         }
 
 
