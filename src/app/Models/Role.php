@@ -20,4 +20,8 @@ class Role extends Model
         return $this->belongsToMany(User::class, 'role_user')
             ->withTimestamps();
     }
+
+    public static function getAllRoles(){
+        return Role::query()->orderBy('id')->get();
+    }
 }

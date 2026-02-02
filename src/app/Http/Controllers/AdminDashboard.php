@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Category;
 use App\Models\User;
+use App\Models\Status;
+use App\Models\Role;
 
 class AdminDashboard extends Controller
 {
@@ -15,12 +17,19 @@ class AdminDashboard extends Controller
         $tab = $this->resolveTab($request, $tab, $tabs, $defaultTab);
         $datas = $this->getDatas($tab, $request);
 
-        return view('admin.dashboard', [
+        $viewArray = [
             'tab' => $tab,
             'headerTitle' => $tabs[$tab] ?? 'Admin',
             'tabView' => 'admin.partials.' . $tab,
             'datas' => $datas,
-        ]);
+        ];
+
+        if($tab == 'users'){
+            $viewArray['statuses'] = Status::getStatuses();
+            $viewArray['roles'] = Role::getAllRoles();
+        }
+
+        return view('admin.dashboard', $viewArray);
     }
 
     private function resolveTab(Request $request, ?string $routeTab, array $tabs, string $defaultTab): string
