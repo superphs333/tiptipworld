@@ -59,8 +59,9 @@
                                 >
                                     <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
                                         <option value="" @selected(blank(request('status')))>전체</option>
-                                        <option value="active" @selected(request('status')==='active')>active</option>
-                                        <option value="suspended" @selected(request('status')==='suspended')>suspended</option>
+                                        @foreach($statuses as $status)
+                                            <option value="{{$status}}" @selected(request('status')==='{{$status}}')>{{$status}}</option>
+                                        @endforeach
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">전체</span>
@@ -70,8 +71,9 @@
                                     </button>
                                     <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                         <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">전체</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('active')" :class="{ 'is-active': value === 'active' }" :aria-selected="value === 'active'">active</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('suspended')" :class="{ 'is-active': value === 'suspended' }" :aria-selected="value === 'suspended'">suspended</li>
+                                        @foreach($statuses as $status)
+                                            <li class="category-panel__select-option" role="option" @click="choose('{{$status}}')" :class="{ 'is-active': value === '{{$status}}' }" :aria-selected="value === '{{$status}}'">{{$status}}</li>
+                                        @endforeach                                        
                                     </ul>
                                 </div>
                             </div>
@@ -88,9 +90,13 @@
                                 >
                                     <select class="category-panel__select-native" name="role" x-ref="select" x-model="value">
                                         <option value="" @selected(blank(request('role')))>전체</option>
-                                        <option value="admin" @selected(request('role')==='admin')>admin</option>
-                                        <option value="editor" @selected(request('role')==='editor')>editor</option>
-                                        <option value="moderator" @selected(request('role')==='moderator')>moderator</option>
+                                        @foreach($roles as $role)
+                                            @php
+                                                $roleKey = $role->key ?? $role->name ?? (string) $role;
+                                                $roleLabel = $role->name ?? $role->key ?? (string) $role;
+                                            @endphp
+                                            <option value="{{ $roleKey }}" @selected(request('role') === $roleKey)>{{ $roleLabel }}</option>
+                                        @endforeach
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">전체</span>
@@ -100,9 +106,19 @@
                                     </button>
                                     <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                         <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">전체</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('admin')" :class="{ 'is-active': value === 'admin' }" :aria-selected="value === 'admin'">admin</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('editor')" :class="{ 'is-active': value === 'editor' }" :aria-selected="value === 'editor'">editor</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('moderator')" :class="{ 'is-active': value === 'moderator' }" :aria-selected="value === 'moderator'">moderator</li>
+                                        @foreach($roles as $role)
+                                            @php
+                                                $roleKey = $role->key ?? $role->name ?? (string) $role;
+                                                $roleLabel = $role->name ?? $role->key ?? (string) $role;
+                                            @endphp
+                                            <li
+                                                class="category-panel__select-option"
+                                                role="option"
+                                                @click="choose(@js($roleKey))"
+                                                :class="{ 'is-active': value === @js($roleKey) }"
+                                                :aria-selected="value === @js($roleKey)"
+                                            >{{ $roleLabel }}</li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
