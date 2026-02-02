@@ -21,6 +21,10 @@ class AdminDashboard extends Controller
             session(['categories.query' => $request->query()]);
         }
 
+        if ($tab === 'users') {
+            session(['users.query' => $request->query()]);
+        }
+
         $viewArray = [
             'tab' => $tab,
             'headerTitle' => $tabs[$tab] ?? 'Admin',

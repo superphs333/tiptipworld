@@ -168,7 +168,7 @@ class ProfileController extends Controller
         $user->roles()->sync($validated['roles'] ?? []);
 
         $persistedFilters = array_filter(
-            $request->only(['provider', 'status', 'role', 'query', 'per_page', 'page']),
+            session('users.query', []),
             static fn ($value) => !($value === null || $value === '')
         );
 
