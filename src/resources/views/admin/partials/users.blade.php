@@ -289,6 +289,14 @@
                 method="POST">
                 @csrf
                 @method('PATCH')
+                @php
+                    $persistParams = ['provider', 'status', 'role', 'query', 'per_page', 'page'];
+                @endphp
+                @foreach ($persistParams as $param)
+                    @if (request()->has($param))
+                        <input type="hidden" name="{{ $param }}" value="{{ request($param) }}" />
+                    @endif
+                @endforeach
                 <div class="user-modal__profile">
                     <div class="user-modal__avatar">
                         <img :src="data.profile_image_url || data.avatar || avatarFallback" alt="" />

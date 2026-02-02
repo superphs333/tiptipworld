@@ -167,6 +167,13 @@ class ProfileController extends Controller
         // roles는 관계(pivot) => sync로 처리
         $user->roles()->sync($validated['roles'] ?? []);
 
-        return redirect()->route('admin',['tab'=>'users'])->with('success','유저의 정보가 수정되었습니다.');
+        $persistedFilters = array_filter(
+            $request->only(['provider', 'status', 'role', 'query', 'per_page', 'page']),
+            static fn ($value) => !($value === null || $value === '')
+        );
+
+        return redirect()
+            ->route('admin', array_merge(['tab' => 'users'], $persistedFilters))
+            ->with('success', '유저의 정보가 수정되었습니다.');
     }
 }
