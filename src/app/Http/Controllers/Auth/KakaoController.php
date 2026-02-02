@@ -38,40 +38,31 @@ class KakaoController extends Controller
                 ->withErrors(['email' => '카카오 로그인에 실패했습니다. 다시 시도해 주세요.']);
         }
 
-        $email = $kakaoUser->getEmail();
-
         $user = User::where('social_id', $kakaoUser->getId())->first();
 
-        if (! $user && $email) {
-            $user = User::where('email', $email)->first();
-        }
-
+        // 회원가입
         if (! $user) {
             $user = new User();
             $user->password = Hash::make(Str::random(32));
-        }
 
-        $user->name = $kakaoUser->getName() ?: $user->name ?: $email;
-        $user->social_id = $kakaoUser->getId();
-        if ($email) {
-            $user->email = $email;
-        }
-        $user->provider = 'kakao';
-        $kakaoAvatarUrl = $kakaoUser->getAvatar();
+            $user->name = $kakaoUser->getName();
+            $user->social_id = $kakaoUser->getId();
+            $user->provider = 'kakao';                
+            $user->social_meta = json_encode(['token' => $kakaoUser->token,'refreshToken'=>$kakaoUser->refreshToken]); // 소셜 관련 데이터
+            $kakaoAvatarUrl = $kakaoUser->getAvatar();
 
-        if (! $user->profile_image_path && $kakaoAvatarUrl) {
-            $downloadedPath = $this->downloadProfileImage($kakaoAvatarUrl);
+            if (! $user->profile_image_path && $kakaoAvatarUrl) {
+                $downloadedPath = $this->downloadProfileImage($kakaoAvatarUrl);
 
-            if ($downloadedPath) {
-                $user->profile_image_path = $downloadedPath;
+                if ($downloadedPath) {
+                    $user->profile_image_path = $downloadedPath;
+                }
             }
+
+            $user->save();
         }
 
-        if ($email && ! $user->email_verified_at) {
-            $user->email_verified_at = now();
-        }
 
-        $user->save();
 
         Auth::login($user, true);
         request()->session()->regenerate();
