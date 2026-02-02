@@ -22,7 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        // 필요하면 여기에 profile_image_path 같은 컬럼도 추가
+        'status',
+
     ];
 
     /**

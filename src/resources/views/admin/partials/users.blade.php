@@ -60,7 +60,7 @@
                                     <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
                                         <option value="" @selected(blank(request('status')))>전체</option>
                                         @foreach($statuses as $status)
-                                            <option value="{{$status}}" @selected(request('status')==='{{$status}}')>{{$status}}</option>
+                                            <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
                                         @endforeach
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -72,7 +72,7 @@
                                     <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                         <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">전체</li>
                                         @foreach($statuses as $status)
-                                            <li class="category-panel__select-option" role="option" @click="choose('{{$status}}')" :class="{ 'is-active': value === '{{$status}}' }" :aria-selected="value === '{{$status}}'">{{$status}}</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose(@js($status))" :class="{ 'is-active': value === @js($status) }" :aria-selected="value === @js($status)">{{ $status }}</li>
                                         @endforeach                                        
                                     </ul>
                                 </div>
@@ -185,11 +185,15 @@
                                 $provider = data_get($user, 'provider', 'email') ?: 'email';
                                 $socialId = data_get($user, 'social_id');
                                 $statusRaw = data_get($user, 'status', data_get($user, 'is_active', 'active'));
-                                $statusValue = 'active';
-                                $statusLabel = 'active';
-                                if ($statusRaw === false || $statusRaw === 0 || $statusRaw === '0' || $statusRaw === 'suspended' || $statusRaw === 'inactive') {
+                                if ($statusRaw === false || $statusRaw === 0 || $statusRaw === '0' || $statusRaw === 'inactive') {
                                     $statusValue = 'suspended';
                                     $statusLabel = 'suspended';
+                                } elseif (is_string($statusRaw) && $statusRaw !== '') {
+                                    $statusValue = $statusRaw;
+                                    $statusLabel = $statusRaw;
+                                } else {
+                                    $statusValue = 'active';
+                                    $statusLabel = 'active';
                                 }
                                 $roleEntries = collect();
                                 if (is_object($user) && method_exists($user, 'relationLoaded') && $user->relationLoaded('roles')) {
@@ -320,8 +324,9 @@
                             @keydown.escape.stop="close()"
                         >
                             <select class="category-modal__select-native" id="user-status" name="status" x-ref="select" x-model="value">
-                                <option value="active">active</option>
-                                <option value="suspended">suspended</option>
+                                @foreach($statuses as $status)
+                                    <option value="{{ $status }}">{{ $status }}</option>
+                                @endforeach
                             </select>
                             <button class="category-modal__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                 <span class="category-modal__select-label" x-text="label">active</span>
@@ -330,31 +335,36 @@
                                 </svg>
                             </button>
                             <ul class="category-modal__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                <li class="category-modal__select-option" role="option" @click="choose('active')" :class="{ 'is-active': value === 'active' }" :aria-selected="value === 'active'">active</li>
-                                <li class="category-modal__select-option" role="option" @click="choose('suspended')" :class="{ 'is-active': value === 'suspended' }" :aria-selected="value === 'suspended'">suspended</li>
+                                @foreach($statuses as $status)
+                                    <li
+                                        class="category-modal__select-option"
+                                        role="option"
+                                        @click="choose(@js($status))"
+                                        :class="{ 'is-active': value === @js($status) }"
+                                        :aria-selected="value === @js($status)"
+                                    >{{ $status }}</li>
+                                @endforeach
                             </ul>
                         </div>
                     </div>
                     <div class="category-modal__field">
                         <label class="category-modal__label">역할</label>
                         <div class="user-modal__roles">
-                            <label class="user-modal__role-option">
-                                <input type="checkbox" name="roles[]" value="admin" x-model="data.roles" />
-                                <span>admin</span>
-                            </label>
-                            <label class="user-modal__role-option">
-                                <input type="checkbox" name="roles[]"  value="editor" x-model="data.roles" />
-                                <span>editor</span>
-                            </label>
-                            <label class="user-modal__role-option">
-                                <input type="checkbox" name="roles[]"  value="moderator" x-model="data.roles" />
-                                <span>moderator</span>
-                            </label>
+                            @foreach($roles as $role)
+                                @php
+                                    $roleKey = $role->id ?? $role->key ?? $role->name ?? (string) $role;
+                                    $roleLabel = $role->name ?? $role->key ?? (string) $role;
+                                @endphp
+                                <label class="user-modal__role-option">
+                                    <input type="checkbox" name="roles[]" value="{{ $roleKey }}" x-model="data.roles" />
+                                    <span>{{ $roleLabel }}</span>
+                                </label>
+                            @endforeach
                         </div>
                     </div>
                 </div>
 
-                <div class="user-modal__meta-toggle">
+                {{-- <div class="user-modal__meta-toggle">
                     <button class="user-modal__toggle" type="button" @click="metaOpen = !metaOpen" :aria-expanded="metaOpen">
                         소셜메타 보기
                         <svg class="user-modal__toggle-icon" :class="{ 'is-open': metaOpen }" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -364,7 +374,7 @@
                 </div>
                 <div class="user-modal__meta" x-show="metaOpen" x-cloak>
                     <textarea class="category-modal__textarea user-modal__textarea" readonly x-model="data.social_meta"></textarea>
-                </div>
+                </div> --}}
 
                 <div class="category-modal__actions">
                     <button class="category-modal__btn" type="button" @click="closeModal()">닫기</button>
@@ -408,8 +418,12 @@
                 console.dir(normalized)
                 const rawStatus = normalized.status ?? normalized.is_active ?? "active";
 
-                if (rawStatus === false || rawStatus === 0 || rawStatus === "0" || rawStatus === "suspended" || rawStatus === "inactive") {
+                if (rawStatus === false || rawStatus === 0 || rawStatus === "0" || rawStatus === "inactive") {
                     normalized.status = "suspended";
+                } else if (typeof rawStatus === "string" && rawStatus !== "") {
+                    normalized.status = rawStatus;
+                } else if (rawStatus === true || rawStatus === 1 || rawStatus === "1") {
+                    normalized.status = "active";
                 } else {
                     normalized.status = "active";
                 }
@@ -428,7 +442,7 @@
                         .map((role) => {
                             if (typeof role === "string") return role;
                             if (role && typeof role === "object") {
-                                return role.key || role.name || "";
+                                return role.id || role.key || role.name || "";
                             }
                             return "";
                         })
