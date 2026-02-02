@@ -22,6 +22,7 @@ class GoogleLoginController extends Controller
     {
         return Socialite::driver('google') 
             ->scopes(['openid', 'email', 'profile']) // 요청할 데이터 범위 지정
+            ->with(['access_type' => 'offline']) // Refresh Token을 받기 위해 필수
             ->redirect();
     }
 
@@ -89,6 +90,20 @@ class GoogleLoginController extends Controller
                 $user->email_verified_at = now();
             }
 
+            $user->save();
+        } else {
+            // 기존 회원 로그인 시 토큰 정보 갱신
+            $currentMeta = json_decode($user->social_meta ?? '{}', true);
+            $user->social_meta = json_encode([
+                'token' => $googleUser->token,
+                'refreshToken' => $googleUser->refreshToken ?? $currentMeta['refreshToken'] ?? null,
+            ]);
+
+            // 이메일로 기존 가입된 사용자가 구글 로그인 시도 시 연동 정보 업데이트
+            if (! $user->social_id) {
+                $user->social_id = $googleUser->getId();
+            }
+            $user->provider = $user->provider ?: 'google';
             $user->save();
         }
 
