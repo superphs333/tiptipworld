@@ -264,7 +264,11 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form class="category-modal__form user-modal__form" action="#" method="POST" @submit.prevent>
+            <form class="category-modal__form user-modal__form" 
+                :action="`{{ route('admin.user.update', ['user_id' => '__ID__']) }}`.replace('__ID__', data.id)" 
+                method="POST">
+                @csrf
+                @method('PATCH')
                 <div class="user-modal__profile">
                     <div class="user-modal__avatar">
                         <img :src="data.profile_image_url || data.avatar || avatarFallback" alt="" />
@@ -274,7 +278,7 @@
                 <div class="category-modal__grid user-modal__grid">
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="user-name">이름</label>
-                        <input class="category-modal__input" type="text" id="user-name" x-ref="modalFocus" x-model="data.name" />
+                        <input class="category-modal__input" type="text" name="name" id="user-name" x-ref="modalFocus" x-model="data.name" />
                     </div>
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="user-email">이메일 </label>
@@ -282,7 +286,7 @@
                     </div>
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="user-provider">가입방식</label>
-                        <input class="category-modal__input user-modal__input--readonly" type="text" id="user-provider" x-model="data.provider" readonly />
+                        <input class="category-modal__input user-modal__input--readonly"  type="text" id="user-provider" x-model="data.provider" readonly />
                     </div>
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="user-social-id">소셜ID</label>
@@ -319,15 +323,15 @@
                         <label class="category-modal__label">역할</label>
                         <div class="user-modal__roles">
                             <label class="user-modal__role-option">
-                                <input type="checkbox" value="admin" x-model="data.roles" />
+                                <input type="checkbox" name="roles[]" value="admin" x-model="data.roles" />
                                 <span>admin</span>
                             </label>
                             <label class="user-modal__role-option">
-                                <input type="checkbox" value="editor" x-model="data.roles" />
+                                <input type="checkbox" name="roles[]"  value="editor" x-model="data.roles" />
                                 <span>editor</span>
                             </label>
                             <label class="user-modal__role-option">
-                                <input type="checkbox" value="moderator" x-model="data.roles" />
+                                <input type="checkbox" name="roles[]"  value="moderator" x-model="data.roles" />
                                 <span>moderator</span>
                             </label>
                         </div>
@@ -348,7 +352,7 @@
 
                 <div class="category-modal__actions">
                     <button class="category-modal__btn" type="button" @click="closeModal()">닫기</button>
-                    <button class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
+                        <button class="category-modal__btn category-modal__btn--primary" type="submit">저장</button>
                 </div>
             </form>
         </div>
@@ -385,6 +389,7 @@
             },
             normalizeUser(user = null) {
                 const normalized = { ...this.initData, ...(user ?? {}) };
+                console.dir(normalized)
                 const rawStatus = normalized.status ?? normalized.is_active ?? "active";
 
                 if (rawStatus === false || rawStatus === 0 || rawStatus === "0" || rawStatus === "suspended" || rawStatus === "inactive") {

@@ -9,7 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Support\Arr;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+
+
 
 class ProfileController extends Controller
 {
@@ -134,5 +140,33 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * 관리자에서 user의 정보 편집
+     */
+    public function updateUserInAdmin($user_id,Request $request): RedirectResponse
+    {
+        $allowedStatusItemValues = ['active', 'suspended'];
+        $allowedRoleItemValues = Role::getAllRoles()->pluck('key');
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'status' => ['required',Rule::in($allowedStatusItemValues)],
+            'roles' => ['nullable','array'],
+            'roles.*' => [Rule::in($allowedRoleItemValues)]
+        ]);
+
+        $user = User::findOrFail($user_id);
+
+        // users 테이블의 컬럼만 업데이트
+        $user->update(Arr::except($validated,['roles']));
+
+        // roles는 관계(pivot) => sync로 처리
+        $user->roles()->sync($validated['roles'] ?? []);
+
+
+
+        return redirect()->route('admin',['tab'=>'users'])->with('success','유저의 정보가 수정되었습니다.');
     }
 }

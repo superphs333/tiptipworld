@@ -50,5 +50,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::patch('/admin/categories/updateIsActive/{category_ids}', [CategoryController::class, 'updateIsActive'])->name('admin.categories.updateIsActive'); // 활성화/비활성화
 
     // User
+    Route::patch('/admin/user/update/{user_id}',[ProfileController::class, 'updateUserInAdmin'])->name('admin.user.update'); // 수정 
     
 });
