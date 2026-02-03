@@ -72,7 +72,7 @@
             <table class="category-panel__table">
                 <thead>
                     <tr>
-                        <th>
+                        <th x-show="{{ request('is_active') ? 'false' : 'true' }}">
                             <input type="checkbox"
                             x-ref="selectAll"
                             @change="
@@ -96,7 +96,7 @@
                             <td>
                                 <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" x-model="selected" />
                             </td>
-                            <td class="category-panel__drag-cell w-10 text-center">
+                            <td x-show="{{ request('is_active') ? 'false' : 'true' }}" class="category-panel__drag-cell w-10 text-center">
                                 <span class="category-panel__drag-handle" aria-hidden="true">≡</span>
                             </td>
                             <td>{{ $category->name }}</td>
