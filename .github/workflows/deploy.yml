@@ -18,32 +18,32 @@ jobs:
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
-                    # 1. 프로젝트 폴더 이동
-                    cd ~/infrastructure/services/tiptipworld
-                    
-                    # 2. 최신 코드 가져오기
-                    git pull origin main
-                    
-                    # 3. 소유권 정리
-                    sudo chown -R $USER:$USER .
-                    
-                    # 4. PHP 라이브러리 설치 (경로 반영)
-                    # 컨테이너 안의 tiptipworld 폴더로 들어가서 composer를 실행하도록 설정
-                    docker exec -w /var/www/html/tiptipworld php composer install --ignore-platform-reqs
-                    
-                    # 5. 프론트엔드 빌드 (일회용 Node 컨테이너)
-                    docker run --rm -v $(pwd):/app -w /app node:20 sh -c "npm install && npm run build"
-                    
-                    # 6. 권한 부여
-                    sudo chmod -R 777 storage bootstrap/cache
-                    
-                    # 7. 데이터베이스 마이그레이션 (중요: 정확한 경로 지정)
-                    docker exec php php /var/www/html/tiptipworld/artisan migrate --force
-                    
-                    # 8. 라라벨 최적화 캐시 (중요: 정확한 경로 지정)
-                    docker exec php php /var/www/html/tiptipworld/artisan config:cache
-                    docker exec php php /var/www/html/tiptipworld/artisan route:cache
-                    docker exec php php /var/www/html/tiptipworld/artisan view:cache
+                      # 1. 프로젝트 루트 폴더 이동 (docker-compose.yml이 있는 위치)
+                      cd ~/infrastructure/services/tiptipworld
+                      
+                      # 2. 최신 코드 가져오기
+                      git pull origin main
+                      
+                      # 3. 소유권 정리 (src 폴더 포함 전체)
+                      sudo chown -R $USER:$USER .
+                      
+                      # 4. PHP 라이브러리 설치 (컨테이너 내부 경로는 /var/www/html임)
+                      # -w /var/www/html 설정을 통해 artisan 파일이 있는 곳에서 실행함
+                      docker exec -w /var/www/html tiptipworld-php composer install --ignore-platform-reqs
+                      
+                      # 5. 프론트엔드 빌드 (src 폴더로 이동하여 실행)
+                      # 빌드 대상 파일(package.json 등)이 src 안에 있으므로 경로 주의
+                      cd src
+                      docker run --rm -v $(pwd):/app -w /app node:20 sh -c "npm install && npm run build"
+                      
+                      # 6. 권한 부여 (라라벨 쓰기 권한)
+                      sudo chmod -R 777 storage bootstrap/cache
+                      
+                      # 7. 데이터베이스 마이그레이션 및 캐시 최적화
+                      docker exec -w /var/www/html tiptipworld-php php artisan migrate --force
+                      docker exec -w /var/www/html tiptipworld-php php artisan config:cache
+                      docker exec -w /var/www/html tiptipworld-php php artisan route:cache
+                      docker exec -w /var/www/html tiptipworld-php php artisan view:cache
 
-                    # 9. 권한 최종 확인
-                    sudo chmod -R 777 storage bootstrap/cache
+                      # 8. 권한 최종 확인
+                      sudo chmod -R 777 storage bootstrap/cache
