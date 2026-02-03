@@ -19,7 +19,7 @@ jobs:
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
                     # 1. 프로젝트 폴더 이동
-                    cd ~/docker-projects/src/tiptipworld
+                    cd ~/infrastructure/services/tiptipworld
                     
                     # 2. 최신 코드 가져오기
                     git pull origin main
