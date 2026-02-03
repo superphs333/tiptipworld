@@ -21,4 +21,13 @@ sudo chown -R devl333:devl333 .
 chmod 664 .env
 chmod -R 777 storage bootstrap/cache
 docker compose exec -u root app php artisan key:generate
+
+cd ~/infrastructure/services/tiptipworld/src
+docker compose exec -u root app npm install
+docker compose exec -u root app npm run build
+sudo chown -R devl333:devl333 node_modules public/build
+
+docker compose exec app php artisan migrate
+
+
 ```
