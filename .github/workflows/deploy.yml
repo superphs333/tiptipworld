@@ -1,0 +1,49 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [ "main" ] # main 브랜치에 푸시될 때 작동
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+                    # 1. 프로젝트 폴더 이동
+                    cd ~/docker-projects/src/tiptipworld
+                    
+                    # 2. 최신 코드 가져오기
+                    git pull origin main
+                    
+                    # 3. 소유권 정리
+                    sudo chown -R $USER:$USER .
+                    
+                    # 4. PHP 라이브러리 설치 (경로 반영)
+                    # 컨테이너 안의 tiptipworld 폴더로 들어가서 composer를 실행하도록 설정
+                    docker exec -w /var/www/html/tiptipworld php composer install --ignore-platform-reqs
+                    
+                    # 5. 프론트엔드 빌드 (일회용 Node 컨테이너)
+                    docker run --rm -v $(pwd):/app -w /app node:20 sh -c "npm install && npm run build"
+                    
+                    # 6. 권한 부여
+                    sudo chmod -R 777 storage bootstrap/cache
+                    
+                    # 7. 데이터베이스 마이그레이션 (중요: 정확한 경로 지정)
+                    docker exec php php /var/www/html/tiptipworld/artisan migrate --force
+                    
+                    # 8. 라라벨 최적화 캐시 (중요: 정확한 경로 지정)
+                    docker exec php php /var/www/html/tiptipworld/artisan config:cache
+                    docker exec php php /var/www/html/tiptipworld/artisan route:cache
+                    docker exec php php /var/www/html/tiptipworld/artisan view:cache
+
+                    # 9. 권한 최종 확인
+                    sudo chmod -R 777 storage bootstrap/cache
