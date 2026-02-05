@@ -72,7 +72,7 @@
             <table class="category-panel__table">
                 <thead>
                     <tr>
-                        <th x-show="{{ request('is_active') ? 'false' : 'true' }}">
+                        <th>
                             <input type="checkbox"
                             x-ref="selectAll"
                             @change="
@@ -84,7 +84,7 @@
                             "
                             />
                         </th>
-                        <th class="w-10 text-center" aria-label="정렬">↕</th>
+                        <th x-show="{{ request('is_active') ? 'false' : 'true' }}"  class="w-10 text-center" aria-label="정렬">↕</th>
                         <th>이름</th>
                         <th>상태</th>
                         <th>관리</th>
