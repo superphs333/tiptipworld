@@ -28,9 +28,8 @@ class Tag extends Model
         /**
          * 필터 
          */
-        if(!empty($fillters['is_blocked'])){
-            $q->where('is_blocked', $fillters['is_blocked']);
-        }
+        $fillters['is_blocked'] ?? 0;
+        $q->where('is_blocked', $fillters['is_blocked']);
         if(!empty($fillters['query'])){
             $keyword = trim($fillters['query']);
             $q->where('name', 'like', '%'.$keyword.'%');
