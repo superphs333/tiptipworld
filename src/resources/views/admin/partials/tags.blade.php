@@ -19,6 +19,40 @@
                     <span class="category-panel__add-icon" aria-hidden="true">+</span>
                 </button>
             </div>
+
+            <div
+                class="tag-panel__alerts"
+                x-data="{
+                    showErrors: {{ $errors->any() ? 'true' : 'false' }},
+                    showError: {{ session('error') ? 'true' : 'false' }},
+                    showSuccess: {{ session('success') ? 'true' : 'false' }},
+                }"
+            >
+                @if ($errors->any())
+                    <div class="tag-panel__alert tag-panel__alert--error" x-show="showErrors">
+                        <button class="tag-panel__alert-close" type="button" aria-label="닫기" @click="showErrors = false">×</button>
+                        <ul>
+                            @foreach ($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="tag-panel__alert tag-panel__alert--error" x-show="showError">
+                        <button class="tag-panel__alert-close" type="button" aria-label="닫기" @click="showError = false">×</button>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="tag-panel__alert tag-panel__alert--success" x-show="showSuccess">
+                        <button class="tag-panel__alert-close" type="button" aria-label="닫기" @click="showSuccess = false">×</button>
+                        {{ session('success') }}
+                    </div>
+                @endif
+            </div>
             <div class="tag-panel__filter">
                 <form class="tag-panel__filter-form" action="" method="GET">
                     <div
@@ -152,13 +186,13 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <form class="category-modal__form tag-modal__form" action="" method="POST">
+            <form class="category-modal__form tag-modal__form" :action="modeAction" method="POST">
                 @csrf
                 <div class="category-modal__grid tag-modal__grid">
-                    <div class="category-modal__field">
+                    {{-- <div class="category-modal__field">
                         <label class="category-modal__label" for="tag-id">ID</label>
                         <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-id" x-model="data.id" readonly />
-                    </div>
+                    </div> --}}
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="tag-name">이름*</label>
                         <input class="category-modal__input" type="text" id="tag-name" name="name" required x-ref="modalFocus" x-model="data.name" />
@@ -166,7 +200,7 @@
                     <div class="category-modal__field tag-modal__field--toggle">
                         <label class="category-modal__label" for="tag-blocked">금지 태그</label>
                         <label class="tag-modal__toggle">
-                            <input type="checkbox" id="tag-blocked" name="is_blocked" x-model="data.is_blocked" />
+                            <input type="checkbox" id="tag-blocked" name="is_blocked" value="1" x-model="data.is_blocked" />
                             {{-- <span>금지</span> --}}
                         </label>
                     </div>
@@ -209,6 +243,7 @@
                 created_at: "",
                 updated_at: ""
             },
+            storeUrl : @js(route('admin.tag.store')),
             data: {},
             get isEdit() { return this.modalMode === "edit"; },
             get modalTitle() { return this.isEdit ? "편집" : "추가"; },
@@ -224,7 +259,7 @@
             },
             normalizeData(data = null) {
                 const normalized = { ...this.initData, ...(data ?? {}) };
-                normalized.is_blocked = Boolean(normalized.is_blocked);
+                normalized.is_blocked = Boolean(normalized.is_blocked) ?? 0;
                 normalized.usage_count = normalized.usage_count ?? 0;
                 return normalized;
             },
@@ -241,6 +276,11 @@
                 if (this.$refs.selectAll) {
                     this.$refs.selectAll.checked = false;
                 }
+            },
+            get modeAction(){
+                return this.isEdit
+                ? this.updateUrl.replace('__ID__',this.data?.id??'')
+                : this.storeUrl
             }
         }));
 

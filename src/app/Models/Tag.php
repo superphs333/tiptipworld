@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tag extends Model
 {
+
+    protected $fillable = [
+        'name',
+        'is_blocked',
+    ];
+
+
+
     /**
      * Tag - Tip (m:n)
      * pivot : tip_tag(tag_id, tip_id)

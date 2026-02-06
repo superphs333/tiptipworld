@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminDashboard;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -51,5 +52,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // User
     Route::patch('/admin/user/update/{user_id}',[ProfileController::class, 'updateUserInAdmin'])->name('admin.user.update'); // 수정 
+
+    // 태그
+    Route::post('/admin/tag/save',[TagController::class, 'store'])->name('admin.tag.store'); // 저장 
+
     
 });
