@@ -22,17 +22,22 @@ class Tag extends Model
         return $this->belongsToMany(Tip::class, 'tip_tag', 'tag_id', 'tip_id')->withTimestamps();
     }
 
-    public static function getTags(array $fillters = [], int $perPage = 20){
+    public static function getTags(array $filters = [], int $perPage = 20){
         $q = Tag::query()->with('tips');
 
         /**
-         * 필터 
+         * 필터
          */
-        $fillters['is_blocked'] ?? 0;
-        $q->where('is_blocked', $fillters['is_blocked']);
-        if(!empty($fillters['query'])){
-            $keyword = trim($fillters['query']);
-            $q->where('name', 'like', '%'.$keyword.'%');
+        $isBlocked = $filters['is_blocked'] ?? null;
+        if ($isBlocked !== null && $isBlocked !== '') {
+            $q->where('is_blocked', (int) $isBlocked);
+        }
+
+        if (isset($filters['query'])) {
+            $keyword = trim((string) $filters['query']);
+            if ($keyword !== '') {
+                $q->where('name', 'like', '%' . $keyword . '%');
+            }
         }
 
         return $q->orderBy('id')->paginate($perPage)->withQueryString();
