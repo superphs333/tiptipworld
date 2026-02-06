@@ -31,6 +31,6 @@ class TagController extends Controller
             ->withInput();
         }
 
-  
+        return $q->orderBy('id')->paginate($perPage)->withQueryString();
     }
 }

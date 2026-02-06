@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\User;
 use App\Models\Status;
 use App\Models\Role;
+use App\Models\Tag;
 
 class AdminDashboard extends Controller
 {
@@ -64,6 +65,10 @@ class AdminDashboard extends Controller
             ->get(),
             'users' => User::getUsers(
                 $request->only(['provider', 'query', 'status', 'role']),
+                $this->resolvePerPage($request),
+            ),
+            'tags' => Tag::getTags(
+                $request->only(['is_blocked', 'query']),
                 $this->resolvePerPage($request),
             ),
             default => null,
