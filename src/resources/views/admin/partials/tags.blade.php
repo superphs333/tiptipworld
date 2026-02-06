@@ -53,6 +53,8 @@
                     </div>
                 @endif
             </div>
+
+            {{-- 필터링 부분 --}}
             <div class="tag-panel__filter">
                 <form class="tag-panel__filter-form" action="" method="GET">
                     @if (request()->has('per_page'))
@@ -83,7 +85,7 @@
                         </ul>
                     </div>
                     <div class="tag-panel__filter-search">
-                        <input class="category-panel__input tag-panel__search-input" type="text" name="query" placeholder="이름 / ID 검색" value="{{ request('query') }}" />
+                        <input class="category-panel__input tag-panel__search-input" type="text" name="query" placeholder="이름 검색" value="{{ request('query') }}" />
                         <button class="category-panel__search-btn" type="submit" aria-label="검색">
                             <svg class="category-panel__search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M11 19a8 8 0 1 1 5.657-2.343L21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
