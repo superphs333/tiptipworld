@@ -204,15 +204,11 @@
                             {{-- <span>금지</span> --}}
                         </label>
                     </div>
-                    <div class="category-modal__field">
-                        <label class="category-modal__label" for="tag-usage">사용량(캐시)</label>
-                        <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-usage" x-model="data.usage_count" readonly />
-                    </div>
-                    <div class="category-modal__field">
+                    <div x-show="data.modalMode === 'edit'" class="category-modal__field">
                         <label class="category-modal__label" for="tag-created">생성일</label>
                         <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-created" x-model="data.created_at" readonly />
                     </div>
-                    <div class="category-modal__field">
+                    <div x-show="data.modalMode === 'edit'"  class="category-modal__field">
                         <label class="category-modal__label" for="tag-updated">수정일</label>
                         <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-updated" x-model="data.updated_at" readonly />
                     </div>
