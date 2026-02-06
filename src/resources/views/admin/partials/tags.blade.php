@@ -55,6 +55,9 @@
             </div>
             <div class="tag-panel__filter">
                 <form class="tag-panel__filter-form" action="" method="GET">
+                    @if (request()->has('per_page'))
+                        <input type="hidden" name="per_page" value="{{ request('per_page') }}" />
+                    @endif
                     <div
                         class="category-panel__select-wrap tag-panel__filter-select"
                         x-data="selectBox()"
@@ -87,6 +90,35 @@
                             </svg>
                         </button>
                     </div>
+                </form>
+            </div>
+
+            <div class="user-panel__list-header">
+                <div class="user-panel__list-title">목록</div>
+                <form class="user-panel__display-form" action="" method="GET">
+                    @php
+                        $displayParams = ['tab', 'is_blocked', 'query'];
+                    @endphp
+                    @foreach ($displayParams as $param)
+                        @if (request()->has($param))
+                            <input type="hidden" name="{{ $param }}" value="{{ request($param) }}" />
+                        @endif
+                    @endforeach
+                    <span class="user-panel__display-label">표시설정</span>
+                    <label class="user-panel__display-control" for="tags-per-page">
+                        <span>페이지당</span>
+                        <input
+                            class="category-panel__input user-panel__per-page-input"
+                            type="number"
+                            id="tags-per-page"
+                            name="per_page"
+                            min="1"
+                            max="100"
+                            step="1"
+                            value="{{ request('per_page', 20) }}"
+                        />
+                    </label>
+                    <button class="category-panel__bulk-btn" type="submit">적용</button>
                 </form>
             </div>
 
