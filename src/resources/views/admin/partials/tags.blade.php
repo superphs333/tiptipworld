@@ -160,7 +160,9 @@
                                 <td>{{ $tagName }}</td>
                                 <td>{{ number_format((int) $usageCount) }}</td>
                                 <td>
-                                    <span class="tag-panel__badge {{ $isBlocked ? 'is-blocked' : 'is-normal' }}">{{ $isBlocked ? '금지' : '정상' }}</span>
+                                    @if ($isBlocked)
+                                        <span class="tag-panel__badge is-blocked" aria-label="금지됨">✓</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <button type="button" class="category-panel__action category-panel__action--delete">
