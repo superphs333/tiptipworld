@@ -95,6 +95,7 @@
                 </form>
             </div>
 
+            {{--  페이징 --}}
             <div class="user-panel__list-header">
                 <div class="user-panel__list-title">목록</div>
                 <form class="user-panel__display-form" action="" method="GET">
@@ -124,6 +125,7 @@
                 </form>
             </div>
 
+            {{-- 테이블 --}}
             <div class="tag-panel__table-wrap">
                 <table class="category-panel__table tag-panel__table">
                     <thead>
@@ -194,6 +196,7 @@
                 </table>
             </div>
 
+            {{-- 페이지네이션 --}}
             <div class="tag-panel__pagination">
                 <div class="tag-panel__page-meta">
                     <span class="tag-panel__page-range">
@@ -213,6 +216,7 @@
         </div>
     </div>
 
+    {{-- 모달 --}}
     <div class="category-modal tag-modal" :class="{ 'is-open': modalOpen }" :aria-hidden="(!modalOpen).toString()">
         <div class="category-modal__overlay" @click="closeModal()"></div>
         <div class="category-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="tag-modal-title">
@@ -224,6 +228,9 @@
             </div>
             <form class="category-modal__form tag-modal__form" :action="modeAction" method="POST">
                 @csrf
+                <template x-if="isEdit">
+                    <input type="hidden" name="_method" value="PATCH" />
+                </template>
                 <div class="category-modal__grid tag-modal__grid">
                     {{-- <div class="category-modal__field">
                         <label class="category-modal__label" for="tag-id">ID</label>
@@ -240,13 +247,13 @@
                             {{-- <span>금지</span> --}}
                         </label>
                     </div>
-                    <div x-show="data.modalMode === 'edit'" class="category-modal__field">
+                    <div x-show="isEdit === true" class="category-modal__field">
                         <label class="category-modal__label" for="tag-created">생성일</label>
-                        <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-created" x-model="data.created_at" readonly />
+                        <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-created" x-model="data.created_date" readonly />
                     </div>
-                    <div x-show="data.modalMode === 'edit'"  class="category-modal__field">
+                    <div x-show="isEdit === true"  class="category-modal__field">
                         <label class="category-modal__label" for="tag-updated">수정일</label>
-                        <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-updated" x-model="data.updated_at" readonly />
+                        <input class="category-modal__input tag-modal__input--readonly" type="text" id="tag-updated" x-model="data.updated_date" readonly />
                     </div>
                 </div>
                 <div class="category-modal__actions">
@@ -272,14 +279,15 @@
                 name: "",
                 is_blocked: false,
                 usage_count: 0,
-                created_at: "",
-                updated_at: ""
+                created_date: "",
+                updated_date: "",
             },
             storeUrl : @js(route('admin.tag.store')),
+            updateUrl : @js(route('admin.tag.update',['tag_id'=>'__ID__'])),
             data: {},
             get isEdit() { return this.modalMode === "edit"; },
             get modalTitle() { return this.isEdit ? "편집" : "추가"; },
-            get submitLabel() { return this.isEdit ? "저장" : "저장"; },
+            get submitLabel() { return this.isEdit ? "수정" : "저장"; },
             init() {
                 this.$watch("modalOpen", (value) => {
                     document.body.classList.toggle("is-modal-open", value);

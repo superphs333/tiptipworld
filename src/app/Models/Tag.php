@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Tag extends Model
 {
@@ -13,6 +15,11 @@ class Tag extends Model
         'is_blocked',
     ];
 
+    protected $appends = [
+        'created_date',
+        'updated_date'
+    ];
+
 
     /**
      * Tag - Tip (m:n)
@@ -20,6 +27,22 @@ class Tag extends Model
      */
     public function tips() : BelongsToMany{
         return $this->belongsToMany(Tip::class, 'tip_tag', 'tag_id', 'tip_id')->withTimestamps();
+    }
+
+    protected function createdDate() : Attribute
+    {
+        return Attribute::make(
+            get : fn(mixed $value, array $attributes) => 
+                \Illuminate\Support\Carbon::parse($attributes['created_at'])->format('Y-m-d H시i분s초')
+        );
+    }
+
+    protected function updatedDate() : Attribute
+    {
+        return Attribute::make(
+            get : fn(mixed $value, array $attributes) => 
+                \Illuminate\Support\Carbon::parse($attributes['updated_at'])->format('Y-m-d H시i분s초')
+        );
     }
 
     public static function getTags(array $filters = [], int $perPage = 20){
