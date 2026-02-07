@@ -1,4 +1,5 @@
 import './bootstrap';
+import './components/tiptap-editor';
 
 import Alpine from 'alpinejs';
 

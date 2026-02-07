@@ -1,0 +1,151 @@
+/* Reusable Tiptap component */
+.tiptap-field {
+    --tiptap-line: var(--line, rgba(31, 31, 29, 0.12));
+    --tiptap-surface: var(--surface, #fffdf8);
+    --tiptap-surface-2: var(--surface-2, #f6f0e7);
+    --tiptap-ink: var(--ink, #1f1f1d);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.tiptap-field__toolbar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tiptap-field__tool {
+    border: 1px solid var(--tiptap-line);
+    background: var(--tiptap-surface-2);
+    color: var(--tiptap-ink);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    min-height: 30px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tiptap-field__tool:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 14px rgba(31, 31, 29, 0.08);
+}
+
+.tiptap-field__tool.is-active {
+    border-color: rgba(217, 119, 6, 0.42);
+    background: rgba(217, 119, 6, 0.18);
+    color: #9a3412;
+}
+
+.tiptap-field__tool:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.tiptap-field__editor-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.tiptap-field__placeholder {
+    position: absolute;
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    color: rgba(31, 31, 29, 0.5);
+    font-size: 14px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.tiptap-field.is-empty .tiptap-field__placeholder {
+    opacity: 1;
+}
+
+.tiptap-field__editor {
+    border: 1px solid var(--tiptap-line);
+    background: var(--tiptap-surface);
+    color: var(--tiptap-ink);
+    border-radius: 14px;
+    width: 100%;
+    display: flex;
+    align-items: stretch;
+    font-size: 14px;
+    line-height: 1.68;
+    overflow-wrap: anywhere;
+    cursor: text;
+}
+
+.tiptap-field__editor:focus-within {
+    outline: none;
+    border-color: rgba(217, 119, 6, 0.55);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+.tiptap-field__editor .ProseMirror {
+    flex: 1 1 auto;
+    width: 100%;
+    min-height: inherit;
+    padding: 14px 16px;
+    border: 0;
+    outline: none;
+    box-shadow: none;
+    background: transparent;
+}
+
+.tiptap-field__editor .ProseMirror:focus {
+    outline: none;
+}
+
+.tiptap-field__editor p {
+    margin: 0 0 0.7em;
+}
+
+.tiptap-field__editor p:last-child {
+    margin-bottom: 0;
+}
+
+.tiptap-field__editor h2,
+.tiptap-field__editor h3 {
+    font-weight: 700;
+    margin: 1em 0 0.55em;
+}
+
+.tiptap-field__editor ul,
+.tiptap-field__editor ol {
+    margin: 0.7em 0;
+    padding-left: 1.35em;
+}
+
+.tiptap-field__editor blockquote {
+    margin: 0.8em 0;
+    border-left: 3px solid rgba(217, 119, 6, 0.38);
+    padding-left: 12px;
+    color: rgba(31, 31, 29, 0.84);
+}
+
+.tiptap-field__editor pre {
+    background: #22201b;
+    color: #f9f7f2;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 0.8em 0;
+    overflow-x: auto;
+}
+
+.tiptap-field__editor code {
+    background: rgba(31, 31, 29, 0.08);
+    border-radius: 6px;
+    padding: 0.1em 0.3em;
+}
+
+.tiptap-field__editor pre code {
+    background: transparent;
+    padding: 0;
+}

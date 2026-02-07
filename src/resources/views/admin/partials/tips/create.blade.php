@@ -115,20 +115,12 @@
                                     <h3 class="tip-create__card-title">본문</h3>
                                     <p class="tip-create__card-desc">에디터/마크다운/HTML</p>
                                 </div>
-                                <div class="tip-create__toolbar">
-                                    <button class="tip-create__tool" type="button">굵게</button>
-                                    <button class="tip-create__tool" type="button">링크</button>
-                                    <button class="tip-create__tool" type="button">코드</button>
-                                    <button class="tip-create__tool" type="button">이미지</button>
-                                </div>
                             </div>
-                            <textarea
-                                class="category-panel__input tip-create__textarea tip-create__textarea--content"
+                            <x-tiptap
                                 name="content"
-                                rows="12"
                                 placeholder="내용을 입력하세요."
-                                x-model="content"
-                            ></textarea>
+                                min-height="70vh"
+                            />
                         </section>
                     </div>
 
@@ -262,7 +254,6 @@
         Alpine.data("tipCreate", () => ({
             title: "",
             excerpt: "",
-            content: "",
             tagInput: "",
             selectedTags: [],
             addTag() {

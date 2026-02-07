@@ -1,4 +1,5 @@
 @import "components/pagination.css";
+@import "components/tiptap.css";
 
 @tailwind base;
 @tailwind components;
