@@ -95,6 +95,31 @@
                 </form>
             </div>
 
+            {{-- 선택 후 대량 처리 --}}
+            <div class="category-panel__bulk-actions tag-panel__bulk-actions" x-show="selected.length > 0" x-cloak>
+                <div class="category-panel__bulk-left">
+                    <span class="category-panel__bulk-dot" aria-hidden="true"></span>
+                    <span class="category-panel__bulk-count" x-text="`${selected.length}개 선택됨`"></span>
+                    <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="clearSelection()">선택 해제</button>
+                </div>
+                <div class="category-panel__bulk-right">
+                    <form method="POST"
+                        :action="`{{ route('admin.tags.updateIsBlocked', ['tag_ids' => '__IDS__']) }}`.replace('__IDS__', selected.join(','))">
+                        @csrf
+                        @method('PATCH')
+                        <button class="category-panel__bulk-btn" name="is_blocked_action" value="1" type="submit">금지</button>
+                        <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" name="is_blocked_action" value="0" type="submit">사용</button>
+                    </form>
+
+                    <form method="POST" onsubmit="return confirm('정말 삭제할까요?')"
+                    :action="`{{ route('admin.tags.delete', ['tag_ids' => '__IDS__']) }}`.replace('__IDS__', selected.join(','))">
+                        @csrf
+                        @method('DELETE')
+                        <button class="category-panel__bulk-btn category-panel__bulk-btn--danger" type="submit">삭제</button>
+                    </form>
+                </div>
+            </div>
+
             {{--  페이징 --}}
             <div class="user-panel__list-header">
                 <div class="user-panel__list-title">목록</div>
@@ -169,15 +194,19 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <button type="button" class="category-panel__action category-panel__action--delete">
-                                        <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                            <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
-                                            <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M7 7l1 12h8l1-12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-linecap="round"/>
-                                        </svg>
-                                        <span>삭제</span>
-                                    </button>
+                                    <form  method="POST" onsubmit="return confirm('정말 삭제할까요?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="category-panel__action category-panel__action--delete category-panel__delete-link">
+                                            <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
+                                                <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M7 7l1 12h8l1-12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-linecap="round"/>
+                                            </svg>
+                                            <span>삭제</span>
+                                        </button>
+                                    </form>
                                     <button type="button" class="category-panel__action category-panel__action--edit" @click="openModal('edit', @js($tag))">
                                         <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                             <path d="M4 20h4l10-10-4-4L4 16v4z" stroke="currentColor" stroke-linejoin="round"/>

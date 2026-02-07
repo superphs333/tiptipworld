@@ -73,4 +73,31 @@ class TagController extends Controller
         }
     }
 
+
+    /**
+     * 태그 삭제
+     */
+    public function destroy($tag_ids){
+        $tags = explode(',', $tag_ids);
+        Tag::whereIn('id',$tags)->delete();
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'tags'], session('tags.query', []))
+        )->with('success','선택한 태그들을 성공적으로 삭제되었습니다.');
+    }
+
+    /**
+     * 태그 사용/금지 
+     */
+    public function updateIsBlocked($tag_ids, Request $request){
+        $tags = explode(',', $tag_ids);
+        $is_blocked = $request->boolean('is_blocked_action');
+        Tag::whereIn('id',$tags)->update(['is_blocked' => $is_blocked]);
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'tags'], session('tags.query', []))
+        )->with('success','선택한 태그들을 성공적으로 수정되었습니다.');
+        
+    } 
+
 }

@@ -56,6 +56,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // 태그
     Route::post('/admin/tag/save',[TagController::class, 'store'])->name('admin.tag.store'); // 저장 
     Route::patch('/admin/tag/update/{tag_id}',[TagController::class, 'update'])->name('admin.tag.update'); // 수정
+    Route::delete('/admin/tags/delete/{tag_ids}',[TagController::class,'destroy'])->name('admin.tags.delete'); // 삭제
+    Route::patch('/admin/tags/updateIsBlocked/{tag_ids}',[TagController::class, 'updateIsBlocked'])->name('admin.tags.updateIsBlocked'); // 금지/사용 수정
+    
 
     
 });
