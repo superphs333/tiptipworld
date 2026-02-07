@@ -92,7 +92,7 @@ class TagController extends Controller
     public function updateIsBlocked($tag_ids, Request $request){
         $tags = explode(',', $tag_ids);
         $is_blocked = $request->boolean('is_blocked_action');
-        Tag::whereIn('id',$tags)->update(['is_blocked' => $is_blocked]);
+        Tag::whereIn('id',$tags)->update(['is_blocked' => $is_blocked, 'updated_at' => Date::now()]);
         return redirect()->route(
             'admin',
             array_merge(['tab' => 'tags'], session('tags.query', []))
