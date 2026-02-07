@@ -113,14 +113,9 @@
                             <div class="tip-create__card-header">
                                 <div>
                                     <h3 class="tip-create__card-title">본문</h3>
-                                    <p class="tip-create__card-desc">에디터/마크다운/HTML</p>
                                 </div>
                             </div>
-                            <x-tiptap
-                                name="content"
-                                placeholder="내용을 입력하세요."
-                                min-height="70vh"
-                            />
+                            <x-summernote name="content" />
                         </section>
                     </div>
 
