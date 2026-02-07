@@ -3,10 +3,13 @@
         $adminTabs = config('admin.tabs', []);
         $defaultAdminTab = array_key_first($adminTabs) ?? 'users';
         $adminTab = request()->route('tab') ?? request()->query('tab', $defaultAdminTab);
+        if (request()->routeIs('admin.tip.create')) {
+            $adminTab = 'tips';
+        }
         if (!array_key_exists($adminTab, $adminTabs)) {
             $adminTab = $defaultAdminTab;
         }
-        $isAdminArea = request()->routeIs('admin');
+        $isAdminArea = request()->is('admin*') || request()->routeIs('admin.*');
     @endphp
 
     <!-- Primary Navigation Menu -->

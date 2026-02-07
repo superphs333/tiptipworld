@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\TipController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -59,6 +60,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/tags/delete/{tag_ids}',[TagController::class,'destroy'])->name('admin.tags.delete'); // 삭제
     Route::patch('/admin/tags/updateIsBlocked/{tag_ids}',[TagController::class, 'updateIsBlocked'])->name('admin.tags.updateIsBlocked'); // 금지/사용 수정
     
+    /**
+     * Tips
+     */
+    // 팁 생성/수정 페이지 
+    Route::get('/admin/tips/create', [TipController::class, 'createForm'])->name('admin.tip.create');
 
-    
 });
