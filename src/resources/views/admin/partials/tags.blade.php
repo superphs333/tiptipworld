@@ -194,10 +194,11 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <form  method="POST" onsubmit="return confirm('정말 삭제할까요?')">
+                                    <form  method="POST" onsubmit="return confirm('정말 삭제할까요?')"
+                                    action="{{ route('admin.tags.delete', ['tag_ids' => $tagId]) }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="category-panel__action category-panel__action--delete category-panel__delete-link">
+                                        <button type="submit" class="category-panel__action category-panel__action--delete category-panel__delete-link" >
                                             <svg class="category-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                                 <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
                                                 <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
