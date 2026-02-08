@@ -8,13 +8,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
 use App\Models\Role;
 use App\Models\Status;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Services\FileStorageService;
 
 
 
@@ -60,7 +60,7 @@ class ProfileController extends Controller
     /**
      * Update the user's profile image.
      */
-    public function updateImage(Request $request): RedirectResponse
+    public function updateImage(Request $request, FileStorageService $storage): RedirectResponse
     {
         $validated = $request->validate([
             'profile_image' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
@@ -68,13 +68,9 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        if ($user->profile_image_path) {
-            Storage::disk('r2')->delete($user->profile_image_path);
-        }
+        $storage->deleteIfExists($user->profile_image_path);
+        $user->profile_image_path = $storage->storeUploaded($validated['profile_image'], 'profile');
 
-        $path = $validated['profile_image']->store('profile-images', 'r2');
-
-        $user->profile_image_path = $path;
         $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-image-updated');
@@ -83,15 +79,13 @@ class ProfileController extends Controller
     /**
      * Remove the user's profile image.
      */
-    public function destroyImage(Request $request): RedirectResponse
+    public function destroyImage(Request $request, FileStorageService $storage): RedirectResponse
     {
         $user = $request->user();
 
-        if ($user->profile_image_path) {
-            Storage::disk('r2')->delete($user->profile_image_path);
-            $user->profile_image_path = null;
-            $user->save();
-        }
+        $storage->deleteIfExists($user->profile_image_path);
+        $user->profile_image_path = null;
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-image-removed');
     }

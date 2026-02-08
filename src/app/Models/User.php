@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
+use App\Services\FileStorageService;
 
 class User extends Authenticatable
 {
@@ -67,7 +67,7 @@ class User extends Authenticatable
             return asset('images/avatar-default.svg');
         }
 
-        return Storage::disk('r2')->url($this->profile_image_path);
+        return app(FileStorageService::class)->url($this->profile_image_path);
     }
 
     /**

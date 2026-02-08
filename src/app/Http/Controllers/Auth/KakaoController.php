@@ -4,17 +4,23 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\FileStorageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
 class KakaoController extends Controller
 {
+    private FileStorageService $storage;
+
+    public function __construct(FileStorageService $storage)
+    {
+        $this->storage = $storage;
+    }
     /**
      * 카카오 OAuth 인증 화면으로 리디렉트.
      */
@@ -102,10 +108,7 @@ class KakaoController extends Controller
             return null;
         }
 
-        $path = 'profile-images/kakao/' . Str::uuid() . '.' . $extension;
-        $stored = Storage::disk('r2')->put($path, $response->body());
-
-        return $stored ? $path : null;
+        return $this->storage->storeRemote($response->body(), 'profile_kakao', $extension);
     }
 
     private function resolveImageExtension(string $contentType): ?string
