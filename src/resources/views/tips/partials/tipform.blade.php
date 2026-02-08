@@ -198,14 +198,16 @@
                             </div>
                         </section>
 
+                        {{-- 태그부분 --}}
                         <section class="tip-create__card">
+                            {{-- 헤드 --}}
                             <div class="tip-create__card-header">
                                 <div>
                                     <h3 class="tip-create__card-title">태그</h3>
-                                    <p class="tip-create__card-desc">tip_tags pivot</p>
                                 </div>
                                 <div class="tip-create__counter" x-text="`총 ${selectedTags.length}개`">총 0개</div>
                             </div>
+                            {{-- 태그 입력부 --}}
                             <div class="tip-create__tag-input">
                                 <input
                                     class="category-panel__input"
@@ -217,6 +219,7 @@
                                 />
                                 <button class="category-panel__bulk-btn" type="button" @click="addTag()">추가</button>
                             </div>
+                            {{-- 선택된 태그 표시 --}}
                             <div class="tip-create__tags">
                                 <template x-if="selectedTags.length === 0">
                                     <span class="tip-create__tags-empty">선택된 태그 없음</span>
@@ -228,7 +231,6 @@
                                     </span>
                                 </template>
                             </div>
-                            <p class="tip-create__note">tags_count는 자동 계산(표시만)</p>
                         </section>
                     </aside>
                 </div>
