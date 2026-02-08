@@ -7,7 +7,7 @@
 <div x-data="tipCreate()">
     <div class="category-panel tip-create">
         <div class="category-panel__content tip-create__content">
-            <form class="tip-create__form" action="{{ $formAction }}" method="POST">
+            <form class="tip-create__form" action="{{ route($formAction) }}" method="POST">
                 @csrf
 
                 <div class="tip-create__sticky-bar">
@@ -72,9 +72,7 @@
                         </div>
                     </div>
                     <div class="tip-create__sticky-actions">
-                        <button class="category-panel__bulk-btn" type="button">임시저장</button>
-                        <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button">미리보기</button>
-                        <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="submit">{{ $submitLabel }}</button>
+                        <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" name="intent" value="publish" type="submit">{{ $submitLabel }}</button>
                     </div>
                 </div>
 
@@ -231,6 +229,8 @@
                                     </span>
                                 </template>
                             </div>
+                            {{-- 태그 임시 저장 (name으로 전송용) --}}
+                            <input name="tags" type="hidden" :value="JSON.stringify(selectedTags)" /> 
                         </section>
                     </aside>
                 </div>

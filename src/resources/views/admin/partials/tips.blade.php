@@ -30,7 +30,7 @@
                     </div>
                 </div>
                 <div class="tip-panel__summary-actions">
-                    <a class="category-panel__bulk-btn category-panel__bulk-btn--accent tip-panel__add-btn" href="{{ route('admin.tip.create') }}">+ Tip 추가</a>
+                    <a class="category-panel__bulk-btn category-panel__bulk-btn--accent tip-panel__add-btn" href="{{ route('admin.tip.form') }}">+ Tip 추가</a>
                 </div>
             </div>
 

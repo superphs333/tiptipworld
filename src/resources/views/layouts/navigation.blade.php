@@ -3,7 +3,7 @@
         $adminTabs = config('admin.tabs', []);
         $defaultAdminTab = array_key_first($adminTabs) ?? 'users';
         $adminTab = request()->route('tab') ?? request()->query('tab', $defaultAdminTab);
-        if (request()->routeIs('admin.tip.create')) {
+        if (request()->routeIs('admin.tip.*')) {
             $adminTab = 'tips';
         }
         if (!array_key_exists($adminTab, $adminTabs)) {

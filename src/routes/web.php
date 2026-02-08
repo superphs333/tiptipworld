@@ -64,8 +64,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     /**
      * Tips
      */
-    // 팁 생성/수정 페이지 
-    Route::get('/admin/tips/create', [TipController::class, 'createForm'])->name('admin.tip.create');
+    // 팁 생성/수정 페이지
+    Route::get('/admin/tips/form/{tip_id?}', [TipController::class, 'form'])
+        ->whereNumber('tip_id')
+        ->name('admin.tip.form');
+    Route::post('/tip/store',[TipController::class, 'saveTip'])->name('tip.store'); // 추가
+    Route::post('/tip/update/{tip_id}',[TipController::class, 'updateTipPost'])->name('tip.update'); // 수정
+    
 
     
     /**
