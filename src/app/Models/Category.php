@@ -8,7 +8,7 @@ use App\Models\Tip;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'description', 'is_active'];
+    protected $fillable = ['name', 'slug', 'description', 'is_active', 'sort_order'];
     protected $casts = ['is_active' => 'boolean'];
     
     // tip과의 관계 : 1개의 팁은 1개의 카테고리에 속한다.
@@ -28,5 +28,6 @@ class Category extends Model
                 $query->where('name', 'like', "%{$name}%");
             });
     }
+
 
 }

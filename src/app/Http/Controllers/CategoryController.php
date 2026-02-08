@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
+    
     public function store(Request $request){
         // 검증
         $validated = $request->validate([
@@ -14,7 +16,18 @@ class CategoryController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'required|boolean'
         ]);
-        Category::create($validated);
+
+        DB::transaction(function () use ($validated) {
+            $lastSortOrder = Category::query()
+                ->lockForUpdate()
+                ->max('sort_order');
+
+            $validated['sort_order'] = (int) ($lastSortOrder ?? 0) + 1;
+
+            Category::create($validated);
+        });
+
+        
         
         return redirect()->route(
             'admin',
