@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /**
+     * 팁 관련 변수들
+     */
+    'tip_status' => [
+        'draft','published'
+    ],
+    'tip_visibility' => [
+        'public','private'
+    ]
+
+        
+
 ];

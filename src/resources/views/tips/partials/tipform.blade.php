@@ -24,8 +24,10 @@
                                     @keydown.escape.stop="close()"
                                 >
                                     <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
-                                        <option value="draft">draft</option>
-                                        <option value="published">published</option>
+                                        @foreach(config('app.tip_status', []) as $status)
+                                            <option value="{{ $status }}">{{ $status }}</option>
+                                        @endforeach
+
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">draft</span>
@@ -34,8 +36,9 @@
                                         </svg>
                                     </button>
                                     <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                        <li class="category-panel__select-option" role="option" @click="choose('draft')" :class="{ 'is-active': value === 'draft' }" :aria-selected="value === 'draft'">draft</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('published')" :class="{ 'is-active': value === 'published' }" :aria-selected="value === 'published'">published</li>
+                                        @foreach(config('app.tip_status', []) as $status)
+                                            <li class="category-panel__select-option" role="option" @click="choose('{{ $status }}')" :class="{ 'is-active': value === '{{ $status }}' }" :aria-selected="value === '{{ $status }}'">{{ $status }}</li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
@@ -49,8 +52,9 @@
                                     @keydown.escape.stop="close()"
                                 >
                                     <select class="category-panel__select-native" name="visibility" x-ref="select" x-model="value">
-                                        <option value="public">public</option>
-                                        <option value="private">private</option>
+                                        @foreach(config('app.tip_visibility', []) as $visibility)
+                                            <option value="{{ $visibility }}">{{ $visibility }}</option>
+                                        @endforeach
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                         <span class="category-panel__select-label" x-text="label">public</span>
@@ -59,8 +63,9 @@
                                         </svg>
                                     </button>
                                     <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                        <li class="category-panel__select-option" role="option" @click="choose('public')" :class="{ 'is-active': value === 'public' }" :aria-selected="value === 'public'">public</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('private')" :class="{ 'is-active': value === 'private' }" :aria-selected="value === 'private'">private</li>
+                                        @foreach(config('app.tip_visibility', []) as $visibility)
+                                            <li class="category-panel__select-option" role="option" @click="choose('{{ $visibility }}')" :class="{ 'is-active': value === '{{ $visibility }}' }" :aria-selected="value === '{{ $visibility }}'">{{ $visibility }}</li>
+                                        @endforeach
                                     </ul>
                                 </div>
                             </div>
@@ -129,8 +134,7 @@
                         <section class="tip-create__card">
                             <div class="tip-create__card-header">
                                 <div>
-                                    <h3 class="tip-create__card-title">카테고리</h3>
-                                    <p class="tip-create__card-desc">category_id 선택</p>
+                                    <h3 class="tip-create__card-title">카테고리</h3>                                    
                                 </div>
                             </div>
                             <div
@@ -142,8 +146,9 @@
                             >
                                 <select class="category-panel__select-native" name="category_id" x-ref="select" x-model="value">
                                     <option value="">카테고리 선택</option>
-                                    <option value="dev">개발</option>
-                                    <option value="design">디자인</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
                                 </select>
                                 <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                     <span class="category-panel__select-label" x-text="label">카테고리 선택</span>
@@ -153,8 +158,9 @@
                                 </button>
                                 <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                     <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">카테고리 선택</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('dev')" :class="{ 'is-active': value === 'dev' }" :aria-selected="value === 'dev'">개발</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('design')" :class="{ 'is-active': value === 'design' }" :aria-selected="value === 'design'">디자인</li>
+                                    @foreach($categories as $category)
+                                        <li class="category-panel__select-option" role="option" @click="choose('{{ $category->id }}')" :class="{ 'is-active': value === '{{ $category->id }}' }" :aria-selected="value === '{{ $category->id }}'">{{ $category->name }}</li>
+                                    @endforeach
                                 </ul>
                             </div>
                         </section>

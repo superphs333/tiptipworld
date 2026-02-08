@@ -29,5 +29,15 @@ class Category extends Model
             });
     }
 
+    // tip 작성 폼용 카테고리 목록
+    public function scopeForTipForm(Builder $query) : Builder
+    {
+        return $query
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+
 
 }
