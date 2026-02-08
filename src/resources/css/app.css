@@ -1452,6 +1452,7 @@ body.is-modal-open {
 
 .tip-create__select {
     min-width: 130px;
+    flex: 0 0 auto;
 }
 
 .tip-create__sticky-actions {
