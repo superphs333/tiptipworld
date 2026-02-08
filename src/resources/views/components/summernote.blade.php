@@ -71,10 +71,10 @@
 
         for (const file of files) {
             try {
-                const res = awai uploadSingleImage(file);
+                const res = await uploadSingleImage(file);
                 $(editorEl).summernote('insertImage', res.url, function($img) {
                     $img.attr('alt', res.alt ?? '');
-                })
+                });
             } catch (err) {
                 console.warn(err);
 
@@ -115,11 +115,17 @@
                 return;
             }
 
+            const maxImageSizeBytes = 10 * 1024 * 1024;
+            if ((file.size ?? 0) > maxImageSizeBytes) {
+                reject(new Error('이미지 최대 용량은 10MB입니다.'));
+                return;
+            }
+
             const formData = new FormData();
             formData.append('image', file);
 
             $.ajax({
-                url: '/summernote/uploades/image',
+                url: @json(route('summernote.uploadImage', absolute: false)),
                 method: 'POST',
                 data: formData,
                 processData: false,
