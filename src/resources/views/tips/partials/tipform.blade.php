@@ -7,7 +7,7 @@
 <div x-data="tipCreate()">
     <div class="category-panel tip-create">
         <div class="category-panel__content tip-create__content">
-            <form class="tip-create__form" action="{{ route($formAction) }}" method="POST">
+            <form class="tip-create__form" action="{{ route($formAction) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div
@@ -127,6 +127,7 @@
                                 maxlength="120"
                                 placeholder="제목을 입력하세요"
                                 x-model="title"
+                                required
                             />
                         </section>
 
@@ -158,7 +159,7 @@
                                     <h3 class="tip-create__card-title">본문</h3>
                                 </div>
                             </div>
-                            <x-summernote name="content" />
+                            <x-summernote required name="content" />
                         </section>
                     </div>
 

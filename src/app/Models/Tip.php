@@ -10,6 +10,21 @@ use App\Models\Tag;
 
 class Tip extends Model
 {
+    protected $fillable = [
+        'user_id',
+        'category_id',
+        'title',
+        'thumbnail',
+        'content',
+        'excerpt',
+        'status',
+        'visibility',
+        'published_at',
+        'tags_count',
+        'view_count',
+        'like_count',
+    ];
+
     /**
      * Tip - Category (N:1)
      * tips.category_id -> caregories.id

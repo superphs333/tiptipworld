@@ -42,22 +42,25 @@ class TipController extends Controller
 
     public function saveTip(Request $request, FileStorageService $storage){
         $validated = $request->validate([
-            'category_id' => 'nullable|exists:categories,id',
-            'title' => 'required|string|max:120',
-            'thumbnail' => 'nullable|image|max:10240',
-            'content' => 'required|string',
-            'excerpt' => 'nullable|string|max:255',
-            'status' => 'required|in:draft,published,archived,deleted',
-            'visibility' => 'required|in:public,unlisted,private',
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'title' => ['required', 'string', 'max:120'],
+            'thumbnail' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
+            'content' => ['required', 'string'],
+            'excerpt' => ['nullable', 'string', 'max:255'],
+            'status' => ['required', 'in:draft,published,archived,deleted'],
+            'visibility' => ['required', 'in:public,unlisted,private'],
         ]);
         $userId = Auth::id();
         $created_at = Date::now();
         $updated_at = Date::now();
+        $validated['user_id'] = $userId;
+        $validated['created_at'] = $created_at;
+        $validated['updated_at'] = $updated_at;
 
         /**
         * 썸네일 저장 (name : thumbnail)
         */
-        if($validated['thumbnail']){
+        if ($request->hasFile('thumbnail')) {
             $tip_thumbnail_url = $storage->storeUploaded($validated['thumbnail'], 'tip-cover');
             $validated['thumbnail'] = $tip_thumbnail_url;
         }
@@ -86,6 +89,11 @@ class TipController extends Controller
         }
 
 
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'tips'], session('tips.query', []))
+        )->with('success', '팁이 성공적으로 저장되었습니다.')
+        ->withInput();
 
 
 
