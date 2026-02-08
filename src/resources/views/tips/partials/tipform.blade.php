@@ -98,7 +98,7 @@
                             />
                         </section>
 
-                        <section class="tip-create__card">
+                        {{-- <section class="tip-create__card">
                             <div class="tip-create__card-header">
                                 <div>
                                     <h3 class="tip-create__card-title">요약</h3>
@@ -118,7 +118,7 @@
                                 <input type="checkbox" name="excerpt_auto" checked />
                                 <span>본문 첫 문장으로 자동 생성</span>
                             </label>
-                        </section>
+                        </section> --}}
 
                         <section class="tip-create__card">
                             <div class="tip-create__card-header">
