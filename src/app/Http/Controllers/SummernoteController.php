@@ -28,7 +28,7 @@ class SummernoteController extends Controller
         $image = $validated['image'];
 
         try {
-            $storedPath = $storage->storeUploaded($image, 'post');
+            $storedPath = $storage->storeUploaded($image, 'tip-post');
         } catch (RuntimeException) {
             return response()->json([
                 'message' => '이미지 업로드에 실패했습니다.',

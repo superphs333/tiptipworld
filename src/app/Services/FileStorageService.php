@@ -134,15 +134,15 @@ class FileStorageService
                 'visibility' => 'public',
             ],
             // 게시물 이미지
-            'post' => [
-                'prefix' => 'post-images',
+            'tip-post' => [
+                'prefix' => 'tip-post-images',
                 'max_kb' => 10240,
                 'extensions' => ['jpg', 'jpeg', 'png', 'webp', 'gif'],
                 'visibility' => 'public',
             ],
             // 커버 이미지
-            'cover' => [
-                'prefix' => 'cover-images',
+            'tip-cover' => [
+                'prefix' => 'tip-cover-images',
                 'max_kb' => 5120,
                 'extensions' => ['jpg', 'jpeg', 'png', 'webp'],
                 'visibility' => 'public',
