@@ -1393,14 +1393,28 @@ body.is-modal-open {
 }
 
 /* Tip create panel */
+.tip-create {
+    --tip-create-viewport-offset: 12rem;
+    min-height: calc(100vh - var(--tip-create-viewport-offset));
+}
+
+@supports (height: 100dvh) {
+    .tip-create {
+        min-height: calc(100dvh - var(--tip-create-viewport-offset));
+    }
+}
+
 .tip-create__content {
     gap: 24px;
+    min-height: 100%;
 }
 
 .tip-create__form {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    min-height: 100%;
+    flex: 1 1 auto;
 }
 
 .tip-create__sticky-bar {
@@ -1466,7 +1480,9 @@ body.is-modal-open {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     gap: 22px;
-    align-items: start;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .tip-create__main,
@@ -1474,6 +1490,7 @@ body.is-modal-open {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    min-height: 0;
 }
 
 .tip-create__card {
@@ -1485,6 +1502,31 @@ body.is-modal-open {
     display: flex;
     flex-direction: column;
     gap: 14px;
+}
+
+.tip-create__card--editor {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tip-create__card--editor .note-editor.note-frame {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100% !important;
+}
+
+.tip-create__card--editor .note-editor.note-frame .note-editing-area {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tip-create__card--editor .note-editor.note-frame .note-editing-area .note-editable {
+    flex: 1 1 auto;
+    min-height: clamp(500px, 56vh, 920px);
+    height: auto !important;
 }
 
 .tip-create__card-header {
@@ -1642,6 +1684,18 @@ body.is-modal-open {
 }
 
 @media (max-width: 960px) {
+    .tip-create {
+        min-height: auto;
+    }
+
+    .tip-create__form {
+        min-height: auto;
+    }
+
+    .tip-create__card--editor .note-editor.note-frame .note-editing-area .note-editable {
+        min-height: 500px;
+    }
+
     .tip-create__grid {
         grid-template-columns: 1fr;
         gap: 20px;

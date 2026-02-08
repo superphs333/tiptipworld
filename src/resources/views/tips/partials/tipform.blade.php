@@ -120,7 +120,7 @@
                             </label>
                         </section> --}}
 
-                        <section class="tip-create__card">
+                        <section class="tip-create__card tip-create__card--editor">
                             <div class="tip-create__card-header">
                                 <div>
                                     <h3 class="tip-create__card-title">본문</h3>
