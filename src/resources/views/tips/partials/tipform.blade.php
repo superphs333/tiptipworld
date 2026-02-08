@@ -173,12 +173,26 @@
                                 </div>
                             </div>
                             <div class="tip-create__thumb">
-                                <div class="tip-create__thumb-preview">미리보기 썸네일</div>
+                                <div class="tip-create__thumb-preview">
+                                    <template x-if="thumbnailPreviewUrl">
+                                        <img class="tip-create__thumb-image" :src="thumbnailPreviewUrl" alt="썸네일 미리보기" />
+                                    </template>
+                                    <template x-if="!thumbnailPreviewUrl">
+                                        <span>미리보기 썸네일</span>
+                                    </template>
+                                </div>
                                 <div class="tip-create__thumb-actions">
-                                    <input class="tip-create__file" type="file" name="thumbnail" accept="image/*" />
+                                    <input
+                                        class="tip-create__file"
+                                        type="file"
+                                        name="thumbnail"
+                                        accept="image/*"
+                                        x-ref="thumbnailInput"
+                                        @change="onThumbnailChange($event)"
+                                    />
                                     <div class="tip-create__thumb-buttons">
-                                        <button class="category-panel__bulk-btn" type="button">제거</button>
-                                        <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button">변경</button>
+                                        <button class="category-panel__bulk-btn" type="button" @click="clearThumbnail()">제거</button>
+                                        <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="openThumbnailPicker()">변경</button>
                                     </div>
                                 </div>
                             </div>
@@ -263,6 +277,7 @@
             excerpt: "",
             tagInput: "",
             selectedTags: [],
+            thumbnailPreviewUrl: "",
             addTag() {
                 const value = this.tagInput.trim().replace(/^#/, "");
                 if (!value) return;
@@ -273,6 +288,39 @@
             },
             removeTag(tag) {
                 this.selectedTags = this.selectedTags.filter((item) => item !== tag);
+            },
+            openThumbnailPicker() {
+                this.$refs.thumbnailInput?.click();
+            },
+            onThumbnailChange(event) {
+                const file = event?.target?.files?.[0] ?? null;
+
+                if (this.thumbnailPreviewUrl) {
+                    URL.revokeObjectURL(this.thumbnailPreviewUrl);
+                    this.thumbnailPreviewUrl = "";
+                }
+
+                if (!file) {
+                    return;
+                }
+
+                if (!file.type || !file.type.startsWith("image/")) {
+                    event.target.value = "";
+                    return;
+                }
+
+                this.thumbnailPreviewUrl = URL.createObjectURL(file);
+            },
+            clearThumbnail() {
+                if (this.thumbnailPreviewUrl) {
+                    URL.revokeObjectURL(this.thumbnailPreviewUrl);
+                }
+
+                this.thumbnailPreviewUrl = "";
+
+                if (this.$refs.thumbnailInput) {
+                    this.$refs.thumbnailInput.value = "";
+                }
             },
         }));
     });

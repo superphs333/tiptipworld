@@ -1573,6 +1573,13 @@ body.is-modal-open {
     font-size: 12px;
 }
 
+.tip-create__thumb-image {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
 .tip-create__thumb-actions {
     display: flex;
     flex-direction: column;
