@@ -34,6 +34,40 @@
                 </div>
             </div>
 
+            <div
+                class="tip-panel__alerts"
+                x-data="{
+                    showErrors: {{ $errors->any() ? 'true' : 'false' }},
+                    showError: {{ session('error') ? 'true' : 'false' }},
+                    showSuccess: {{ session('success') ? 'true' : 'false' }},
+                }"
+            >
+                @if ($errors->any())
+                    <div class="tip-panel__alert tip-panel__alert--error" x-show="showErrors">
+                        <button class="tip-panel__alert-close" type="button" aria-label="닫기" @click="showErrors = false">×</button>
+                        <ul>
+                            @foreach ($errors->all() as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="tip-panel__alert tip-panel__alert--error" x-show="showError">
+                        <button class="tip-panel__alert-close" type="button" aria-label="닫기" @click="showError = false">×</button>
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div class="tip-panel__alert tip-panel__alert--success" x-show="showSuccess">
+                        <button class="tip-panel__alert-close" type="button" aria-label="닫기" @click="showSuccess = false">×</button>
+                        {{ session('success') }}
+                    </div>
+                @endif
+            </div>
+
             <div class="category-panel__filter tip-panel__filter">
                 <form class="category-panel__form tip-panel__form" action="" method="GET">
                     @if (request()->has('per_page'))

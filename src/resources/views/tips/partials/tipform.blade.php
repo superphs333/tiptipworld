@@ -10,6 +10,40 @@
             <form class="tip-create__form" action="{{ route($formAction) }}" method="POST">
                 @csrf
 
+                <div
+                    class="tip-create__alerts"
+                    x-data="{
+                        showErrors: {{ $errors->any() ? 'true' : 'false' }},
+                        showError: {{ session('error') ? 'true' : 'false' }},
+                        showSuccess: {{ session('success') ? 'true' : 'false' }},
+                    }"
+                >
+                    @if ($errors->any())
+                        <div class="tip-create__alert tip-create__alert--error" x-show="showErrors">
+                            <button class="tip-create__alert-close" type="button" aria-label="닫기" @click="showErrors = false">×</button>
+                            <ul>
+                                @foreach ($errors->all() as $message)
+                                    <li>{{ $message }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="tip-create__alert tip-create__alert--error" x-show="showError">
+                            <button class="tip-create__alert-close" type="button" aria-label="닫기" @click="showError = false">×</button>
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="tip-create__alert tip-create__alert--success" x-show="showSuccess">
+                            <button class="tip-create__alert-close" type="button" aria-label="닫기" @click="showSuccess = false">×</button>
+                            {{ session('success') }}
+                        </div>
+                    @endif
+                </div>
+
                 <div class="tip-create__sticky-bar">
                     <div class="tip-create__sticky-left">
                         <a class="category-panel__bulk-btn category-panel__bulk-btn--ghost tip-create__back" href="{{ $backUrl }}">← 목록</a>
