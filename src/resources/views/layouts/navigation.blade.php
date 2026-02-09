@@ -33,8 +33,11 @@
                             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                                 {{ __('Dashboard') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
+                                {{ __('Profile') }}
+                            </x-nav-link>
                         @endif
-                        @if ($isAdmin)
+                        @if ($isAdmin && $isAdminArea)
                             <x-admin-nav-links
                                 link-component="nav-link"
                                 :tabs="$adminTabs"
@@ -46,38 +49,40 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                        <div class="flex items-center gap-3">
+                @auth
+                    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900" aria-label="검색">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                        </svg>
+                    </button>
+                    <div x-data="{ open: false }" class="relative">
+                        <button type="button" @click="open = !open" aria-expanded="false" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:border-gray-400">
+                            <img src="{{ Auth::user()->profile_image_url ?? asset('images/avatar-default.svg') }}" alt="프로필 이미지" class="h-6 w-6 shrink-0 rounded-full ring-1 ring-gray-300" />
+                            <span>{{ Auth::user()->name }}</span>
                         </button>
-                    </x-slot>
+                        <div x-show="open" @click.outside="open = false" class="absolute end-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
+                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">프로필</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">북마크</a>
+                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">알림</a>
+                            <div class="border-t border-gray-200"></div>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100">
+                                    sign out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endauth
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                @guest
+                    <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-gray-900">로그인</a>
+                    <a href="{{ route('register') }}" class="inline-flex items-center rounded-full bg-gray-800 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-700">
+                        가입하기
+                    </a>
+                @endguest
             </div>
 
             <!-- Hamburger -->
@@ -103,8 +108,11 @@
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
+                        {{ __('Profile') }}
+                    </x-responsive-nav-link>
                 @endif
-                @if ($isAdmin)
+                @if ($isAdmin && $isAdminArea)
                     <x-admin-nav-links
                         link-component="responsive-nav-link"
                         :tabs="$adminTabs"
