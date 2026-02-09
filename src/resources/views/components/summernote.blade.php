@@ -18,6 +18,7 @@
 
 <script>
     (() => {
+        const initialContent = @js($fieldValue());
         const $editor = window.jQuery ? window.jQuery('#{{ $id }}') : null;
 
         if (!$editor || !$editor.length || typeof $editor.summernote !== 'function') {
@@ -30,7 +31,7 @@
         }
 
         $editor.summernote({
-            placeholder: '{{ $placeholder }}',
+            placeholder: @js($placeholder),
             tabsize: 2,
             height: {{ $height }},
             lang: 'ko-KR',
@@ -58,6 +59,10 @@
                 }
             },
         });
+
+        if (initialContent) {
+            $editor.summernote('code', initialContent);
+        }
     })();
 
 

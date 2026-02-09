@@ -28,6 +28,7 @@ class TipController extends Controller
         //$formAction = is_null($tip_id) ? 'tip.store' : 'tip.update';
         $formAction = is_null($tip_id) ? route('tip.store') : route('tip.update', $tip_id);
 
+        $data = !is_null($tip_id) ? Tip::find($tip_id) : null;
 
         return view('admin.dashboard', [
             'tab' => $tab,
@@ -36,7 +37,7 @@ class TipController extends Controller
             'tip_id' => $tip_id,
             'headerTitle' => $tabs[$tab] ?? 'Tips',
             'tabView' => 'admin.partials.tips.create',
-            'datas' => null,
+            'data' => $data,
             'categories' => $categories
         ]);
     }

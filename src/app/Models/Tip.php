@@ -73,7 +73,10 @@ class Tip extends Model
      * 
      */
     public static function getTips(array $filters = [], int $perPage = 20){
-        $q = Tip::query()->with('category')->with('tags')->with('user');
+        $q = Tip::query()
+            ->with('category')
+            ->with('tags:id,name')
+            ->with('user');
 
         // 쿼리(검색어) : title or user
         if(isset($filters['query'])){

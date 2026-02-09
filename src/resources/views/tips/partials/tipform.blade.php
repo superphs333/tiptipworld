@@ -2,6 +2,11 @@
     $formAction = $formAction ?? '';
     $backUrl = $backUrl ?? route('admin', ['tab' => 'tips']);
     $submitLabel = $submitLabel ?? '게시하기';
+    $tip = $data ?? null;
+    $selectedCategoryId = (string) old('category_id', $tip?->category_id ?? '');
+    $thumbnailUrl = (string) old('thumbnail_url', $tip?->thumbnail_url);
+    $tags = collect($tip?->tags ?? [])
+        ->pluck('name')->filter()->values()->all();
 @endphp
 
 <div x-data="tipCreate()">
@@ -59,7 +64,7 @@
                                 >
                                     <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
                                         @foreach(config('app.tip_status', []) as $status)
-                                            <option value="{{ $status }}">{{ $status }}</option>
+                                            <option value="{{ $status }}" @selected(old('status', $tip?->status ?? 'draft')===$status)>{{ $status }}</option>
                                         @endforeach
 
                                     </select>
@@ -87,7 +92,7 @@
                                 >
                                     <select class="category-panel__select-native" name="visibility" x-ref="select" x-model="value">
                                         @foreach(config('app.tip_visibility', []) as $visibility)
-                                            <option value="{{ $visibility }}">{{ $visibility }}</option>
+                                            <option value="{{ $visibility }}" @selected(old('visibility', $tip?->visibility ?? 'draft')===$visibility)>{{ $visibility }}</option>
                                         @endforeach
                                     </select>
                                     <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -159,7 +164,7 @@
                                     <h3 class="tip-create__card-title">본문</h3>
                                 </div>
                             </div>
-                            <x-summernote required name="content" />
+                            <x-summernote required name="content" :value="$tip?->content ?? ''"/>
                         </section>
                     </div>
 
@@ -178,9 +183,9 @@
                                 @keydown.escape.stop="close()"
                             >
                                 <select class="category-panel__select-native" name="category_id" x-ref="select" x-model="value">
-                                    <option value="">카테고리 선택</option>
+                                    <option value="" @selected($selectedCategoryId === '')>카테고리 선택</option>
                                     @foreach($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        <option value="{{ $category->id }}" @selected($selectedCategoryId === (string) $category->id)>{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                                 <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -310,11 +315,11 @@
         }));
 
         Alpine.data("tipCreate", () => ({
-            title: "",
+            title: @js(old('title', $tip?->title ?? '')),
             excerpt: "",
             tagInput: "",
-            selectedTags: [],
-            thumbnailPreviewUrl: "",
+            selectedTags: @js($tags),
+            thumbnailPreviewUrl: @js(old('thumbnail_url', $tip?->thumbnail_url)),
             addTag() {
                 const value = this.tagInput.trim().replace(/^#/, "");
                 if (!value) return;
