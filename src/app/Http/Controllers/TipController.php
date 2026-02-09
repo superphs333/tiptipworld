@@ -100,10 +100,6 @@ class TipController extends Controller
 
         /**
         * 썸네일 저장 (name : thumbnail) 
-        * 전송안되는 경우 : 수정하지 않을 때, 제거를 눌렀을 때 
-        * 수정하지 않은 경우엔 -> 그대로
-        * 제거 누른 경우 -> 없애야함.
-        * 바꿔야 하는 경우 -> 
         */
         $thumbnail_deleted = $request->boolean('thumbnail_delete');
         if ($request->hasFile('thumbnail')) {
