@@ -256,7 +256,7 @@
                 <table class="user-panel__table tip-panel__table">
                     <thead>
                         <tr>
-                            <th>
+                            {{-- <th>
                                 <input
                                     type="checkbox"
                                     x-ref="selectAll"
@@ -268,7 +268,7 @@
                                         : [];
                                     "
                                 />
-                            </th>
+                            </th> --}}
                             <th>ID</th>
                             <th>썸네일</th>
                             <th>카테고리/제목</th>
@@ -328,7 +328,7 @@
                                 $dateLabel = $dateRaw ? \Illuminate\Support\Carbon::parse($dateRaw)->format('y-m-d A h:i') : '-';
                             @endphp
                             <tr>
-                                <td><input type="checkbox" name="tip_ids[]" value="{{ $tipId }}" x-model="selected" /></td>
+                                {{-- <td><input type="checkbox" name="tip_ids[]" value="{{ $tipId }}" x-model="selected" /></td> --}}
                                 <td>{{ $tipId }}</td>
                                 <td>
                                     <div class="tip-panel__thumb">
