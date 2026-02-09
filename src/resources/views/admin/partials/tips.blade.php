@@ -273,6 +273,7 @@
                             <th>썸네일</th>
                             <th>카테고리/제목</th>
                             <th>작성자</th>
+                            <th>노출</th>
                             <th>상태</th>
                             {{-- <th>조회/좋아요</th> --}}
                             <th>날짜</th>
@@ -294,9 +295,29 @@
                                 $thumb = data_get($tip, 'thumbnail_url', data_get($tip, 'thumbnail', ''));
                                 $views = (int) data_get($tip, 'views', data_get($tip, 'view_count', 0));
                                 $likes = (int) data_get($tip, 'likes', data_get($tip, 'like_count', 0));
-                                $statusRaw = data_get($tip, 'status', data_get($tip, 'is_public', true));
-                                $statusKey = $statusRaw === 'private' || $statusRaw === 0 || $statusRaw === false ? 'private' : 'public';
-                                $statusLabel = $statusKey === 'public' ? '공개' : '비공개';
+                                $visibilityRaw = data_get($tip, 'visibility', data_get($tip, 'is_public', true));
+                                if ($visibilityRaw === 'private' || $visibilityRaw === 0 || $visibilityRaw === false) {
+                                    $visibilityKey = 'private';
+                                    $visibilityLabel = '비공개';
+                                } elseif ($visibilityRaw === 'unlisted') {
+                                    $visibilityKey = 'unlisted';
+                                    $visibilityLabel = '일부공개';
+                                } else {
+                                    $visibilityKey = 'public';
+                                    $visibilityLabel = '공개';
+                                }
+
+                                $statusRaw = (string) data_get($tip, 'status', 'draft');
+                                $statusKey = in_array($statusRaw, ['draft', 'published', 'archived', 'deleted'], true)
+                                    ? $statusRaw
+                                    : 'unknown';
+                                $statusLabel = match ($statusKey) {
+                                    'draft' => '임시저장',
+                                    'published' => '게시',
+                                    'archived' => '보관',
+                                    'deleted' => '삭제',
+                                    default => $statusRaw !== '' ? $statusRaw : '-',
+                                };
                                 $dateRaw = data_get($tip, 'created_at', data_get($tip, 'updated_at'));                                
                                 $dateLabel = $dateRaw ? \Illuminate\Support\Carbon::parse($dateRaw)->format('y-m-d A h:i') : '-';
                             @endphp
@@ -339,7 +360,10 @@
                                 </td>
                                 <td>{{ $author }}</td>
                                 <td>
-                                    <span class="tip-panel__status tip-panel__status--{{ $statusKey }}">{{ $statusLabel }}</span>
+                                    <span class="tip-panel__status tip-panel__status--visibility-{{ $visibilityKey }}">{{ $visibilityLabel }}</span>
+                                </td>
+                                <td>
+                                    <span class="tip-panel__status tip-panel__status--state-{{ $statusKey }}">{{ $statusLabel }}</span>
                                 </td>
                                 {{-- <td class="tip-panel__metrics">{{ number_format($views) }} / {{ number_format($likes) }}</td> --}}
                                 <td class="tip-panel__date">{{ $dateLabel }}</td>
