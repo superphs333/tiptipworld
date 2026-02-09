@@ -136,6 +136,26 @@ class TipController extends Controller
 
     }
 
+    public function destroy(int $tip_id, FileStorageService $storage)
+    {
+        try {
+            $target_tip = Tip::findOrFail($tip_id);
+
+            $storage->deleteIfExists($target_tip->thumbnail);
+            $target_tip->delete();
+
+            return redirect()->route(
+                'admin',
+                array_merge(['tab' => 'tips'], session('tips.query', []))
+            )->with('success', '팁이 성공적으로 삭제되었습니다.');
+        } catch (\Throwable $e) {
+            return redirect()->route(
+                'admin',
+                array_merge(['tab' => 'tips'], session('tips.query', []))
+            )->with('error', '삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+        }
+    }
+
     private function saveTags($tagNames, $tip_id){
         $tagIds = [];
         foreach($tagNames as $tagName){

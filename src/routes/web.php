@@ -70,6 +70,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('admin.tip.form');
     Route::post('/tip/store',[TipController::class, 'saveTip'])->name('tip.store'); // 추가
     Route::post('/tip/update/{tip_id}',[TipController::class, 'updateTipPost'])->name('tip.update'); // 수정
+    Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
+        ->whereNumber('tip_id')
+        ->name('tip.destroy');
     
 
     

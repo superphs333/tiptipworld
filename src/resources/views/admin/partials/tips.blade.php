@@ -286,6 +286,9 @@
                                 $editUrl = is_numeric($tipId)
                                     ? route('admin.tip.form', ['tip_id' => $tipId])
                                     : route('admin.tip.form');
+                                $deleteUrl = is_numeric($tipId)
+                                    ? route('tip.destroy', ['tip_id' => $tipId])
+                                    : null;
                                 $title = data_get($tip, 'title', '-');
                                 $summary = data_get($tip, 'summary', data_get($tip, 'excerpt', ''));
                                 $author = data_get($tip, 'user.name', data_get($tip, 'user', '-'));
@@ -357,6 +360,21 @@
                                     <div class="tip-panel__actions">
                                         {{-- <button class="tip-panel__action" type="button">미리보기</button> --}}
                                         <a class="tip-panel__action" href="{{ $editUrl }}">편집</a>
+                                        @if ($deleteUrl)
+                                            <form class="tip-panel__action-form" action="{{ $deleteUrl }}" method="POST" onsubmit="return confirm('정말 삭제할까요?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="tip-panel__action tip-panel__action--delete" type="submit">
+                                                    <svg class="tip-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                        <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
+                                                        <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M7 7l1 12h8l1-12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-linecap="round"/>
+                                                    </svg>
+                                                    <span>삭제</span>
+                                                </button>
+                                            </form>
+                                        @endif
                                         {{-- <button class="tip-panel__action" type="button">복제</button>
                                         <button class="tip-panel__action" type="button">⋯</button> --}}
                                     </div>

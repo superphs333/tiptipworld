@@ -1394,25 +1394,48 @@ body.is-modal-open {
     gap: 6px;
 }
 
+.tip-panel__action-form {
+    margin: 0;
+}
+
 .tip-panel__action {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 4px;
     border: 1px solid var(--line);
     background: #fff7ed;
     color: var(--ink);
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
     text-decoration: none;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.tip-panel__action-icon {
+    width: 12px;
+    height: 12px;
 }
 
 .tip-panel__action:hover {
     background: #ffe7c6;
     box-shadow: 0 8px 12px rgba(217, 119, 6, 0.18);
     transform: translateY(-1px);
+}
+
+.tip-panel__action--delete {
+    background: #fef2f2;
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #b91c1c;
+}
+
+.tip-panel__action--delete:hover {
+    background: #fee2e2;
+    box-shadow: 0 8px 12px rgba(185, 28, 28, 0.18);
 }
 
 .tip-panel__status {
