@@ -74,166 +74,124 @@
                         <input type="hidden" name="per_page" value="{{ request('per_page') }}" />
                     @endif
                     <div class="tip-panel__filters">
-                        <div class="user-panel__filter-row tip-panel__filter-row tip-panel__filter-row--primary">
-                            <input
-                                class="category-panel__input tip-panel__search-input"
-                                type="text"
-                                name="query"
-                                placeholder="검색어(제목/본문/작성자)"
-                                value="{{ request('query') }}"
-                            />
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="category" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('category')))>카테고리</option>
-                                    <option value="dev" @selected(request('category') === 'dev')>개발</option>
-                                    <option value="design" @selected(request('category') === 'design')>디자인</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">카테고리</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">카테고리</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('dev')" :class="{ 'is-active': value === 'dev' }" :aria-selected="value === 'dev'">개발</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('design')" :class="{ 'is-active': value === 'design' }" :aria-selected="value === 'design'">디자인</li>
-                                </ul>
+                        <div class="tip-panel__filters-main">
+                            <div class="user-panel__filter-row tip-panel__filter-row tip-panel__filter-row--top">
+                                <div class="tip-panel__field">
+                                    <span class="tip-panel__field-label">카테고리</span>
+                                    <div
+                                        class="category-panel__select-wrap tip-panel__select"
+                                        x-data="selectBox()"
+                                        :class="{ 'is-open': open }"
+                                        @click.outside="close()"
+                                        @keydown.escape.stop="close()"
+                                    >
+                                        <select class="category-panel__select-native" name="category" x-ref="select" x-model="value">
+                                            <option value="" @selected(blank(request('category')))>카테고리</option>
+                                            <option value="dev" @selected(request('category') === 'dev')>개발</option>
+                                            <option value="design" @selected(request('category') === 'design')>디자인</option>
+                                        </select>
+                                        <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
+                                            <span class="category-panel__select-label" x-text="label">카테고리</span>
+                                            <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                                <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
+                                            <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">카테고리</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('dev')" :class="{ 'is-active': value === 'dev' }" :aria-selected="value === 'dev'">개발</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('design')" :class="{ 'is-active': value === 'design' }" :aria-selected="value === 'design'">디자인</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="tip-panel__field">
+                                    <span class="tip-panel__field-label">노출</span>
+                                    <div
+                                        class="category-panel__select-wrap tip-panel__select"
+                                        x-data="selectBox()"
+                                        :class="{ 'is-open': open }"
+                                        @click.outside="close()"
+                                        @keydown.escape.stop="close()"
+                                    >
+                                        <select class="category-panel__select-native" name="visible" x-ref="select" x-model="value">
+                                            <option value="" @selected(blank(request('visible')))>노출</option>
+                                            <option value="1" @selected(request('visible') === '1')>노출</option>
+                                            <option value="0" @selected(request('visible') === '0')>미노출</option>
+                                        </select>
+                                        <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
+                                            <span class="category-panel__select-label" x-text="label">노출</span>
+                                            <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                                <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
+                                            <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">노출</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('1')" :class="{ 'is-active': value === '1' }" :aria-selected="value === '1'">노출</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">미노출</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="tip-panel__field">
+                                    <span class="tip-panel__field-label">상태</span>
+                                    <div
+                                        class="category-panel__select-wrap tip-panel__select"
+                                        x-data="selectBox()"
+                                        :class="{ 'is-open': open }"
+                                        @click.outside="close()"
+                                        @keydown.escape.stop="close()"
+                                    >
+                                        <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
+                                            <option value="" @selected(blank(request('status')))>상태</option>
+                                            <option value="public" @selected(request('status') === 'public')>공개</option>
+                                            <option value="private" @selected(request('status') === 'private')>비공개</option>
+                                        </select>
+                                        <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
+                                            <span class="category-panel__select-label" x-text="label">상태</span>
+                                            <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                                <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                        </button>
+                                        <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
+                                            <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">상태</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('public')" :class="{ 'is-active': value === 'public' }" :aria-selected="value === 'public'">공개</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('private')" :class="{ 'is-active': value === 'private' }" :aria-selected="value === 'private'">비공개</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="tip-panel__field tip-panel__field--period">
+                                    <span class="tip-panel__field-label">기간</span>
+                                    <div class="tip-panel__date-range">
+                                        <input
+                                            class="category-panel__input tip-panel__date-input"
+                                            type="date"
+                                            name="start_date"
+                                            value="{{ request('start_date') }}"
+                                        />
+                                        <span class="tip-panel__date-separator">~</span>
+                                        <input
+                                            class="category-panel__input tip-panel__date-input"
+                                            type="date"
+                                            name="end_date"
+                                            value="{{ request('end_date') }}"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="tag" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('tag')))>태그</option>
-                                    <option value="laravel" @selected(request('tag') === 'laravel')>#laravel</option>
-                                    <option value="docker" @selected(request('tag') === 'docker')>#docker</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">태그</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">태그</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('laravel')" :class="{ 'is-active': value === 'laravel' }" :aria-selected="value === 'laravel'">#laravel</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('docker')" :class="{ 'is-active': value === 'docker' }" :aria-selected="value === 'docker'">#docker</li>
-                                </ul>
-                            </div>
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('status')))>상태</option>
-                                    <option value="public" @selected(request('status') === 'public')>공개</option>
-                                    <option value="private" @selected(request('status') === 'private')>비공개</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">상태</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">상태</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('public')" :class="{ 'is-active': value === 'public' }" :aria-selected="value === 'public'">공개</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('private')" :class="{ 'is-active': value === 'private' }" :aria-selected="value === 'private'">비공개</li>
-                                </ul>
-                            </div>
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="sort" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('sort')))>정렬</option>
-                                    <option value="recent" @selected(request('sort') === 'recent')>최근순</option>
-                                    <option value="popular" @selected(request('sort') === 'popular')>인기순</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">정렬</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">정렬</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('recent')" :class="{ 'is-active': value === 'recent' }" :aria-selected="value === 'recent'">최근순</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('popular')" :class="{ 'is-active': value === 'popular' }" :aria-selected="value === 'popular'">인기순</li>
-                                </ul>
+                            <div class="user-panel__filter-row tip-panel__filter-row tip-panel__filter-row--search">
+                                <div class="tip-panel__field tip-panel__field--search">
+                                    <span class="tip-panel__field-label">검색어</span>
+                                    <input
+                                        class="category-panel__input tip-panel__search-input"
+                                        type="text"
+                                        name="query"
+                                        placeholder="검색어 입력(제목/작성자)"
+                                        value="{{ request('query') }}"
+                                    />
+                                </div>
                             </div>
                         </div>
-                        <div class="user-panel__filter-row tip-panel__filter-row tip-panel__filter-row--secondary">
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="period" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('period')))>기간</option>
-                                    <option value="7" @selected(request('period') === '7')>최근 7일</option>
-                                    <option value="30" @selected(request('period') === '30')>최근 30일</option>
-                                    <option value="90" @selected(request('period') === '90')>최근 90일</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">기간</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">기간</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('7')" :class="{ 'is-active': value === '7' }" :aria-selected="value === '7'">최근 7일</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('30')" :class="{ 'is-active': value === '30' }" :aria-selected="value === '30'">최근 30일</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('90')" :class="{ 'is-active': value === '90' }" :aria-selected="value === '90'">최근 90일</li>
-                                </ul>
-                            </div>
-                            <div
-                                class="category-panel__select-wrap tip-panel__select"
-                                x-data="selectBox()"
-                                :class="{ 'is-open': open }"
-                                @click.outside="close()"
-                                @keydown.escape.stop="close()"
-                            >
-                                <select class="category-panel__select-native" name="visible" x-ref="select" x-model="value">
-                                    <option value="" @selected(blank(request('visible')))>노출여부</option>
-                                    <option value="1" @selected(request('visible') === '1')>노출</option>
-                                    <option value="0" @selected(request('visible') === '0')>미노출</option>
-                                </select>
-                                <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                    <span class="category-panel__select-label" x-text="label">노출여부</span>
-                                    <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                        <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </button>
-                                <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                    <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">노출여부</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('1')" :class="{ 'is-active': value === '1' }" :aria-selected="value === '1'">노출</li>
-                                    <li class="category-panel__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">미노출</li>
-                                </ul>
-                            </div>
-                            <div class="tip-panel__filter-actions">
-                                <a class="category-panel__bulk-btn category-panel__bulk-btn--ghost" href="{{ url()->current() }}">초기화</a>
-                                <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="submit">검색</button>
-                            </div>
+                        <div class="tip-panel__actions-col">
+                            <a class="category-panel__bulk-btn category-panel__bulk-btn--ghost" href="{{ url()->current() }}">초기화</a>
+                            <button class="category-panel__bulk-btn category-panel__bulk-btn--accent" type="submit">검색</button>
                         </div>
                     </div>
                 </form>
@@ -243,7 +201,7 @@
                 <div class="user-panel__list-title">목록</div>
                 <form class="user-panel__display-form" action="" method="GET">
                     @php
-                        $displayParams = ['tab', 'query', 'category', 'tag', 'status', 'sort', 'period', 'visible'];
+                        $displayParams = ['tab', 'query', 'category', 'status', 'visible', 'start_date', 'end_date'];
                     @endphp
                     @foreach ($displayParams as $param)
                         @if (request()->has($param))
