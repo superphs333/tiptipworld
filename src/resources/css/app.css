@@ -1212,7 +1212,12 @@ body.is-modal-open {
 
 .tip-panel__filter-row--top {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.tip-panel__filter-row--period {
+    display: flex;
     gap: 12px;
 }
 
@@ -1240,6 +1245,7 @@ body.is-modal-open {
 }
 
 .tip-panel__field--period {
+    width: 100%;
     align-items: center;
 }
 
@@ -1263,8 +1269,8 @@ body.is-modal-open {
 }
 
 .tip-panel__date-input {
-    flex: 0 1 180px;
-    min-width: 0;
+    flex: 1 1 260px;
+    min-width: 230px;
 }
 
 .tip-panel__date-separator {
@@ -1356,8 +1362,15 @@ body.is-modal-open {
 }
 
 .tip-panel__category {
-    font-weight: 600;
-    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
 }
 
 .tip-panel__tags {
@@ -1465,6 +1478,7 @@ body.is-modal-open {
     .tip-panel__date-input {
         flex: 1 1 auto;
         width: 100%;
+        min-width: 0;
     }
 
     .tip-panel__date-separator {

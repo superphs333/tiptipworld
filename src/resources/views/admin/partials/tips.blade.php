@@ -16,6 +16,19 @@
     $lastUpdated = $lastUpdatedRaw
         ? \Illuminate\Support\Carbon::parse($lastUpdatedRaw)->format('Y-m-d')
         : '-';
+    $normalizeDateTimeLocal = static function ($value) {
+        if (!filled($value)) {
+            return '';
+        }
+
+        try {
+            return \Illuminate\Support\Carbon::parse($value)->format('Y-m-d\TH:i');
+        } catch (\Throwable $e) {
+            return '';
+        }
+    };
+    $startDateInput = $normalizeDateTimeLocal(request('start_date'));
+    $endDateInput = $normalizeDateTimeLocal(request('end_date'));
 @endphp
 
 <div x-data="{ selected: [] }">
@@ -85,10 +98,12 @@
                                         @click.outside="close()"
                                         @keydown.escape.stop="close()"
                                     >
-                                        <select class="category-panel__select-native" name="category" x-ref="select" x-model="value">
-                                            <option value="" @selected(blank(request('category')))>카테고리</option>
-                                            <option value="dev" @selected(request('category') === 'dev')>개발</option>
-                                            <option value="design" @selected(request('category') === 'design')>디자인</option>
+                                        <select class="category-panel__select-native" name="category_id" x-ref="select" x-model="value">
+                                            <option value="all" @selected(blank(request('category_id')) || request('category_id') === 'all')>전체</option>
+                                            <option value="uncategorized" @selected(request('category_id') === 'uncategorized')>미분류</option>
+                                            @foreach($categories as $category)
+                                                <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->name }}</option>
+                                            @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                             <span class="category-panel__select-label" x-text="label">카테고리</span>
@@ -97,9 +112,11 @@
                                             </svg>
                                         </button>
                                         <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                            <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">카테고리</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('dev')" :class="{ 'is-active': value === 'dev' }" :aria-selected="value === 'dev'">개발</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('design')" :class="{ 'is-active': value === 'design' }" :aria-selected="value === 'design'">디자인</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('all')" :class="{ 'is-active': value === 'all' }" :aria-selected="value === 'all'">전체</li>
+                                            <li class="category-panel__select-option" role="option" @click="choose('uncategorized')" :class="{ 'is-active': value === 'uncategorized' }" :aria-selected="value === 'uncategorized'">미분류</li>
+                                            @foreach($categories as $category)
+                                                <li class="category-panel__select-option" role="option" @click="choose('{{ $category->id }}')" :class="{ 'is-active': value === '{{ $category->id }}' }" :aria-selected="value === '{{ $category->id }}'">{{ $category->name }}</li>
+                                            @endforeach
                                         </ul>
                                     </div>
                                 </div>
@@ -112,10 +129,11 @@
                                         @click.outside="close()"
                                         @keydown.escape.stop="close()"
                                     >
-                                        <select class="category-panel__select-native" name="visible" x-ref="select" x-model="value">
-                                            <option value="" @selected(blank(request('visible')))>노출</option>
-                                            <option value="1" @selected(request('visible') === '1')>노출</option>
-                                            <option value="0" @selected(request('visible') === '0')>미노출</option>
+                                        <select class="category-panel__select-native" name="visibility" x-ref="select" x-model="value">
+                                            <option value="" @selected(blank(request('visibility')))>노출</option>
+                                            @foreach(config('app.tip_visibility', []) as $visibility)
+                                                <option value="{{ $visibility }}" @selected(request('visibility') === $visibility)>{{ $visibility }}</option>
+                                            @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                             <span class="category-panel__select-label" x-text="label">노출</span>
@@ -125,8 +143,9 @@
                                         </button>
                                         <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                             <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">노출</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('1')" :class="{ 'is-active': value === '1' }" :aria-selected="value === '1'">노출</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('0')" :class="{ 'is-active': value === '0' }" :aria-selected="value === '0'">미노출</li>
+                                            @foreach(config('app.tip_visibility', []) as $visibility)
+                                                <li class="category-panel__select-option" role="option" @click="choose('{{ $visibility }}')" :class="{ 'is-active': value === '{{ $visibility }}' }" :aria-selected="value === '{{ $visibility }}'">{{ $visibility }}</li>
+                                            @endforeach
                                         </ul>
                                     </div>
                                 </div>
@@ -141,8 +160,9 @@
                                     >
                                         <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
                                             <option value="" @selected(blank(request('status')))>상태</option>
-                                            <option value="public" @selected(request('status') === 'public')>공개</option>
-                                            <option value="private" @selected(request('status') === 'private')>비공개</option>
+                                            @foreach(config('app.tip_status', []) as $status)
+                                                <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
+                                            @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
                                             <span class="category-panel__select-label" x-text="label">상태</span>
@@ -152,26 +172,32 @@
                                         </button>
                                         <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                             <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">상태</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('public')" :class="{ 'is-active': value === 'public' }" :aria-selected="value === 'public'">공개</li>
-                                            <li class="category-panel__select-option" role="option" @click="choose('private')" :class="{ 'is-active': value === 'private' }" :aria-selected="value === 'private'">비공개</li>
+                                            @foreach(config('app.tip_status', []) as $status)
+                                                <li class="category-panel__select-option" role="option" @click="choose('{{ $status }}')" :class="{ 'is-active': value === '{{ $status }}' }" :aria-selected="value === '{{ $status }}'">{{ $status }}</li>
+                                            @endforeach
                                         </ul>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="user-panel__filter-row tip-panel__filter-row tip-panel__filter-row--period">
                                 <div class="tip-panel__field tip-panel__field--period">
                                     <span class="tip-panel__field-label">기간</span>
                                     <div class="tip-panel__date-range">
                                         <input
                                             class="category-panel__input tip-panel__date-input"
-                                            type="date"
+                                            type="datetime-local"
                                             name="start_date"
-                                            value="{{ request('start_date') }}"
+                                            value="{{ $startDateInput }}"
+                                            step="60"
                                         />
                                         <span class="tip-panel__date-separator">~</span>
                                         <input
                                             class="category-panel__input tip-panel__date-input"
-                                            type="date"
+                                            type="datetime-local"
                                             name="end_date"
-                                            value="{{ request('end_date') }}"
+                                            value="{{ $endDateInput }}"
+                                            step="60"
+                                            @change="onEndDateChange($event)"
                                         />
                                     </div>
                                 </div>
@@ -201,7 +227,7 @@
                 <div class="user-panel__list-title">목록</div>
                 <form class="user-panel__display-form" action="" method="GET">
                     @php
-                        $displayParams = ['tab', 'query', 'category', 'status', 'visible', 'start_date', 'end_date'];
+                        $displayParams = ['tab', 'query', 'category_id', 'status', 'visibility', 'start_date', 'end_date'];
                     @endphp
                     @foreach ($displayParams as $param)
                         @if (request()->has($param))
@@ -245,10 +271,10 @@
                             </th>
                             <th>ID</th>
                             <th>썸네일</th>
-                            <th>제목/요약</th>
+                            <th>카테고리/제목</th>
                             <th>작성자</th>
                             <th>상태</th>
-                            <th>조회/좋아요</th>
+                            {{-- <th>조회/좋아요</th> --}}
                             <th>날짜</th>
                         </tr>
                     </thead>
@@ -258,8 +284,8 @@
                                 $tipId = data_get($tip, 'id', '-');
                                 $title = data_get($tip, 'title', '-');
                                 $summary = data_get($tip, 'summary', data_get($tip, 'excerpt', ''));
-                                $author = data_get($tip, 'author.name', data_get($tip, 'author', '-'));
-                                $category = data_get($tip, 'category.name', data_get($tip, 'category', '-'));
+                                $author = data_get($tip, 'user.name', data_get($tip, 'user', '-'));
+                                $category = data_get($tip, 'category.name', data_get($tip, 'category', '미분류'));
                                 $tags = data_get($tip, 'tags', []);
                                 $tagItems = collect($tags)
                                     ->map(fn ($tag) => is_string($tag) ? $tag : (data_get($tag, 'name') ?? data_get($tag, 'label')))
@@ -271,8 +297,8 @@
                                 $statusRaw = data_get($tip, 'status', data_get($tip, 'is_public', true));
                                 $statusKey = $statusRaw === 'private' || $statusRaw === 0 || $statusRaw === false ? 'private' : 'public';
                                 $statusLabel = $statusKey === 'public' ? '공개' : '비공개';
-                                $dateRaw = data_get($tip, 'created_at', data_get($tip, 'updated_at'));
-                                $dateLabel = $dateRaw ? \Illuminate\Support\Carbon::parse($dateRaw)->format('m-d') : '-';
+                                $dateRaw = data_get($tip, 'created_at', data_get($tip, 'updated_at'));                                
+                                $dateLabel = $dateRaw ? \Illuminate\Support\Carbon::parse($dateRaw)->format('y-m-d A h:i') : '-';
                             @endphp
                             <tr>
                                 <td><input type="checkbox" name="tip_ids[]" value="{{ $tipId }}" x-model="selected" /></td>
@@ -287,10 +313,15 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="tip-panel__title-line">“{{ $title }}”</div>
-                                    <div class="tip-panel__summary-line">{{ $summary ?: '요약이 없습니다.' }}</div>
                                     <div class="tip-panel__meta-line">
                                         <span class="tip-panel__category">{{ $category }}</span>
+                                    </div>
+                                    <div class="tip-panel__title-line">
+                                        “{{ $title }}”
+                                    </div>
+                                    {{-- <div class="tip-panel__summary-line">{{ $summary ?: '요약이 없습니다.' }}</div> --}}
+                                    <div class="tip-panel__meta-line">
+                                        
                                         @if ($tagItems->isNotEmpty())
                                             <span class="tip-panel__tags">
                                                 @foreach ($tagItems as $tag)
@@ -300,17 +331,17 @@
                                         @endif
                                     </div>
                                     <div class="tip-panel__actions">
-                                        <button class="tip-panel__action" type="button">미리보기</button>
+                                        {{-- <button class="tip-panel__action" type="button">미리보기</button> --}}
                                         <button class="tip-panel__action" type="button">편집</button>
-                                        <button class="tip-panel__action" type="button">복제</button>
-                                        <button class="tip-panel__action" type="button">⋯</button>
+                                        {{-- <button class="tip-panel__action" type="button">복제</button>
+                                        <button class="tip-panel__action" type="button">⋯</button> --}}
                                     </div>
                                 </td>
                                 <td>{{ $author }}</td>
                                 <td>
                                     <span class="tip-panel__status tip-panel__status--{{ $statusKey }}">{{ $statusLabel }}</span>
                                 </td>
-                                <td class="tip-panel__metrics">{{ number_format($views) }} / {{ number_format($likes) }}</td>
+                                {{-- <td class="tip-panel__metrics">{{ number_format($views) }} / {{ number_format($likes) }}</td> --}}
                                 <td class="tip-panel__date">{{ $dateLabel }}</td>
                             </tr>
                         @empty

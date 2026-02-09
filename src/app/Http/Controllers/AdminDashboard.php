@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Status;
 use App\Models\Role;
 use App\Models\Tag;
+use App\Models\Tip;
 
 class AdminDashboard extends Controller
 {
@@ -30,6 +31,11 @@ class AdminDashboard extends Controller
             session(['tags.query' => $request->query()]);
         }
 
+        if($tab === 'tips'){
+            session(['tips.query' => $request->query()]);
+        }
+
+
 
         $viewArray = [
             'tab' => $tab,
@@ -38,9 +44,19 @@ class AdminDashboard extends Controller
             'datas' => $datas,
         ];
 
-        if($tab == 'users'){
+        if($tab === 'users'){
             $viewArray['statuses'] = Status::getStatuses();
             $viewArray['roles'] = Role::getAllRoles();
+        }
+
+        if($tab === 'tips'){
+            $categories = Category::query()
+                ->forTipForm()
+                ->get([
+                    'id',
+                    'name',
+                ]);
+            $viewArray['categories'] = $categories;
         }
 
         return view('admin.dashboard', $viewArray);
@@ -69,6 +85,10 @@ class AdminDashboard extends Controller
             ),
             'tags' => Tag::getTags(
                 $request->only(['is_blocked', 'query']),
+                $this->resolvePerPage($request),
+            ), 
+            'tips' => Tip::getTips(
+                $request->only(['category_id', 'query', 'status', 'visibility', 'start_date', 'end_date']),
                 $this->resolvePerPage($request),
             ),
             default => null,
