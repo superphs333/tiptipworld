@@ -13,6 +13,7 @@ class Tip extends Model
 {
     protected $fillable = [
         'user_id',
+        'update_user_id',
         'category_id',
         'title',
         'thumbnail',
@@ -51,7 +52,14 @@ class Tip extends Model
      * Tip - User 
      */
     public function user(){
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class,'user_id');
+    }
+
+    /**
+     * Tip - update user
+     */
+    public function updatedBy() {
+        return $this->belongsTo(User::class,'update_user_id');
     }
 
 
@@ -76,7 +84,7 @@ class Tip extends Model
         $q = Tip::query()
             ->with('category')
             ->with('tags:id,name')
-            ->with('user');
+            ->with(['user:id,name', 'updatedBy:id,name']);
 
         // 쿼리(검색어) : title or user
         if(isset($filters['query'])){
