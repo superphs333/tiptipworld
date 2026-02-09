@@ -228,7 +228,7 @@
                                         x-ref="thumbnailInput"
                                         @change="onThumbnailChange($event)"
                                     />                                    
-                                    <input type="text" x-model="thumbnailDelete"  name="thumbnail_delete" />
+                                    <input type="hidden" x-model="thumbnailDelete"  name="thumbnail_delete" />
                                     <div class="tip-create__thumb-buttons">
                                         <button class="category-panel__bulk-btn" type="button" @click="clearThumbnail()">제거</button>                                        
                                         <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="openThumbnailPicker()">변경</button>

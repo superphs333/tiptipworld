@@ -20,6 +20,7 @@ class TipController extends Controller
             'excerpt' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:draft,published,archived,deleted'],
             'visibility' => ['required', 'in:public,unlisted,private'],
+            'thumbnail_delete' => ['nullable', 'in:true,false'],
     ];
 
     // 추가/업데이트 폼
