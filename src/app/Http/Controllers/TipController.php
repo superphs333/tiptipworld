@@ -166,6 +166,13 @@ class TipController extends Controller
         $tip = Tip::findOrFail($tip_id);
         $tip->tags()->sync($tagIds);
     }
+
+    /**
+     * TIP ONE VIEW
+     */
+    public function showPost($tip_id){
+        return view('tips.partials.view');
+    } 
     
 
 }
