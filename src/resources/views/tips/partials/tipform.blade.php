@@ -7,7 +7,7 @@
 <div x-data="tipCreate()">
     <div class="category-panel tip-create">
         <div class="category-panel__content tip-create__content">
-            <form class="tip-create__form" action="{{ route($formAction) }}" method="POST" enctype="multipart/form-data">
+            <form class="tip-create__form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div

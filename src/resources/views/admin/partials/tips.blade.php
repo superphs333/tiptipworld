@@ -283,6 +283,9 @@
                         @forelse ($tipItems as $tip)
                             @php
                                 $tipId = data_get($tip, 'id', '-');
+                                $editUrl = is_numeric($tipId)
+                                    ? route('admin.tip.form', ['tip_id' => $tipId])
+                                    : route('admin.tip.form');
                                 $title = data_get($tip, 'title', '-');
                                 $summary = data_get($tip, 'summary', data_get($tip, 'excerpt', ''));
                                 $author = data_get($tip, 'user.name', data_get($tip, 'user', '-'));
@@ -353,7 +356,7 @@
                                     </div>
                                     <div class="tip-panel__actions">
                                         {{-- <button class="tip-panel__action" type="button">미리보기</button> --}}
-                                        <button class="tip-panel__action" type="button">편집</button>
+                                        <a class="tip-panel__action" href="{{ $editUrl }}">편집</a>
                                         {{-- <button class="tip-panel__action" type="button">복제</button>
                                         <button class="tip-panel__action" type="button">⋯</button> --}}
                                     </div>

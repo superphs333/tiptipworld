@@ -25,7 +25,8 @@ class TipController extends Controller
                 'name',
             ]);
 
-        $formAction = is_null($tip_id) ? 'tip.store' : 'tip.update';
+        //$formAction = is_null($tip_id) ? 'tip.store' : 'tip.update';
+        $formAction = is_null($tip_id) ? route('tip.store') : route('tip.update', $tip_id);
 
 
         return view('admin.dashboard', [

@@ -1395,12 +1395,16 @@ body.is-modal-open {
 }
 
 .tip-panel__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--line);
     background: #fff7ed;
     color: var(--ink);
     padding: 4px 10px;
     border-radius: 999px;
     font-size: 12px;
+    text-decoration: none;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
