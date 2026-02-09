@@ -227,9 +227,10 @@
                                         accept="image/*"
                                         x-ref="thumbnailInput"
                                         @change="onThumbnailChange($event)"
-                                    />
+                                    />                                    
+                                    <input type="text" x-model="thumbnailDelete"  name="thumbnail_delete" />
                                     <div class="tip-create__thumb-buttons">
-                                        <button class="category-panel__bulk-btn" type="button" @click="clearThumbnail()">제거</button>
+                                        <button class="category-panel__bulk-btn" type="button" @click="clearThumbnail()">제거</button>                                        
                                         <button class="category-panel__bulk-btn category-panel__bulk-btn--ghost" type="button" @click="openThumbnailPicker()">변경</button>
                                     </div>
                                 </div>
@@ -318,6 +319,7 @@
             title: @js(old('title', $tip?->title ?? '')),
             excerpt: "",
             tagInput: "",
+            thumbnailDelete : false,
             selectedTags: @js($tags),
             thumbnailPreviewUrl: @js(old('thumbnail_url', $tip?->thumbnail_url)),
             addTag() {
@@ -352,6 +354,7 @@
                 }
 
                 this.thumbnailPreviewUrl = URL.createObjectURL(file);
+                this.thumbnailDelete = false;
             },
             clearThumbnail() {
                 if (this.thumbnailPreviewUrl) {
@@ -362,6 +365,7 @@
 
                 if (this.$refs.thumbnailInput) {
                     this.$refs.thumbnailInput.value = "";
+                    this.thumbnailDelete = true;
                 }
             },
         }));

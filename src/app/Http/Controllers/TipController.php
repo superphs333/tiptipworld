@@ -60,9 +60,7 @@ class TipController extends Controller
         $validated['created_at'] = $created_at;
         
 
-        /**
-        * 썸네일 저장 (name : thumbnail)
-        */
+
         if ($request->hasFile('thumbnail')) {
             $tip_thumbnail_url = $storage->storeUploaded($validated['thumbnail'], 'tip-cover');
             $validated['thumbnail'] = $tip_thumbnail_url;
@@ -100,12 +98,21 @@ class TipController extends Controller
         $validated['updated_at'] = Date::now();
 
         /**
-         * 썸네일
-         */
+        * 썸네일 저장 (name : thumbnail) 
+        * 전송안되는 경우 : 수정하지 않을 때, 제거를 눌렀을 때 
+        * 수정하지 않은 경우엔 -> 그대로
+        * 제거 누른 경우 -> 없애야함.
+        * 바꿔야 하는 경우 -> 
+        */
+        $thumbnail_deleted = $request->boolean('thumbnail_delete');
         if ($request->hasFile('thumbnail')) {
             $storage->deleteIfExists($target_tip->thumbnail);
             $tip_thumbnail_url = $storage->storeUploaded($validated['thumbnail'], 'tip-cover');
             $validated['thumbnail'] = $tip_thumbnail_url;
+        }
+        if($thumbnail_deleted){
+            $storage->deleteIfExists($target_tip->thumbnail);
+            $validated['thumbnail'] = null;
         }
             
 
