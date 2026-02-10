@@ -38,40 +38,43 @@ class Tip extends Model
     ];
 
     /**
-     * Tip - Category (N:1)
-     * tips.category_id -> caregories.id
-     */
+    * 관계정의 
+    */
+    // Tip - Category (N:1) : tips.category_id -> caregories.id
     public function category(){
         return $this->belongsTo(Category::class);
     }
 
-    /**
-     * Tip - Tag (M:N)
-     * pivot : tip_tag (tip_id, tag_id)
-     */
+    // Tip - Tag (M:N) => pivot : tip_tag (tip_id, tag_id)
     public function tags() : BelongsToMany
     {
         return $this->belongsToMany(Tag::class, 'tip_tag','tip_id', 'tag_id')->withTimestamps();
     }
 
-    /**
-     * Tip - User 
-     */
+    // Tip - User 
     public function user(){
         return $this->belongsTo(User::class,'user_id');
     }
 
-    /**
-     * Tip - update user
-     */
+    // Tip - Update user
     public function updatedBy() {
         return $this->belongsTo(User::class,'update_user_id');
+    }
+
+    // tip_likes 테이블 
+    public function likedUsers() : BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'tip_likes',
+            'tip_id',
+            'user_id',
+        ); 
     }
 
     /**
      * 접근자 모음
      */
-
     // 썸네일 이미지 
     public function getThumbnailUrlAttribute() : string
     {
@@ -106,6 +109,30 @@ class Tip extends Model
     {
         return $this->relationLoaded('tags') ? $this->tags : collect();
     }
+    // 좋아요 갯수
+    public function getLikeCountAttribute() : int
+    {
+        return $this->relationLoaded('likedUsers') ? $this->likedUsers()->count() : 0;
+    }
+   
+
+    
+    /**
+     * get
+     */
+    // 좋아요 갯수
+    public function isLikedBy(User $user) : bool
+    {
+        // 관계가 로드되어 있으면 컬렉션에서 즉시 판단(추가 쿼리 없음)
+        if($this->relationLoaded('likedUsers')){
+            return $this->likedUsers->contains('id',$user->id);
+        }
+        // 로드되어 있지 않으면 exists 쿼리 1번
+        return $this->likedUsers()->where('user_id', $user->id)->exists();
+
+    }
+    
+
 
 
 

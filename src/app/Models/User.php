@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Services\FileStorageService;
+use App\Models\Role;
+use App\Models\Tip;
 
 class User extends Authenticatable
 {
@@ -212,5 +214,20 @@ class User extends Authenticatable
         }
 
         return $q->orderBy('id')->paginate($perPage)->withQueryString();
+    }
+
+
+    /**
+     * 좋아요 관련
+     */
+    // 관계 (이 유저가 좋아요 한 팁들)
+    public function likedTips(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Tip::class,
+            'tip_likes',
+            'user_id',
+            'tip_id',        
+        );
     }
 }
