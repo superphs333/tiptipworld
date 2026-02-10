@@ -133,37 +133,37 @@
 
         <aside class="tip-wireframe__action">
             <div class="tip-wireframe__action-sticky">
-                <button type="button" class="tip-wireframe__action-btn">
+                <button type="button" class="tip-wireframe__action-btn" aria-label="저장">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span>저장</span>
+                    <span class="tip-wireframe__action-label">저장</span>
                 </button>
-                <button type="button" class="tip-wireframe__action-btn">
+                <button type="button" class="tip-wireframe__action-btn" aria-label="좋아요">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span>좋아요</span>
+                    <span class="tip-wireframe__action-label">좋아요</span>
                 </button>
-                <button type="button" class="tip-wireframe__action-btn">
+                <button type="button" class="tip-wireframe__action-btn" aria-label="공유">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M9.5 13.5 14.5 8.5M8.16 9.84l-2.12 2.12a3 3 0 1 0 4.24 4.24l2.12-2.12M15.84 14.16l2.12-2.12a3 3 0 1 0-4.24-4.24l-2.12 2.12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span>공유</span>
+                    <span class="tip-wireframe__action-label">공유</span>
                 </button>
-                <a class="tip-wireframe__action-btn" href="#tip-comments">
+                <a class="tip-wireframe__action-btn" href="#tip-comments" aria-label="댓글">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M5.25 7.5a3.75 3.75 0 0 1 3.75-3.75h6a3.75 3.75 0 0 1 3.75 3.75v5A3.75 3.75 0 0 1 15 16.25H10.6l-3.35 3.14a.5.5 0 0 1-.84-.36v-2.78A3.75 3.75 0 0 1 5.25 12.5v-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span>댓글</span>
+                    <span class="tip-wireframe__action-label">댓글</span>
                 </a>
 
                 {{-- <section class="tip-wireframe__author-card">
@@ -183,29 +183,6 @@
             </div>
         </aside>
     </div>
-
-    <nav class="tip-wireframe__mobile-action" aria-label="모바일 액션">
-        <button type="button" aria-label="좋아요">
-            <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        <button type="button" aria-label="저장">
-            <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-            </svg>
-        </button>
-        <a href="#tip-comments" aria-label="댓글">
-            <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                <path d="M5.25 7.5a3.75 3.75 0 0 1 3.75-3.75h6a3.75 3.75 0 0 1 3.75 3.75v5A3.75 3.75 0 0 1 15 16.25H10.6l-3.35 3.14a.5.5 0 0 1-.84-.36v-2.78A3.75 3.75 0 0 1 5.25 12.5v-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
-            </svg>
-        </a>
-        <button type="button" aria-label="공유">
-            <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                <path d="M9.5 13.5 14.5 8.5M8.16 9.84l-2.12 2.12a3 3 0 1 0 4.24 4.24l2.12-2.12M15.84 14.16l2.12-2.12a3 3 0 1 0-4.24-4.24l-2.12 2.12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-    </nav>
 </section>
 
 <script>
