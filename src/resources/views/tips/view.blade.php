@@ -1,8 +1,28 @@
 @extends('layouts.community')
+@php
+    $title = null;
+    $partial = null;
 
-@section('title',  $tip->title)
+    switch ($viewMode ?? null) {
+        case 'detailView':
+            $title = isset($tip) ? $tip->title : null;
+            $partial = 'tips.partials.detail';
+            break;
+        case 'tipListBySort':
+            $title = $site_title;
+            $partial = 'tips.partials.listbysort';
+            break;
+    }
+@endphp
+
+@if (!empty($title))
+    @section('title', $title)
+@endif
+
 @section('container_class', 'w-full max-w-none px-0 py-10')
 
 @section('content')
-    @include('tips.partials.detail')
+    @if (!empty($partial))
+        @include($partial)
+    @endif
 @endsection

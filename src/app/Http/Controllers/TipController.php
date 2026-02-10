@@ -197,8 +197,30 @@ class TipController extends Controller
         }
 
         return view('tips.view', [
+            'viewMode' => 'detailView',
             'tip' => $tip,
         ]);
+    }
+
+    /**
+     * 분류별 페이지
+     */
+    public function tipListBySort(Request $request, int $sort_id){
+        $sort = "";
+        $site_title = "";
+        if($request->routeIs('tips.category')){
+            $sort = "category";
+            $site_title = Category::findOrFail($sort_id)->name;
+        }else if($request->routeIs('tips.tag')){
+            $sort = "tag";
+            $site_title = Tag::findOrFail($sort_id)->name;
+        }
+
+        return view('tips.view', [
+            'viewMode' => 'tipListBySort',
+            'site_title' => $site_title,
+        ]);
+
     }
 
 }
