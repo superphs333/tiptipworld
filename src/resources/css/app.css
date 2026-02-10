@@ -1,6 +1,7 @@
 @import "components/pagination.css";
 @import "components/tiptap.css";
 @import "pages/tip-detail-wireframe.css";
+@import "pages/tip-list-wireframe.css";
 
 @tailwind base;
 @tailwind components;
