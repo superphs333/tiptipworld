@@ -15,11 +15,13 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans text-slate-900 antialiased">
-        <div class="min-h-screen bg-slate-50 flex flex-col">
+        <div class="min-h-screen flex flex-col">
             <x-site-header />
 
             <main class="flex-1">
-                @yield('content')
+                <div class="@yield('container_class', 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10')">
+                    @yield('content')
+                </div>
             </main>
 
             <x-site-footer />

@@ -171,7 +171,11 @@ class TipController extends Controller
      * TIP ONE VIEW
      */
     public function showPost($tip_id){
-        return view('tips.partials.view');
+        $tip = Tip::findOrFail($tip_id);
+
+        return view('tips.view', [
+            'tip' => $tip,
+        ]);
     } 
     
 
