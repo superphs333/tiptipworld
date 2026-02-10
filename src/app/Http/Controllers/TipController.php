@@ -172,6 +172,29 @@ class TipController extends Controller
      */
     public function showPost($tip_id){
         $tip = Tip::findOrFail($tip_id);
+        $user = Auth::user();
+        $is_admin = $user?->isAdmin() ?? false;
+        $isTipOwner = $user?->id == $tip->user_id;
+        $tip_status = $tip->status;
+        $tip_visibility = $tip->visibility;
+
+        /**
+         * 팁 접근 설정
+         * 본인 글 | 관리자 -> 모두 접근 가능
+         * status -> published 
+         * visibility -> public 만 가능 
+         */
+        if (!$is_admin && !$isTipOwner && ($tip_status !== 'published' || $tip_visibility !== 'public')) {
+            return response(
+                "<script>alert('접근할 수 없는 게시글입니다.');" .
+                "if (window.history.length > 1) { window.history.back(); }" .
+                "else { window.location.href = '/'; }</script>"
+            );
+        }
+
+
+
+
 
         return view('tips.view', [
             'tip' => $tip,

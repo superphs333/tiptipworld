@@ -38,6 +38,14 @@ Route::get('/',[HomeController::class, 'index'])->name('home');
 
 
 /**
+ * 팁관련
+ */
+// 개별페이지
+Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
+    ->whereNumber('tip_id');
+
+    
+/**
  * 관리자 전용 라우트 그룹
  */
 Route::middleware(['auth', 'admin'])->group(function () {
@@ -73,9 +81,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
         ->whereNumber('tip_id')
         ->name('tip.destroy');
-    // 개별페이지
-    Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
-        ->whereNumber('tip_id');
+
     
 
     
