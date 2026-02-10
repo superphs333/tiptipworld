@@ -93,7 +93,7 @@
 
             </section>
 
-            <section class="tip-wireframe__section">
+            {{-- <section class="tip-wireframe__section">
                 <h2 class="tip-wireframe__section-title">관련 팁</h2>
                 <div class="tip-wireframe__related-grid">
                     <article class="tip-wireframe__related-item">
@@ -109,7 +109,7 @@
                         <p>요약 한 줄과 이동 액션만 남겨 정보 밀도를 조절합니다.</p>
                     </article>
                 </div>
-            </section>
+            </section> --}}
 
             <section class="tip-wireframe__section tip-wireframe__comments" id="tip-comments">
                 <h2 class="tip-wireframe__section-title">댓글</h2>
@@ -138,7 +138,7 @@
                 <button type="button" class="tip-wireframe__action-btn">🔗 공유</button>
                 <a class="tip-wireframe__action-btn" href="#tip-comments">💬 댓글</a>
 
-                <section class="tip-wireframe__author-card">
+                {{-- <section class="tip-wireframe__author-card">
                     <h3>작성자 카드</h3>
                     <p>{{ $tip->authorName }}</p>
                     <small>간단 소개 영역</small>
@@ -151,7 +151,7 @@
                         <li><a href="javascript:void(0)">연결 팁 B</a></li>
                         <li><a href="javascript:void(0)">연결 팁 C</a></li>
                     </ul>
-                </section>
+                </section> --}}
             </div>
         </aside>
     </div>
