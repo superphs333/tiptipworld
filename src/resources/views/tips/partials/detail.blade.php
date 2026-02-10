@@ -1,4 +1,3 @@
-
 <section class="tip-wireframe" data-tip-wireframe>
     <div class="tip-wireframe__topbar">
         <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a>

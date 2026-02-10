@@ -3,6 +3,10 @@
     $currentValue = $fieldValue();
 @endphp
 
+@once
+    @vite('resources/js/components/tiptap-editor.js')
+@endonce
+
 {{-- Tiptap 컴포넌트 루트.
      - `data-tiptap`: JS 마운트 대상 식별자
      - `is-empty`: 초기값이 비어 있으면 placeholder 표시를 위한 클래스 --}}
