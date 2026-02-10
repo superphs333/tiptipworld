@@ -480,31 +480,62 @@
 .tip-wireframe__action-sticky {
     position: sticky;
     top: 94px;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    padding: 10px;
+    border: 1px solid var(--wf-card-line);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(18, 18, 18, 0.08);
+    padding: 12px;
     display: grid;
-    gap: 8px;
+    gap: 10px;
 }
 
 .tip-wireframe__action-btn {
-    border: 1px solid var(--wf-line);
-    border-radius: 0;
-    background: transparent;
-    min-height: 38px;
-    padding: 8px 10px;
+    width: 100%;
+    border: 1px solid rgba(18, 18, 18, 0.12);
+    border-radius: 12px;
+    background: #fff;
+    min-height: 44px;
+    padding: 8px 11px;
     color: var(--wf-ink);
     text-align: left;
     text-decoration: none;
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     font-weight: 700;
-    transition: border-color 0.2s ease, background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    line-height: 1;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .tip-wireframe__action-btn:hover {
-    border-color: var(--wf-line-strong);
-    background: transparent;
+    border-color: #989898;
+    background: #fcfcfc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(18, 18, 18, 0.08);
+}
+
+.tip-wireframe__action-btn:focus-visible {
+    outline: 2px solid #202020;
+    outline-offset: 2px;
+}
+
+.tip-wireframe__action-icon {
+    width: 28px;
+    height: 28px;
+    border: 1px solid rgba(18, 18, 18, 0.1);
+    border-radius: 8px;
+    background: #fafafa;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    flex-shrink: 0;
+}
+
+.tip-wireframe__action-icon svg {
+    width: 15px;
+    height: 15px;
 }
 
 .tip-wireframe__author-card,
@@ -568,8 +599,8 @@
 .tip-wireframe__mobile-action button,
 .tip-wireframe__mobile-action a {
     border: 1px solid var(--wf-line);
-    border-radius: 0;
-    background: transparent;
+    border-radius: 10px;
+    background: #fff;
     height: 38px;
     font-size: 1rem;
     color: var(--wf-ink);
@@ -577,6 +608,18 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tip-wireframe__mobile-action button:hover,
+.tip-wireframe__mobile-action a:hover {
+    border-color: #9d9d9d;
+    background: #f7f7f7;
+}
+
+.tip-wireframe__mobile-action svg {
+    width: 17px;
+    height: 17px;
 }
 
 @media (max-width: 1023px) {
