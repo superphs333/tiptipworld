@@ -171,7 +171,11 @@ class TipController extends Controller
      * TIP ONE VIEW
      */
     public function showPost($tip_id){
-        $tip = Tip::findOrFail($tip_id);
+        $tip = Tip::with([
+            'category:id,name',
+            'user:id,name',
+            'tags:id,name',
+        ])->findOrFail($tip_id);
         $user = Auth::user();
         $is_admin = $user?->isAdmin() ?? false;
         $isTipOwner = $user?->id == $tip->user_id;
@@ -192,14 +196,9 @@ class TipController extends Controller
             );
         }
 
-
-
-
-
         return view('tips.view', [
             'tip' => $tip,
         ]);
-    } 
-    
+    }
 
 }

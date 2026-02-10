@@ -1,11 +1,3 @@
-@php
-    $authorName = optional($tip->user)->name ?? '작성자 미상';
-    $categoryName = optional($tip->category)->name ?? '미분류';
-    $createdAt = $tip->created_at ? $tip->created_at->format('Y.m.d') : '-';
-    $excerpt = trim((string) ($tip->excerpt ?? ''));
-    $content = trim((string) ($tip->content ?? ''));
-    $displayTags = $tip->relationLoaded('tags') ? $tip->tags : collect();
-@endphp
 
 <section class="tip-wireframe" data-tip-wireframe>
     <div class="tip-wireframe__topbar">
@@ -29,15 +21,30 @@
 
         <article class="tip-wireframe__article">
             <header class="tip-wireframe__article-header">
-                <div class="tip-wireframe__badge-row">
-                    <span class="tip-wireframe__badge">{{ $categoryName }}</span>
-                    <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) ($tip->status ?? 'published')) }}</span>
+                <div class="tip-wireframe__header-top">
+                    <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                    <div class="tip-wireframe__badge-row">
+                        @if (filled($tip->status))
+                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->status) }}</span>
+                        @endif
+                        @if (filled($tip->visibility))
+                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->visibility) }}</span>
+                        @endif
+                    </div>
                 </div>
                 <h1 class="tip-wireframe__title">{{ $tip->title }}</h1>
                 <p class="tip-wireframe__meta">
-                    {{ $authorName }} · {{ $createdAt }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
+                    {{ $tip->authorName }} · {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
                 </p>
             </header>
+
+            {{-- 썸네일 --}}
+            @if(!blank($tip->thumbnail))
+                <figure class="tip-wireframe__thumbnail">
+                    <img src="{{ $tip->thumbnailUrl }}" alt="{{ $tip->title }}" loading="lazy">
+                </figure>
+            @endif
+
 
             <section class="tip-wireframe__toc-mobile" data-toc-mobile hidden>
                 <button type="button" class="tip-wireframe__toc-toggle tip-wireframe__toc-toggle--mobile" data-toc-toggle="mobile" aria-expanded="false">
@@ -48,14 +55,14 @@
                 </nav>
             </section>
 
-            <p class="tip-wireframe__excerpt">
+            {{-- <p class="tip-wireframe__excerpt">
                 {{ $excerpt !== '' ? $excerpt : '요약(Excerpt) 영역입니다. 핵심 메시지를 2~3줄로 먼저 전달합니다.' }}
-            </p>
+            </p> --}}
 
             <hr class="tip-wireframe__divider">
 
             <section class="tip-wireframe__content" data-tip-article>
-                @if ($content !== '')
+                @if ($tip->content !== '')
                     {!! $tip->content !!}
                 @else
                     <h2>1. 문제 정의</h2>
@@ -75,15 +82,15 @@
 
             <section class="tip-wireframe__section">
                 <h2 class="tip-wireframe__section-title">태그</h2>
-                <div class="tip-wireframe__tags">
-                    @forelse ($displayTags as $tag)
-                        <span class="tip-wireframe__tag">#{{ $tag->name }}</span>
-                    @empty
-                        <span class="tip-wireframe__tag">#팁</span>
-                        <span class="tip-wireframe__tag">#와이어프레임</span>
-                        <span class="tip-wireframe__tag">#UI구조</span>
-                    @endforelse
-                </div>
+                
+                    @if(!blank($tip->displayTags))
+                        <div class="tip-wireframe__tags">
+                            @foreach($tip->displayTags as $tag)
+                                <span class="tip-wireframe__tag">#{{ $tag->name }}</span>
+                            @endforeach
+                        </div>
+                    @endif
+
             </section>
 
             <section class="tip-wireframe__section">
@@ -133,7 +140,7 @@
 
                 <section class="tip-wireframe__author-card">
                     <h3>작성자 카드</h3>
-                    <p>{{ $authorName }}</p>
+                    <p>{{ $tip->authorName }}</p>
                     <small>간단 소개 영역</small>
                 </section>
 

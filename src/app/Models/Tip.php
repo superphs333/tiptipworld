@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Category;
@@ -28,7 +29,12 @@ class Tip extends Model
     ];
 
     protected $appends = [
-        'thumbnailUrl'
+        'thumbnailUrl',
+        'createdDate',
+        'updatedDate',
+        'authorName',
+        'categoryName',
+        'displayTags',
     ];
 
     /**
@@ -62,10 +68,11 @@ class Tip extends Model
         return $this->belongsTo(User::class,'update_user_id');
     }
 
-
     /**
-     * 썸네일 이미지 접근자
+     * 접근자 모음
      */
+
+    // 썸네일 이미지 
     public function getThumbnailUrlAttribute() : string
     {
         if(!$this->thumbnail){
@@ -73,6 +80,34 @@ class Tip extends Model
         }
         return app(FileStorageService::class)->url($this->thumbnail);
     }
+
+    // 생성일
+    public function getCreatedDateAttribute() : string
+    {
+        return $this->created_at->format('Y-m-d H시i분s초');
+    }
+    // 수정일
+    public function getUpdatedDateAttribute() : string
+    {
+        return $this->updated_at->format('Y-m-d H시i분s초');
+    }
+    // 작성자 이름
+    public function getUserNameAttribute() : string
+    {
+        return optional($this->user)->name ?? '작성자 미상';
+    }
+    // 카테고리 이름
+    public function getCategoryNameAttribute() : string
+    {
+        return optional($this->category)->name ?? '미분류';
+    }
+    // 태그 리스트
+    public function getDisplayTagsAttribute() : Collection
+    {
+        return $this->relationLoaded('tags') ? $this->tags : collect();
+    }
+
+
 
 
 
