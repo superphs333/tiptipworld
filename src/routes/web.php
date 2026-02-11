@@ -46,7 +46,8 @@ Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
 // 분류별 페이지
 Route::get('/tips/category/{category_id}',[TipController::class, 'tipListBySort'])->whereNumber('category_id')->name('tips.category');
 Route::get('/tips/tag/{tag_id}',[TipController::class, 'tipListBySort'])->whereNumber('tag_id')->name('tips.tag');
-
+// 좋아요
+Route::post('/tip/like/{tip_id}', [TipController::class, 'like'])->whereNumber('tip_id')->middleware('auth')->name('tip.like');
     
 /**
  * 관리자 전용 라우트 그룹
@@ -85,6 +86,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->whereNumber('tip_id')
         ->name('tip.destroy');
 
+    
     
 
     

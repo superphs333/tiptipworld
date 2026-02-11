@@ -223,4 +223,27 @@ class TipController extends Controller
 
     }
 
+    /**
+     * 좋아요 기능
+     */
+    public function like(int $tip_id){
+        $user = Auth::user();
+
+        $tip = Tip::findOrFail($tip_id);
+
+        $changed = $tip->likedUsers()->toggle($user->id); // like <-> unlike
+        $liked = !empty($changed['attached']); // 최종 like 상태 
+
+        $likeCount = $tip->likedUsers()->count();
+        $tip->update(['like_count' => $likeCount]);
+
+        return response()->json([
+            'success' => true,
+            'liked' => $liked,
+            'likeCount' => $likeCount,
+        ]);
+        
+        
+    }
+
 }
