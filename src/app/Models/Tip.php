@@ -32,7 +32,7 @@ class Tip extends Model
         'thumbnailUrl',
         'createdDate',
         'updatedDate',
-        'authorName',
+        'userName',
         'categoryName',
         'displayTags',
     ];
