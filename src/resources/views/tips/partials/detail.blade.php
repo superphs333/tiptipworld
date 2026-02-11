@@ -1,4 +1,4 @@
-<section class="tip-wireframe" data-tip-wireframe>
+<section class="tip-wireframe" data-tip-wireframe data-tip-id="{{ $tip->id }}">
     <div class="tip-wireframe__topbar">
         <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a>
         <div class="tip-wireframe__topbar-right">
@@ -140,7 +140,7 @@
                     </span>
                     <span class="tip-wireframe__action-label">저장</span>
                 </button>
-                <button type="button" class="tip-wireframe__action-btn" aria-label="좋아요">
+                <button type="button" class="tip-wireframe__action-btn" aria-label="좋아요" data-tip-action="like">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>

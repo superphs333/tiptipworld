@@ -1,17 +1,17 @@
+import $ from 'jquery';
 import 'summernote/dist/summernote-lite.css';
 import 'summernote/dist/summernote-lite';
 import 'summernote/dist/lang/summernote-ko-KR';
 
-function getJQuery() {
-    return window.jQuery || window.$ || null;
-}
+window.$ = window.$ || $;
+window.jQuery = window.jQuery || $;
 
 function getCsrfToken() {
     const tokenElement = document.querySelector('meta[name="csrf-token"]');
     return tokenElement ? tokenElement.getAttribute('content') : null;
 }
 
-function removeHiddenBackdrops($) {
+function removeHiddenBackdrops() {
     $('.note-modal-backdrop').each(function () {
         const $backdrop = $(this);
         if ($backdrop.css('display') === 'none') {
@@ -20,7 +20,7 @@ function removeHiddenBackdrops($) {
     });
 }
 
-function uploadSingleImage(file, uploadUrl, $) {
+function uploadSingleImage(file, uploadUrl) {
     return new Promise((resolve, reject) => {
         if (!file.type || !file.type.startsWith('image/')) {
             reject(new Error('이미지 파일만 업로드할 수 있어요.'));
@@ -64,12 +64,12 @@ function uploadSingleImage(file, uploadUrl, $) {
     });
 }
 
-async function uploadImagesSequentially(files, editorElement, uploadUrl, $) {
+async function uploadImagesSequentially(files, editorElement, uploadUrl) {
     const failed = [];
 
     for (const file of files) {
         try {
-            const response = await uploadSingleImage(file, uploadUrl, $);
+            const response = await uploadSingleImage(file, uploadUrl);
             $(editorElement).summernote('insertImage', response.url, ($image) => {
                 $image.attr('alt', response.alt ?? '');
             });
@@ -99,8 +99,7 @@ function mountSummernote(element) {
         return;
     }
 
-    const $ = getJQuery();
-    if (!$ || typeof $.fn?.summernote !== 'function') {
+    if (typeof $.fn?.summernote !== 'function') {
         return;
     }
 
@@ -134,14 +133,14 @@ function mountSummernote(element) {
         ],
         callbacks: {
             onDialogHidden: () => {
-                removeHiddenBackdrops($);
+                removeHiddenBackdrops();
             },
             onImageUpload: function (files) {
                 if (!uploadUrl) {
                     return;
                 }
 
-                uploadImagesSequentially(Array.from(files), this, uploadUrl, $);
+                uploadImagesSequentially(Array.from(files), this, uploadUrl);
             },
         },
     });
@@ -156,8 +155,7 @@ export function mountSummernotes(container = document) {
 }
 
 export function unmountSummernotes(container = document) {
-    const $ = getJQuery();
-    if (!$ || typeof $.fn?.summernote !== 'function') {
+    if (typeof $.fn?.summernote !== 'function') {
         return;
     }
 
