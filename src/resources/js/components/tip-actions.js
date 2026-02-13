@@ -22,15 +22,23 @@ $(() => {
         },
     });
 
-    // 같은 tip_id를 가진 좋아요 버튼들을 모두 찾는다(피드/상세 동시 갱신용)
-    function getButtonsByTipId(tipId) {
-        return $(`[data-tip-action="like"][data-tip-id="${tipId}"]`);
+    // 같은 tip_id/action 버튼들을 모두 찾는다(피드/상세 동시 갱신용)
+    function getButtonsByTipId(tipId, action) {
+        return $(`[data-tip-action="${action}"][data-tip-id="${tipId}"]`);
     }
 
     // 좋아요 토글 API 호출
     function likeTip(tipId) {
         return $.ajax({
             url: `/tip/like/${encodeURIComponent(tipId)}`,
+            method: 'POST',
+        });
+    }
+
+    // 북마크 토글 api 호출
+    function bookmarkTip(tipId) {
+        return $.ajax({
+            url: `/tip/bookmark/${encodeURIComponent(tipId)}`,
             method: 'POST',
         });
     }
@@ -55,7 +63,7 @@ $(() => {
 
         pendingByTipId[tipId] = true;
 
-        const $buttons = getButtonsByTipId(tipId);
+        const $buttons = getButtonsByTipId(tipId, 'like');
         $buttons.prop('disabled', true);
 
         likeTip(tipId)
@@ -82,6 +90,61 @@ $(() => {
                 const message =
                     xhr?.responseJSON?.message ??
                     (xhr?.status ? `좋아요 처리 실패 (HTTP ${xhr.status})` : '좋아요 처리 실패');
+                alert(message);
+            })
+            .always(() => {
+                pendingByTipId[tipId] = false;
+                $buttons.prop('disabled', false);
+            });
+    });
+
+    /**
+     * 북마크 기능
+     */
+    $(document).on('click', '[data-tip-action="bookmark"]', function (event) {
+        event.preventDefault();
+
+        const $clicked = $(this);
+        const tipId = String($clicked.data('tipId') ?? '');
+
+        if (!tipId) {
+            console.warn('북마크 버튼에 data-tip-id가 없습니다.');
+            return;
+        }
+
+        if (pendingByTipId[tipId]) {
+            return;
+        }
+
+        pendingByTipId[tipId] = true;
+
+        const $buttons = getButtonsByTipId(tipId, 'bookmark');
+        $buttons.prop('disabled', true);
+
+        bookmarkTip(tipId)
+            .done((response) => {
+                const bookmarked = Boolean(response?.bookmarked);
+                const bookmarkCount = Number(response?.bookmark_count ?? 0);
+
+                // 같은 tip_id 버튼의 상태를 모두 동기화
+                $buttons
+                    .attr('aria-pressed', bookmarked ? 'true' : 'false')
+                    .toggleClass('is-bookmarked', bookmarked);
+
+                if (Number.isFinite(bookmarkCount)) {
+                    $buttons.find('[data-bookmark-count]').text(bookmarkCount.toLocaleString());
+                }
+            })
+            .fail((xhr) => {
+                if (xhr?.status === 401) {
+                    const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+                    window.location.href = `/login?redirect=${redirect}`;
+                    return;
+                }
+
+                const message =
+                    xhr?.responseJSON?.message ??
+                    (xhr?.status ? `북마크 처리 실패 (HTTP ${xhr.status})` : '북마크 처리 실패');
                 alert(message);
             })
             .always(() => {

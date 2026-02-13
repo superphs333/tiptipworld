@@ -48,6 +48,8 @@ Route::get('/tips/category/{category_id}',[TipController::class, 'tipListBySort'
 Route::get('/tips/tag/{tag_id}',[TipController::class, 'tipListBySort'])->whereNumber('tag_id')->name('tips.tag');
 // 좋아요
 Route::post('/tip/like/{tip_id}', [TipController::class, 'like'])->whereNumber('tip_id')->middleware('auth')->name('tip.like');
+// 북마크
+Route::post('/tip/bookmark/{tip_id}', [TipController::class, 'bookmark'])->whereNumber('tip_id')->middleware('auth')->name('tip.bookmark');
     
 /**
  * 관리자 전용 라우트 그룹

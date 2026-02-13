@@ -260,4 +260,28 @@ class TipController extends Controller
         ]);
     }
 
+
+    /**
+     * 북마크 기능
+     */
+    public function bookmark(int $tip_id){
+        $tip = Tip::findOrFail($tip_id);
+        $userId = Auth::id();
+
+        $changed = $tip->bookmarkedUsers()->toggle($userId);
+        $bookmarked = !empty($changed['attached']);
+
+        $bookmarkCount = $tip->bookmarkedUsers()->count();
+        $tip->update(['bookmark_count' => $bookmarkCount]);
+
+        return response()->json([
+            'success' => true,
+            'tip_id' => $tip->id,
+            'bookmarked' => $bookmarked,
+            'bookmark_count' => $bookmarkCount,
+        ]);
+
+
+    }
+
 }

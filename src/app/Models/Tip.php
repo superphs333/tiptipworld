@@ -26,6 +26,7 @@ class Tip extends Model
         'tags_count',
         'view_count',
         'like_count',
+        'bookmark_count',
     ];
 
     protected $appends = [
@@ -141,6 +142,16 @@ class Tip extends Model
         // 로드되어 있지 않으면 exists 쿼리 1번
         return $this->likedUsers()->where('user_id', $user->id)->exists();
 
+    }
+
+    // 북마크 여부
+    public function isBookmarkedBy(User $user) : bool
+    {
+        if($this->relationLoaded('bookmarkedUsers')){
+            return $this->bookmarkedUsers->contains('id', $user->id);
+        }
+
+        return $this->bookmarkedUsers()->where('user_id', $user->id)->exists();
     }
     
 

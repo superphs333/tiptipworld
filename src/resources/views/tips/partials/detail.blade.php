@@ -132,16 +132,24 @@
 
         @php
             $isLiked = auth()->check() ? $tip->isLikedBy(auth()->user()) : false;
+            $isBookmarked = auth()->check() ? $tip->isBookmarkedBy(auth()->user()) : false;
         @endphp
         <aside class="tip-wireframe__action">
             <div class="tip-wireframe__action-sticky">
-                <button type="button" class="tip-wireframe__action-btn" aria-label="저장">
+                <button type="button" 
+                class="tip-wireframe__action-btn {{ $isBookmarked ? 'is-bookmarked' : '' }}" 
+                aria-label="북마크"
+                data-tip-action="bookmark"
+                aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}"
+                data-tip-id="{{ $tip->id }}"
+                >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
                         </svg>
                     </span>
-                    <span class="tip-wireframe__action-label">저장</span>
+                    <span class="tip-wireframe__action-label">북마크</span>
+                    <span class="tip-wireframe__action-count" data-bookmark-count>{{ number_format((int) ($tip->bookmark_count ?? 0)) }}</span>
                 </button>                
                 <button
                     type="button"

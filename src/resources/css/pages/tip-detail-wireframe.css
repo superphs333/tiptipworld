@@ -549,6 +549,13 @@
     fill: #d11a4b;
 }
 
+/* 북마크 on 상태: 아이콘을 검은색으로 */
+.tip-wireframe__action-btn[data-tip-action="bookmark"].is-bookmarked .tip-wireframe__action-icon svg path,
+.tip-wireframe__action-btn[data-tip-action="bookmark"][aria-pressed="true"] .tip-wireframe__action-icon svg path {
+    stroke: #111;
+    fill: #111;
+}
+
 .tip-wireframe__action-label {
     display: none;
 }
