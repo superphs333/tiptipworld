@@ -542,7 +542,18 @@
     height: 17px;
 }
 
+/* 좋아요 on 상태: 하트 아이콘(path) 색상만 변경 */
+.tip-wireframe__action-btn[data-tip-action="like"].is-liked .tip-wireframe__action-icon svg path,
+.tip-wireframe__action-btn[data-tip-action="like"][aria-pressed="true"] .tip-wireframe__action-icon svg path {
+    stroke: #d11a4b;
+    fill: #d11a4b;
+}
+
 .tip-wireframe__action-label {
+    display: none;
+}
+
+.tip-wireframe__action-count {
     display: none;
 }
 
@@ -700,7 +711,23 @@
     }
 
     .tip-wireframe__action-label {
-        display: inline;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .tip-wireframe__action-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        min-width: 28px;
+        padding: 2px 8px;
+        border: 1px solid rgba(18, 18, 18, 0.12);
+        border-radius: 999px;
+        background: #f8f8f8;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.2;
     }
 
     .tip-wireframe__mobile-only {

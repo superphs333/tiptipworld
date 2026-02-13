@@ -131,8 +131,8 @@
         </article>
 
         @php
-            $isLiked = auth()->check() ? $tip->isLIkedBy(auth()->user()) : false;
-        @endphp           
+            $isLiked = auth()->check() ? $tip->isLikedBy(auth()->user()) : false;
+        @endphp
         <aside class="tip-wireframe__action">
             <div class="tip-wireframe__action-sticky">
                 <button type="button" class="tip-wireframe__action-btn" aria-label="저장">
@@ -143,13 +143,13 @@
                     </span>
                     <span class="tip-wireframe__action-label">저장</span>
                 </button>                
-                <button type="button" 
-                class="tip-wireframe__action-btn" 
-                aria-label="좋아요" 
-                data-tip-action="like"
-                aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
-                data-tip-id="{{ $tip->id }}"
-                data-liked="{{ $isLiked ? '1' : '0'}}"
+                <button
+                    type="button"
+                    class="tip-wireframe__action-btn {{ $isLiked ? 'is-liked' : '' }}"
+                    aria-label="좋아요"
+                    data-tip-action="like"
+                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                    data-tip-id="{{ $tip->id }}"
                 >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -157,6 +157,7 @@
                         </svg>
                     </span>
                     <span class="tip-wireframe__action-label">좋아요</span>
+                    <span class="tip-wireframe__action-count" data-like-count>{{ number_format((int) ($tip->like_count ?? 0)) }}</span>
                 </button>
                 <button type="button" class="tip-wireframe__action-btn" aria-label="공유">
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
