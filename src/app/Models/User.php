@@ -230,4 +230,18 @@ class User extends Authenticatable
             'tip_id',        
         );
     }
+
+    /**
+     * 북마크 관련
+     */
+    // 관계
+    public function bookmarkedTips(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Tip::class,
+            'tip_bookmark',
+            'user_id',
+            'tip_id',
+        );
+    }
 }

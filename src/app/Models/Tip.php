@@ -72,6 +72,17 @@ class Tip extends Model
         ); 
     }
 
+    // tip_bookmark 테이블
+    public function bookmarkedUsers() : BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'tip_bookmark',
+            'tip_id',
+            'user_id',
+        );
+    }
+
     /**
      * 접근자 모음
      */
