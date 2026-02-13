@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Date;
 use App\Services\FileStorageService;
 use App\Models\Tip;
 use App\Models\Tag;
+use Illuminate\Support\Str;
 
 class TipController extends Controller
 {
@@ -183,6 +184,19 @@ class TipController extends Controller
         $tip_visibility = $tip->visibility;
 
         /**
+         * Tip url 용
+         */
+        // content 첫문장
+        $plain = trim(strip_tags($tip->content));
+        $first = preg_split('/[.!?]/u', $plain, 2)[0] ?? $plain;
+        $tip_data_for_share = [
+            "url_tip_title" => $tip->title,
+            "url_tip_text" => mb_strimwidth($first, 0, 120, '...'),
+            'url_tip_url' => route('tip.show', ['tip_id' => $tip->id]),
+
+        ];
+
+        /**
          * 팁 접근 설정
          * 본인 글 | 관리자 -> 모두 접근 가능
          * status -> published 
@@ -199,6 +213,7 @@ class TipController extends Controller
         return view('tips.view', [
             'viewMode' => 'detailView',
             'tip' => $tip,
+            'tip_data_for_share' => $tip_data_for_share,
         ]);
     }
 

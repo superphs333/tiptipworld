@@ -4,6 +4,9 @@ window.$ = window.$ || $;
 window.jQuery = window.jQuery || $;
 
 $(() => {
+    /**
+     * 좋아요 기능
+     */
     // Laravel 레이아웃의 meta 태그에서 CSRF 토큰 1회 조회
     const csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
 
@@ -86,4 +89,32 @@ $(() => {
                 $buttons.prop('disabled', false);
             });
     });
+
+
+    /**
+     * 공유 기능
+     */
+    $(document).on('click', '[data-tip-action="share"]', async function (event) {
+        event.preventDefault();
+        
+        const $btn = $(this);
+        const shareData = {
+            title : $btn.data('title'),
+            text : $btn.data('text'),
+            url : $btn.data('url')
+        };
+
+        try{
+            if(navigator.share && (!navigator.canShare || navigator.canShare(shareData))){
+                await navigator.share(shareData);
+                console.log('ok')
+                return ;
+            }
+            await navigator.clipboard.writeText(shareData.url); // 공유 미지원
+            alert('공유가 완료되었습니다.');
+        }catch(err){
+            if (err.name !== 'AbortError') console.error(err);
+        }
+    });
+
 });

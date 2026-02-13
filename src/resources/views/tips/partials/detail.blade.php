@@ -159,7 +159,12 @@
                     <span class="tip-wireframe__action-label">좋아요</span>
                     <span class="tip-wireframe__action-count" data-like-count>{{ number_format((int) ($tip->like_count ?? 0)) }}</span>
                 </button>
-                <button type="button" class="tip-wireframe__action-btn" aria-label="공유">
+                <button type="button" class="share_btn tip-wireframe__action-btn" aria-label="공유"
+                data-tip-action="share"
+                data-title="{{ $tip_data_for_share['url_tip_title'] }}"
+                data-text = "{{ $tip_data_for_share['url_tip_text'] }}"
+                data-url = "{{ $tip_data_for_share['url_tip_url'] }}"
+                >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
                             <path d="M9.5 13.5 14.5 8.5M8.16 9.84l-2.12 2.12a3 3 0 1 0 4.24 4.24l2.12-2.12M15.84 14.16l2.12-2.12a3 3 0 1 0-4.24-4.24l-2.12 2.12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
