@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminDashboard;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SummernoteController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TipController;
@@ -50,6 +51,8 @@ Route::get('/tips/tag/{tag_id}',[TipController::class, 'tipListBySort'])->whereN
 Route::post('/tip/like/{tip_id}', [TipController::class, 'like'])->whereNumber('tip_id')->middleware('auth')->name('tip.like');
 // 북마크
 Route::post('/tip/bookmark/{tip_id}', [TipController::class, 'bookmark'])->whereNumber('tip_id')->middleware('auth')->name('tip.bookmark');
+// 댓글
+Route::post('/tip/comment/{tip_id}',[CommentController::class, 'commentAdd'])->whereNumber('tip_id')->middleware('auth')->name('tip.add.comment');
     
 /**
  * 관리자 전용 라우트 그룹

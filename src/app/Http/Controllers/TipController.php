@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Date;
 use App\Services\FileStorageService;
 use App\Models\Tip;
 use App\Models\Tag;
+use App\Models\Comment;
 use Illuminate\Support\Str;
 
 class TipController extends Controller

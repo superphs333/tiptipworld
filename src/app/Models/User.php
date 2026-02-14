@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Services\FileStorageService;
 use App\Models\Role;
 use App\Models\Tip;
+use App\Models\Comment;
 
 class User extends Authenticatable
 {
@@ -244,4 +246,14 @@ class User extends Authenticatable
             'tip_id',
         );
     }
+
+    /**
+     * 댓글 관련
+     */
+    // 관계
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+    
 }

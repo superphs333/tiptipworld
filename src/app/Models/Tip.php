@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Tag;
 use Carbon\Carbon;
 use App\Services\FileStorageService;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tip extends Model
 {
@@ -83,6 +84,13 @@ class Tip extends Model
             'user_id',
         );
     }
+
+    // comments
+    public function comments() : HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
 
     /**
      * 접근자 모음
