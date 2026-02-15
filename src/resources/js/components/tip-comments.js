@@ -20,8 +20,14 @@ $(() => {
     const $list = $section.find('.tip-wireframe__comment-list');
     const $textarea = $section.find('#tip-wireframe-comment');
     const $submitBtn = $section.find('[data-tip-action="comment_add"]');
+    const $cancelBtn = $section.find('[data-tip-action="comment_cancel"]');
 
     const DEFAULT_PLACEHOLDER = '댓글을 입력해주세요.';
+    const DEFAULT_SUBMIT_LABEL = String($submitBtn.text() ?? '').trim() || '댓글 등록';
+    const EDIT_PLACEHOLDER = '수정할 댓글을 입력해주세요.';
+    const REPLY_SUBMIT_LABEL = '답글 등록';
+    const EDIT_SUBMIT_LABEL = '댓글 수정';
+    const commentMap = new Map();
 
     // CSRF 공통 헤더
     const csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
@@ -60,6 +66,16 @@ $(() => {
         return $.ajax({
             url: `/tip/comment/${encodeURIComponent(commentId)}`,
             method: 'DELETE',
+        });
+    }
+
+    function editComment(commentId, body) {
+        return $.ajax({
+            url: `/tip/comment/${encodeURIComponent(commentId)}`,
+            method: 'PATCH',
+            data: {
+                comment: body,
+            },
         });
     }
 
@@ -132,15 +148,31 @@ $(() => {
         $textarea.val('').attr('placeholder', DEFAULT_PLACEHOLDER);
         $submitBtn.removeData('parentId');
         $submitBtn.removeData('replyToId');
+        $submitBtn.removeData('editCommentId');
+        $submitBtn.text(DEFAULT_SUBMIT_LABEL);
         $submitBtn.prop('disabled', false);
+        $cancelBtn.prop('hidden', true);
     }
 
     function setReplyMode(parentId, replyToId, parentAuthor, parentPreview = '') {
         $submitBtn.data('parentId', parentId);
         $submitBtn.data('replyToId', replyToId);
+        $submitBtn.removeData('editCommentId');
+        $submitBtn.text(REPLY_SUBMIT_LABEL);
+        $cancelBtn.prop('hidden', false);
 
         const previewLabel = parentPreview ? ` ${parentPreview}` : '';
-        $textarea.attr('placeholder', `${parentAuthor}${previewLabel}에게 답글 입력...`).focus();
+        $textarea.val('').attr('placeholder', `${parentAuthor}${previewLabel}에게 답글 입력...`).focus();
+    }
+
+    function setEditMode(commentId, commentBody) {
+        $submitBtn.removeData('parentId');
+        $submitBtn.removeData('replyToId');
+        $submitBtn.data('editCommentId', commentId);
+        $submitBtn.text(EDIT_SUBMIT_LABEL);
+        $cancelBtn.prop('hidden', false);
+
+        $textarea.val(String(commentBody ?? '')).attr('placeholder', EDIT_PLACEHOLDER).focus();
     }
 
     /**
@@ -158,6 +190,21 @@ $(() => {
                 data-comment-action="delete"
                 data-comment-id="${comment.id}"
             >삭제</button>
+        `.trim();
+    }
+
+    function renderEditButton(comment) {
+        if (!comment.can_edit) {
+            return '';
+        }
+
+        return `
+            <button
+                type="button"
+                class="tip-wireframe__comment-action-btn"
+                data-comment-action="edit"
+                data-comment-id="${comment.id}"
+            >수정</button>
         `.trim();
     }
 
@@ -225,7 +272,7 @@ $(() => {
 
                     <div class="tip-wireframe__comment-bottom">
                         <div class="tip-wireframe__comment-meta">${renderReplyButton(reply)}</div>
-                        <div class="tip-wireframe__comment-actions">${renderDeleteButton(reply)}</div>
+                        <div class="tip-wireframe__comment-actions">${renderEditButton(reply)}${renderDeleteButton(reply)}</div>
                     </div>
                 </article>
             </li>
@@ -261,13 +308,32 @@ $(() => {
 
                     <div class="tip-wireframe__comment-bottom">
                         <div class="tip-wireframe__comment-meta">${renderReplyButton(comment)}</div>
-                        <div class="tip-wireframe__comment-actions">${renderDeleteButton(comment)}</div>
+                        <div class="tip-wireframe__comment-actions">${renderEditButton(comment)}${renderDeleteButton(comment)}</div>
                     </div>
                 </article>
 
                 ${repliesHtml}
             </li>
         `.trim();
+    }
+
+    function indexComments(comments) {
+        commentMap.clear();
+
+        comments.forEach((root) => {
+            const rootId = parseNullableInt(root?.id);
+            if (rootId !== null) {
+                commentMap.set(rootId, root);
+            }
+
+            const children = Array.isArray(root?.children) ? root.children : [];
+            children.forEach((child) => {
+                const childId = parseNullableInt(child?.id);
+                if (childId !== null) {
+                    commentMap.set(childId, child);
+                }
+            });
+        });
     }
 
     function loadComments() {
@@ -278,6 +344,7 @@ $(() => {
         getCommentList()
             .done((response) => {
                 const comments = Array.isArray(response?.comments) ? response.comments : [];
+                indexComments(comments);
                 $list.html(comments.map(renderRootItem).join(''));
             })
             .fail((xhr) => {
@@ -308,6 +375,22 @@ $(() => {
         setReplyMode(parentId, replyToId, parentAuthor, parentPreview);
     });
 
+    // 수정 모드 진입
+    $(document).on('click', '#tip-comments [data-comment-action="edit"]', function () {
+        const $btn = $(this);
+        const commentId = parseNullableInt($btn.data('commentId'));
+        if (!commentId) {
+            return;
+        }
+
+        const comment = commentMap.get(commentId);
+        if (!comment || !comment.can_edit) {
+            return;
+        }
+
+        setEditMode(commentId, comment.body);
+    });
+
     // 댓글 등록
     $(document).on('click', '#tip-comments [data-tip-action="comment_add"]', function (event) {
         event.preventDefault();
@@ -318,12 +401,17 @@ $(() => {
             return;
         }
 
+        const editCommentId = parseNullableInt($submitBtn.data('editCommentId'));
         const parentId = parseNullableInt($submitBtn.data('parentId'));
         const replyToId = parseNullableInt($submitBtn.data('replyToId'));
 
         $submitBtn.prop('disabled', true);
 
-        addComment(body, parentId, replyToId)
+        const request = editCommentId
+            ? editComment(editCommentId, body)
+            : addComment(body, parentId, replyToId);
+
+        request
             .done(() => {
                 resetComposer();
                 loadComments();
@@ -333,10 +421,17 @@ $(() => {
                     return;
                 }
 
-                const message = xhr?.responseJSON?.message ?? '댓글 등록 실패';
+                const defaultErrorMessage = editCommentId ? '댓글 수정 실패' : '댓글 등록 실패';
+                const message = xhr?.responseJSON?.message ?? defaultErrorMessage;
                 alert(message);
                 $submitBtn.prop('disabled', false);
             });
+    });
+
+    // 입력 취소
+    $(document).on('click', '#tip-comments [data-tip-action="comment_cancel"]', function (event) {
+        event.preventDefault();
+        resetComposer();
     });
 
     // 댓글 삭제 (status 변경)

@@ -115,7 +115,15 @@
                 <form class="tip-wireframe__comment-form" action="#" method="post" onsubmit="return false;">
                     <label for="tip-wireframe-comment">댓글 입력</label>
                     <textarea id="tip-wireframe-comment" placeholder="댓글을 입력해주세요."></textarea>
-                    <button type="submit" data-tip-action="comment_add" >댓글 등록</button>
+                    <div class="tip-wireframe__comment-form-actions">
+                        <button type="submit" data-tip-action="comment_add">댓글 등록</button>
+                        <button
+                            type="button"
+                            class="tip-wireframe__comment-cancel-btn"
+                            data-tip-action="comment_cancel"
+                            hidden
+                        >취소</button>
+                    </div>
                 </form>
                 <ul class="tip-wireframe__comment-list" aria-live="polite"></ul>
             </section>

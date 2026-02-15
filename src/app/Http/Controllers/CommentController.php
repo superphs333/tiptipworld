@@ -229,6 +229,59 @@ class CommentController extends Controller
     }
 
     /**
+     * 댓글 수정
+     *
+     * 정책:
+     * - 본인 또는 관리자만 수정 가능
+     * - active 상태 댓글만 수정 가능
+     */
+    public function commentUpdate(int $comment_id, Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'comment' => ['required', 'string', 'max:500'],
+        ]);
+
+        $body = trim((string) $validated['comment']);
+        if ($body === '') {
+            return response()->json(['message' => '댓글을 입력해주세요.'], 422);
+        }
+
+        $comment = Comment::query()->findOrFail($comment_id);
+
+        $user = Auth::user();
+        $isOwner = (int) $comment->user_id === (int) $user->id;
+        $isAdmin = $user?->isAdmin() ?? false;
+
+        if (! $isOwner && ! $isAdmin) {
+            return response()->json(['message' => '수정 권한이 없습니다.'], 403);
+        }
+
+        if ($comment->status !== 'active') {
+            return response()->json(['message' => '삭제되었거나 숨김 처리된 댓글은 수정할 수 없습니다.'], 422);
+        }
+
+        $comment->update([
+            'body' => $body,
+        ]);
+
+        $comment->load([
+            'user:id,name,profile_image_path',
+            'parent:id,user_id,body,status',
+            'parent.user:id,name',
+            'replyTo:id,user_id,body,status,parent_id',
+            'replyTo.user:id,name',
+        ]);
+
+        $authUserId = $user?->id;
+
+        return response()->json([
+            'success' => true,
+            'message' => '댓글이 수정되었습니다.',
+            'comment' => $this->serializeComment($comment, $authUserId, $isAdmin),
+        ]);
+    }
+
+    /**
      * 부모 댓글의 active 대댓글 개수를 reply_count에 반영
      */
     private function syncReplyCount(int $parentId): void
@@ -293,6 +346,9 @@ class CommentController extends Controller
             'status' => (string) $comment->status,
             'is_deleted' => $isDeleted,
             'can_reply' => ! $isDeleted && (int) ($comment->depth ?? 0) <= 1,
+            'can_edit' => ! $isDeleted
+                && $authUserId !== null
+                && ((int) $comment->user_id === $authUserId || $isAdmin),
             'can_delete' => ! $isDeleted
                 && $authUserId !== null
                 && ((int) $comment->user_id === $authUserId || $isAdmin),

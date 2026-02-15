@@ -57,6 +57,8 @@ Route::post('/tip/comment/{tip_id}',[CommentController::class, 'commentAdd'])->w
 Route::get('/tip/comment_list/{tip_id}',[CommentController::class, 'commentList'])->whereNumber('tip_id')->name('tip.comment.list');
 // 댓글 삭제 (물리삭제가 아닌 status 변경)
 Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDelete'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.delete');
+// 댓글 수정
+Route::patch('/tip/comment/{comment_id}',[CommentController::class, 'commentUpdate'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.update');
     
 /**
  * 관리자 전용 라우트 그룹
