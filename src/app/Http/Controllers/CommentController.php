@@ -30,14 +30,22 @@ class CommentController extends Controller
         $isAdmin = $authUser?->isAdmin() ?? false;
 
         // 평면 댓글 목록 조회
-        $flat = Comment::query()
+        $query = Comment::query()
             ->with([
                 'user:id,name,profile_image_path',
                 'parent:id,user_id,body,status',
                 'parent.user:id,name',
                 'replyTo:id,user_id,body,status,parent_id',
                 'replyTo.user:id,name',
-            ])
+            ]);
+
+        if ($authUserId !== null) {
+            $query->with([
+                'likedUsers' => fn ($likeQuery) => $likeQuery->whereKey($authUserId),
+            ]);
+        }
+
+        $flat = $query
             ->where('tip_id', $tip_id)
             ->whereIn('status', ['active', 'deleted'])
             ->where('depth', '<=', 1)
@@ -166,17 +174,23 @@ class CommentController extends Controller
             $this->syncReplyCount((int) $parentId);
         }
 
-        $comment->load([
+        $authUser = Auth::user();
+        $authUserId = $authUser?->id;
+        $isAdmin = $authUser?->isAdmin() ?? false;
+
+        $relations = [
             'user:id,name,profile_image_path',
             'parent:id,user_id,body,status',
             'parent.user:id,name',
             'replyTo:id,user_id,body,status,parent_id',
             'replyTo.user:id,name',
-        ]);
+        ];
 
-        $authUser = Auth::user();
-        $authUserId = $authUser?->id;
-        $isAdmin = $authUser?->isAdmin() ?? false;
+        if ($authUserId !== null) {
+            $relations['likedUsers'] = fn ($likeQuery) => $likeQuery->whereKey($authUserId);
+        }
+
+        $comment->load($relations);
 
         return response()->json([
             'success' => true,
@@ -264,20 +278,51 @@ class CommentController extends Controller
             'body' => $body,
         ]);
 
-        $comment->load([
+        $authUserId = $user?->id;
+        $relations = [
             'user:id,name,profile_image_path',
             'parent:id,user_id,body,status',
             'parent.user:id,name',
             'replyTo:id,user_id,body,status,parent_id',
             'replyTo.user:id,name',
-        ]);
+        ];
 
-        $authUserId = $user?->id;
+        if ($authUserId !== null) {
+            $relations['likedUsers'] = fn ($likeQuery) => $likeQuery->whereKey($authUserId);
+        }
+
+        $comment->load($relations);
 
         return response()->json([
             'success' => true,
             'message' => '댓글이 수정되었습니다.',
             'comment' => $this->serializeComment($comment, $authUserId, $isAdmin),
+        ]);
+    }
+
+    /**
+     * 댓글 좋아요 토글
+     */
+    public function commentLike(int $comment_id): JsonResponse
+    {
+        $comment = Comment::query()->findOrFail($comment_id);
+
+        if ($comment->status !== 'active') {
+            return response()->json(['message' => '삭제되었거나 숨김 처리된 댓글에는 좋아요를 누를 수 없습니다.'], 422);
+        }
+
+        $userId = Auth::id();
+        $changed = $comment->likedUsers()->toggle($userId);
+        $liked = ! empty($changed['attached']);
+
+        $likeCount = $comment->likedUsers()->count();
+        $comment->update(['like_count' => $likeCount]);
+
+        return response()->json([
+            'success' => true,
+            'comment_id' => (int) $comment->id,
+            'liked' => $liked,
+            'like_count' => $likeCount,
         ]);
     }
 
@@ -306,6 +351,15 @@ class CommentController extends Controller
     {
         $isDeleted = $comment->status === 'deleted';
         $replyTarget = $comment->replyTo ?? $comment->parent;
+        $isLiked = false;
+
+        if ($authUserId !== null) {
+            if ($comment->relationLoaded('likedUsers')) {
+                $isLiked = $comment->likedUsers->contains('id', $authUserId);
+            } else {
+                $isLiked = $comment->likedUsers()->where('user_id', $authUserId)->exists();
+            }
+        }
 
         $replyToId = $comment->reply_to_id === null ? null : (int) $comment->reply_to_id;
         if ($replyToId === null && (int) ($comment->depth ?? 0) === 1 && $comment->parent_id !== null) {
@@ -345,6 +399,8 @@ class CommentController extends Controller
             'reply_to_body_preview' => $replyToBodyPreview,
             'status' => (string) $comment->status,
             'is_deleted' => $isDeleted,
+            'is_liked' => $isLiked,
+            'can_like' => ! $isDeleted,
             'can_reply' => ! $isDeleted && (int) ($comment->depth ?? 0) <= 1,
             'can_edit' => ! $isDeleted
                 && $authUserId !== null

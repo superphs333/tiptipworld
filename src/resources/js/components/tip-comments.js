@@ -28,6 +28,7 @@ $(() => {
     const REPLY_SUBMIT_LABEL = '답글 등록';
     const EDIT_SUBMIT_LABEL = '댓글 수정';
     const commentMap = new Map();
+    const pendingLikeByCommentId = Object.create(null);
 
     // CSRF 공통 헤더
     const csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
@@ -66,6 +67,13 @@ $(() => {
         return $.ajax({
             url: `/tip/comment/${encodeURIComponent(commentId)}`,
             method: 'DELETE',
+        });
+    }
+
+    function likeComment(commentId) {
+        return $.ajax({
+            url: `/tip/comment/like/${encodeURIComponent(commentId)}`,
+            method: 'POST',
         });
     }
 
@@ -118,6 +126,10 @@ $(() => {
 
         const n = Number(rawValue);
         return Number.isInteger(n) && n > 0 ? n : null;
+    }
+
+    function getCommentLikeButtons(commentId) {
+        return $(`#tip-comments [data-comment-action="like"][data-comment-id="${commentId}"]`);
     }
 
     function formatCommentTime(iso) {
@@ -208,6 +220,34 @@ $(() => {
         `.trim();
     }
 
+    function renderLikeButton(comment) {
+        if (!comment.can_like) {
+            return '';
+        }
+
+        const liked = Boolean(comment.is_liked);
+        const likeCount = Number(comment.like_count ?? 0);
+        const displayCount = Number.isFinite(likeCount) ? likeCount : 0;
+
+        return `
+            <button
+                type="button"
+                class="tip-wireframe__comment-like-btn ${liked ? 'is-liked' : ''}"
+                data-comment-action="like"
+                data-comment-id="${comment.id}"
+                aria-pressed="${liked ? 'true' : 'false'}"
+                aria-label="댓글 좋아요"
+            >
+                <span class="tip-wireframe__comment-like-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                        <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke-width="1.6" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span data-comment-like-count>${displayCount.toLocaleString()}</span>
+            </button>
+        `.trim();
+    }
+
     function renderReplyButton(comment) {
         if (!comment.can_reply) {
             return '';
@@ -271,7 +311,7 @@ $(() => {
                     <p class="tip-wireframe__comment-body">${body}</p>
 
                     <div class="tip-wireframe__comment-bottom">
-                        <div class="tip-wireframe__comment-meta">${renderReplyButton(reply)}</div>
+                        <div class="tip-wireframe__comment-meta">${renderLikeButton(reply)}${renderReplyButton(reply)}</div>
                         <div class="tip-wireframe__comment-actions">${renderEditButton(reply)}${renderDeleteButton(reply)}</div>
                     </div>
                 </article>
@@ -307,7 +347,7 @@ $(() => {
                     <p class="tip-wireframe__comment-body">${body}</p>
 
                     <div class="tip-wireframe__comment-bottom">
-                        <div class="tip-wireframe__comment-meta">${renderReplyButton(comment)}</div>
+                        <div class="tip-wireframe__comment-meta">${renderLikeButton(comment)}${renderReplyButton(comment)}</div>
                         <div class="tip-wireframe__comment-actions">${renderEditButton(comment)}${renderDeleteButton(comment)}</div>
                     </div>
                 </article>
@@ -373,6 +413,60 @@ $(() => {
         }
 
         setReplyMode(parentId, replyToId, parentAuthor, parentPreview);
+    });
+
+    // 댓글 좋아요
+    $(document).on('click', '#tip-comments [data-comment-action="like"]', function (event) {
+        event.preventDefault();
+
+        const $btn = $(this);
+        const commentId = parseNullableInt($btn.data('commentId'));
+        if (!commentId) {
+            return;
+        }
+
+        if (pendingLikeByCommentId[commentId]) {
+            return;
+        }
+
+        pendingLikeByCommentId[commentId] = true;
+
+        const $buttons = getCommentLikeButtons(commentId);
+        $buttons.prop('disabled', true);
+
+        likeComment(commentId)
+            .done((response) => {
+                const liked = Boolean(response?.liked);
+                const likeCount = Number(response?.like_count ?? 0);
+
+                $buttons
+                    .attr('aria-pressed', liked ? 'true' : 'false')
+                    .toggleClass('is-liked', liked);
+
+                if (Number.isFinite(likeCount)) {
+                    $buttons.find('[data-comment-like-count]').text(likeCount.toLocaleString());
+                }
+
+                const cached = commentMap.get(commentId);
+                if (cached) {
+                    cached.is_liked = liked;
+                    if (Number.isFinite(likeCount)) {
+                        cached.like_count = likeCount;
+                    }
+                }
+            })
+            .fail((xhr) => {
+                if (handleUnauthorized(xhr)) {
+                    return;
+                }
+
+                const message = xhr?.responseJSON?.message ?? '댓글 좋아요 처리 실패';
+                alert(message);
+            })
+            .always(() => {
+                pendingLikeByCommentId[commentId] = false;
+                $buttons.prop('disabled', false);
+            });
     });
 
     // 수정 모드 진입

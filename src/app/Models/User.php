@@ -233,6 +233,17 @@ class User extends Authenticatable
         );
     }
 
+    // 관계 (이 유저가 좋아요 한 댓글들)
+    public function likedComments(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Comment::class,
+            'comment_likes',
+            'user_id',
+            'comment_id',
+        );
+    }
+
     /**
      * 북마크 관련
      */

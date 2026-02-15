@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Comment extends Model
@@ -56,5 +57,18 @@ class Comment extends Model
     public function replyTo(): BelongsTo
     {
         return $this->belongsTo(Comment::class, 'reply_to_id');
+    }
+
+    /**
+     * 댓글 좋아요를 누른 사용자들
+     */
+    public function likedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'comment_likes',
+            'comment_id',
+            'user_id',
+        );
     }
 }
