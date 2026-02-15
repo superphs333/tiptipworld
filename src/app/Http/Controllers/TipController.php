@@ -7,10 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use App\Services\FileStorageService;
+use App\Services\TipViewCounterService;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\Comment;
-use Illuminate\Support\Str;
 
 class TipController extends Controller
 {
@@ -172,7 +172,7 @@ class TipController extends Controller
     /**
      * TIP ONE VIEW
      */
-    public function showPost($tip_id){
+    public function showPost(Request $request, int $tip_id, TipViewCounterService $tipViewCounter){
         $tip = Tip::with([
             'category:id,name',
             'user:id,name',
@@ -210,6 +210,12 @@ class TipController extends Controller
                 "else { window.location.href = '/'; }</script>"
             );
         }
+
+        /**
+         * 조회수
+         * 같은 방문자(로그인/비로그인) 기준 24시간 중복 조회 방지
+         */
+        $tipViewCounter->increaseIfNeeded($request, $tip);
 
         return view('tips.view', [
             'viewMode' => 'detailView',
