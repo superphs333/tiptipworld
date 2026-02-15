@@ -21,7 +21,9 @@
         <article class="tip-wireframe__article">
             <header class="tip-wireframe__article-header">
                 <div class="tip-wireframe__header-top">
-                    <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                    <a target="_blank" href="{{ route('tips.category', ['category_id'=>$tip->category_id]) }}" >
+                        <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                    </a>                    
                     <div class="tip-wireframe__badge-row">
                         @if (filled($tip->status))
                             <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->status) }}</span>
@@ -85,7 +87,9 @@
                     @if(!blank($tip->displayTags))
                         <div class="tip-wireframe__tags">
                             @foreach($tip->displayTags as $tag)
-                                <span class="tip-wireframe__tag">#{{ $tag->name }}</span>
+                                <a href="{{ route('tips.tag', $tag->id) }}" target="_blank">
+                                    <span  class="tip-wireframe__tag">#{{ $tag->name }}</span>
+                                </a>                                
                             @endforeach
                         </div>
                     @endif
