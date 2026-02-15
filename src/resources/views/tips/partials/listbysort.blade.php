@@ -8,7 +8,7 @@
     $sortKey = array_key_exists($requestedSort, $sortOptions) ? $requestedSort : 'latest';
 
     $siteTitle = filled($site_title ?? null) ? $site_title : '샘플 분야';
-    $description = '분류별 팁을 한 화면에서 빠르게 탐색할 수 있도록 정리된 더미 데이터 화면입니다.';
+   //$description = '분류별 팁을 한 화면에서 빠르게 탐색할 수 있도록 정리된 더미 데이터 화면입니다.';
     $modeLabel = request()->routeIs('tips.tag') ? 'TAG VIEW' : 'CATEGORY VIEW';
 
     $dummyTitles = [

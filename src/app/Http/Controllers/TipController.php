@@ -232,15 +232,27 @@ class TipController extends Controller
         $site_title = "";
         if($request->routeIs('tips.category')){
             $sort = "category";
-            $site_title = Category::findOrFail($sort_id)->name;
+            $category = Category::findOrFail($sort_id);
+            $site_title = $category->name;
+            $description = $category->description;
+            $tipItems = Tip::query()->where('category_id', $sort_id)->count();
+
         }else if($request->routeIs('tips.tag')){
             $sort = "tag";
-            $site_title = Tag::findOrFail($sort_id)->name;
+            $tag = Tag::findOrFail($sort_id);
+            $site_title = $tag->name;
+            $description = $tag->description;
+            $tipItems = Tip::query()->whereHas('tags', function($query) use($sort_id){
+                $query->where('id', $sort_id);
+            })->count();
+        
         }
 
         return view('tips.view', [
             'viewMode' => 'tipListBySort',
             'site_title' => $site_title,
+            'description' => $description,
+            'tipItems' => $tipItems,
         ]);
 
     }
