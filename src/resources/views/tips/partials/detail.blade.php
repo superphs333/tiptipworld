@@ -1,9 +1,9 @@
 <section class="tip-wireframe" data-tip-wireframe data-tip-id="{{ $tip->id }}">
     <div class="tip-wireframe__topbar">
-        <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a>
+        {{-- <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a> --}}
         <div class="tip-wireframe__topbar-right">
             <button class="tip-wireframe__icon-btn tip-wireframe__mobile-only" type="button" aria-label="공유">공유</button>
-            <button class="tip-wireframe__icon-btn" type="button" aria-label="더보기">⋯</button>
+            {{-- <button class="tip-wireframe__icon-btn" type="button" aria-label="더보기">⋯</button> --}}
         </div>
     </div>
 
