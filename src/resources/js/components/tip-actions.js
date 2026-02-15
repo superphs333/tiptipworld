@@ -43,15 +43,6 @@ $(() => {
         });
     }
 
-    // 댓글 추가
-    function commentAdd(tipId, comment){
-        return $.ajax({
-            url: `/tip/comment/${encodeURIComponent(tipId)}`,
-            method: 'POST',
-            data: { comment }
-        });
-    }
-
     window.likeTip = likeTip;
 
     // 이벤트 위임: 동적으로 렌더링되는 버튼도 동일하게 처리
@@ -187,51 +178,6 @@ $(() => {
         }catch(err){
             if (err.name !== 'AbortError') console.error(err);
         }
-    });
-
-
-    /**
-     * 댓글 등록
-     */
-    $(document).on('click', '[data-tip-action="comment_add"]', function (event) {
-        event.preventDefault();
-
-        const $btn = $(this);
-        // 이 요소의 부모 중 #tip-comments 인것의 data
-
-        const tipId = $btn.closest('#tip-comments').data('tipId');
-        const comment = $btn.siblings('#tip-wireframe-comment').val();
-
-        if(!comment){
-            alert("댓글을 입력해주세요.");
-            return;
-        }
-
-        console.log('tipId->'+tipId);
-        console.log('comment->'+comment)
-
-        commentAdd(tipId,comment)
-            .done((response) => { // 추가된 댓글을 리스트에 넣기. 
-               
-                console.dir(response)
-                
-
-            })
-            .fail((xhr) => {
-                if (xhr?.status === 401) {
-                    const redirect = encodeURIComponent(window.location.pathname + window.location.search);
-                    window.location.href = `/login?redirect=${redirect}`;
-                    return;
-                }
-
-                const message =
-                    xhr?.responseJSON?.message ??
-                    (xhr?.status ? `댓글 추가 실패 (HTTP ${xhr.status})` : '댓글 추가 실패');
-                alert(message);
-            })
-            .always(() => {
-
-            });
     });
 
 });

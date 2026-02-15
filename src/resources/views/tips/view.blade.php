@@ -1,6 +1,7 @@
 @extends('layouts.community')
 @once
     @vite('resources/js/components/tip-actions.js')
+    @vite('resources/js/components/tip-comments.js')
 @endonce
 @php
     $title = null;

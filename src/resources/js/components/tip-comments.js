@@ -1,0 +1,374 @@
+import $ from 'jquery';
+
+window.$ = window.$ || $;
+window.jQuery = window.jQuery || $;
+
+$(() => {
+    // 댓글 섹션이 없는 페이지에서는 동작하지 않는다.
+    const $section = $('#tip-comments');
+    if (!$section.length) {
+        return;
+    }
+
+    // 현재 상세 글의 tip_id
+    const tipId = String($section.data('tipId') ?? '');
+    if (!tipId) {
+        return;
+    }
+
+    // 자주 쓰는 DOM 캐시
+    const $list = $section.find('.tip-wireframe__comment-list');
+    const $textarea = $section.find('#tip-wireframe-comment');
+    const $submitBtn = $section.find('[data-tip-action="comment_add"]');
+
+    const DEFAULT_PLACEHOLDER = '댓글을 입력해주세요.';
+
+    // CSRF 공통 헤더
+    const csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            Accept: 'application/json',
+        },
+    });
+
+    /**
+     * API helpers
+     */
+    function getCommentList() {
+        return $.ajax({
+            url: `/tip/comment_list/${encodeURIComponent(tipId)}`,
+            method: 'GET',
+        });
+    }
+
+    function addComment(body, parentId = null, replyToId = null) {
+        return $.ajax({
+            url: `/tip/comment/${encodeURIComponent(tipId)}`,
+            method: 'POST',
+            data: {
+                comment: body,
+                parent_id: parentId,
+                reply_to_id: replyToId,
+            },
+        });
+    }
+
+    function deleteComment(commentId) {
+        return $.ajax({
+            url: `/tip/comment/${encodeURIComponent(commentId)}`,
+            method: 'DELETE',
+        });
+    }
+
+    /**
+     * UI helpers
+     */
+    function escapeHtml(value = '') {
+        return String(value).replace(/[&<>"']/g, (m) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[m]));
+    }
+
+    function nl2br(value = '') {
+        return escapeHtml(value).replace(/\n/g, '<br>');
+    }
+
+    function compactText(value = '') {
+        return String(value).replace(/\s+/g, ' ').trim();
+    }
+
+    function toReplyPreview(value = '', maxLength = 18) {
+        const compact = compactText(value);
+        if (!compact) {
+            return '';
+        }
+
+        return compact.length > maxLength
+            ? `${compact.slice(0, maxLength)}...`
+            : compact;
+    }
+
+    function parseNullableInt(rawValue) {
+        if (rawValue === undefined || rawValue === null || rawValue === '') {
+            return null;
+        }
+
+        const n = Number(rawValue);
+        return Number.isInteger(n) && n > 0 ? n : null;
+    }
+
+    function formatCommentTime(iso) {
+        if (!iso) {
+            return '';
+        }
+
+        const d = new Date(iso);
+        if (Number.isNaN(d.getTime())) {
+            return '';
+        }
+
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}.${pad(d.getMonth() + 1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function handleUnauthorized(xhr) {
+        if (xhr?.status !== 401) {
+            return false;
+        }
+
+        const redirect = encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.href = `/login?redirect=${redirect}`;
+        return true;
+    }
+
+    function resetComposer() {
+        $textarea.val('').attr('placeholder', DEFAULT_PLACEHOLDER);
+        $submitBtn.removeData('parentId');
+        $submitBtn.removeData('replyToId');
+        $submitBtn.prop('disabled', false);
+    }
+
+    function setReplyMode(parentId, replyToId, parentAuthor, parentPreview = '') {
+        $submitBtn.data('parentId', parentId);
+        $submitBtn.data('replyToId', replyToId);
+
+        const previewLabel = parentPreview ? ` ${parentPreview}` : '';
+        $textarea.attr('placeholder', `${parentAuthor}${previewLabel}에게 답글 입력...`).focus();
+    }
+
+    /**
+     * Render helpers
+     */
+    function renderDeleteButton(comment) {
+        if (!comment.can_delete) {
+            return '';
+        }
+
+        return `
+            <button
+                type="button"
+                class="tip-wireframe__comment-action-btn is-danger"
+                data-comment-action="delete"
+                data-comment-id="${comment.id}"
+            >삭제</button>
+        `.trim();
+    }
+
+    function renderReplyButton(comment) {
+        if (!comment.can_reply) {
+            return '';
+        }
+
+        const threadParentId = parseNullableInt(comment.parent_id) ?? parseNullableInt(comment.id);
+        const replyToId = parseNullableInt(comment.id);
+        if (!threadParentId || !replyToId) {
+            return '';
+        }
+
+        const safeAuthor = escapeHtml(comment.user_name || '작성자');
+        const safePreview = escapeHtml(toReplyPreview(comment.body || ''));
+
+        return `
+            <button
+                type="button"
+                class="tip-wireframe__comment-reply-btn"
+                data-comment-action="reply"
+                data-comment-parent-id="${threadParentId}"
+                data-comment-reply-to-id="${replyToId}"
+                data-comment-author="${safeAuthor}"
+                data-comment-preview="${safePreview}"
+                aria-label="${safeAuthor} 댓글에 답글 달기"
+            >답글 달기</button>
+        `.trim();
+    }
+
+    function renderReplyItem(reply) {
+        const author = escapeHtml(reply.user_name || '익명');
+        const avatar = escapeHtml(reply.user_profile_image_url || '/images/avatar-default.svg');
+        const body = nl2br(reply.body || '');
+        const time = escapeHtml(formatCommentTime(reply.created_at));
+        const replyToId = parseNullableInt(reply.reply_to_id);
+        const parentId = parseNullableInt(reply.parent_id);
+        const shouldShowTarget = replyToId !== null && parentId !== null && replyToId !== parentId;
+
+        const targetName = escapeHtml(reply.reply_to_user_name || '작성자');
+        const targetPreview = escapeHtml(reply.reply_to_body_preview || '');
+        const target = targetPreview
+            ? `${targetName} ${targetPreview}에게 답글`
+            : `${targetName}에게 답글`;
+        const targetHtml = shouldShowTarget
+            ? `<p class="tip-wireframe__comment-target">${target}</p>`
+            : '';
+
+        return `
+            <li class="tip-wireframe__reply-item" data-comment-id="${reply.id}" data-parent-id="${reply.parent_id ?? ''}">
+                <article class="tip-wireframe__comment-card tip-wireframe__comment-card--reply ${reply.is_deleted ? 'is-deleted' : ''}">
+                    <header class="tip-wireframe__comment-head">
+                        <div class="tip-wireframe__comment-user">
+                            <span class="tip-wireframe__comment-avatar">
+                                <img src="${avatar}" alt="${author} 프로필" loading="lazy">
+                            </span>
+                            <strong class="tip-wireframe__comment-author">${author}</strong>
+                        </div>
+                        <time class="tip-wireframe__comment-time">${time}</time>
+                    </header>
+
+                    ${targetHtml}
+                    <p class="tip-wireframe__comment-body">${body}</p>
+
+                    <div class="tip-wireframe__comment-bottom">
+                        <div class="tip-wireframe__comment-meta">${renderReplyButton(reply)}</div>
+                        <div class="tip-wireframe__comment-actions">${renderDeleteButton(reply)}</div>
+                    </div>
+                </article>
+            </li>
+        `.trim();
+    }
+
+    function renderRootItem(comment) {
+        const author = escapeHtml(comment.user_name || '익명');
+        const avatar = escapeHtml(comment.user_profile_image_url || '/images/avatar-default.svg');
+        const body = nl2br(comment.body || '');
+        const time = escapeHtml(formatCommentTime(comment.created_at));
+
+        const children = Array.isArray(comment.children) ? comment.children : [];
+
+        const repliesHtml = children.length > 0
+            ? `<ul class="tip-wireframe__reply-list" aria-label="대댓글 목록">${children.map((reply) => renderReplyItem(reply)).join('')}</ul>`
+            : '';
+
+        return `
+            <li class="tip-wireframe__comment-item" data-comment-id="${comment.id}">
+                <article class="tip-wireframe__comment-card ${comment.is_deleted ? 'is-deleted' : ''}">
+                    <header class="tip-wireframe__comment-head">
+                        <div class="tip-wireframe__comment-user">
+                            <span class="tip-wireframe__comment-avatar">
+                                <img src="${avatar}" alt="${author} 프로필" loading="lazy">
+                            </span>
+                            <strong class="tip-wireframe__comment-author">${author}</strong>
+                        </div>
+                        <time class="tip-wireframe__comment-time">${time}</time>
+                    </header>
+
+                    <p class="tip-wireframe__comment-body">${body}</p>
+
+                    <div class="tip-wireframe__comment-bottom">
+                        <div class="tip-wireframe__comment-meta">${renderReplyButton(comment)}</div>
+                        <div class="tip-wireframe__comment-actions">${renderDeleteButton(comment)}</div>
+                    </div>
+                </article>
+
+                ${repliesHtml}
+            </li>
+        `.trim();
+    }
+
+    function loadComments() {
+        if (!$list.length) {
+            return;
+        }
+
+        getCommentList()
+            .done((response) => {
+                const comments = Array.isArray(response?.comments) ? response.comments : [];
+                $list.html(comments.map(renderRootItem).join(''));
+            })
+            .fail((xhr) => {
+                if (handleUnauthorized(xhr)) {
+                    return;
+                }
+
+                const message = xhr?.responseJSON?.message ?? '댓글 목록 조회 실패';
+                alert(message);
+            });
+    }
+
+    // 최초 목록 조회
+    loadComments();
+
+    // 답글 모드 진입
+    $(document).on('click', '#tip-comments [data-comment-action="reply"]', function () {
+        const $btn = $(this);
+        const parentId = parseNullableInt($btn.data('commentParentId'));
+        const replyToId = parseNullableInt($btn.data('commentReplyToId'));
+        const parentAuthor = String($btn.data('commentAuthor') ?? '작성자');
+        const parentPreview = String($btn.data('commentPreview') ?? '');
+
+        if (!parentId || !replyToId) {
+            return;
+        }
+
+        setReplyMode(parentId, replyToId, parentAuthor, parentPreview);
+    });
+
+    // 댓글 등록
+    $(document).on('click', '#tip-comments [data-tip-action="comment_add"]', function (event) {
+        event.preventDefault();
+
+        const body = String($textarea.val() ?? '').trim();
+        if (!body) {
+            alert('댓글을 입력해주세요.');
+            return;
+        }
+
+        const parentId = parseNullableInt($submitBtn.data('parentId'));
+        const replyToId = parseNullableInt($submitBtn.data('replyToId'));
+
+        $submitBtn.prop('disabled', true);
+
+        addComment(body, parentId, replyToId)
+            .done(() => {
+                resetComposer();
+                loadComments();
+            })
+            .fail((xhr) => {
+                if (handleUnauthorized(xhr)) {
+                    return;
+                }
+
+                const message = xhr?.responseJSON?.message ?? '댓글 등록 실패';
+                alert(message);
+                $submitBtn.prop('disabled', false);
+            });
+    });
+
+    // 댓글 삭제 (status 변경)
+    $(document).on('click', '#tip-comments [data-comment-action="delete"]', function (event) {
+        event.preventDefault();
+
+        const $btn = $(this);
+        const commentId = Number($btn.data('commentId') ?? 0);
+
+        if (!commentId) {
+            return;
+        }
+
+        if (!window.confirm('댓글을 삭제하시겠습니까?')) {
+            return;
+        }
+
+        $btn.prop('disabled', true);
+
+        deleteComment(commentId)
+            .done(() => {
+                resetComposer();
+                loadComments();
+            })
+            .fail((xhr) => {
+                if (handleUnauthorized(xhr)) {
+                    return;
+                }
+
+                const message = xhr?.responseJSON?.message ?? '댓글 삭제 실패';
+                alert(message);
+                $btn.prop('disabled', false);
+            });
+    });
+});

@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/components/tiptap-editor.js',
                 'resources/js/components/summernote.js',
                 'resources/js/components/tip-actions.js',
+                'resources/js/components/tip-comments.js',
             ],
             refresh: true,
         }),

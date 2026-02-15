@@ -53,6 +53,10 @@ Route::post('/tip/like/{tip_id}', [TipController::class, 'like'])->whereNumber('
 Route::post('/tip/bookmark/{tip_id}', [TipController::class, 'bookmark'])->whereNumber('tip_id')->middleware('auth')->name('tip.bookmark');
 // 댓글
 Route::post('/tip/comment/{tip_id}',[CommentController::class, 'commentAdd'])->whereNumber('tip_id')->middleware('auth')->name('tip.add.comment');
+// 댓글 리스트
+Route::get('/tip/comment_list/{tip_id}',[CommentController::class, 'commentList'])->whereNumber('tip_id')->name('tip.comment.list');
+// 댓글 삭제 (물리삭제가 아닌 status 변경)
+Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDelete'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.delete');
     
 /**
  * 관리자 전용 라우트 그룹
