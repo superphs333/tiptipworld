@@ -73,6 +73,8 @@
                         @php
                             $authorName = data_get($item, 'user.name', '작성자 미상');
                             $authorImage = data_get($item, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                            $likeCount = (int) data_get($item, 'like_count', data_get($item, 'likes_count', 0));
+                            $bookmarkCount = (int) data_get($item, 'bookmark_count', data_get($item, 'bookmarks_count', 0));
                         @endphp
                         <span class="tip-list-wireframe__author">
                             <img
@@ -89,6 +91,38 @@
                     <p class="tip-list-wireframe__summary">
                             {{ \Illuminate\Support\Str::limit(strip_tags(data_get($item, 'content', '')), 80, '...') }}
                     </p>
+                    <div class="tip-list-wireframe__engagement" aria-label="좋아요 및 북마크 자리">
+                        <button
+                            type="button"
+                            class="tip-list-wireframe__engagement-btn"
+                            aria-label="좋아요 기능 준비중"
+                            title="좋아요 기능 준비중"
+                            disabled
+                        >
+                            <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                                    <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke-width="1.6" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="tip-list-wireframe__engagement-label">좋아요</span>
+                            <span class="tip-list-wireframe__engagement-count">{{ number_format($likeCount) }}</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="tip-list-wireframe__engagement-btn"
+                            aria-label="북마크 기능 준비중"
+                            title="북마크 기능 준비중"
+                            disabled
+                        >
+                            <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                                    <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke-width="1.6" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span class="tip-list-wireframe__engagement-label">북마크</span>
+                            <span class="tip-list-wireframe__engagement-count">{{ number_format($bookmarkCount) }}</span>
+                        </button>
+                    </div>
                 </div>
             </article>
             @endforeach

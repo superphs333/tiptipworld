@@ -130,9 +130,17 @@ class Tip extends Model
         return $this->relationLoaded('tags') ? $this->tags : collect();
     }
     // 좋아요 갯수
-    public function getLikeCountAttribute() : int
+    public function getLikeCountAttribute($value) : int
     {
-        return $this->relationLoaded('likedUsers') ? $this->likedUsers()->count() : 0;
+        if ($value !== null) {
+            return (int) $value;
+        }
+
+        if (array_key_exists('likes_count', $this->attributes)) {
+            return (int) $this->attributes['likes_count'];
+        }
+
+        return $this->relationLoaded('likedUsers') ? $this->likedUsers->count() : 0;
     }
    
 

@@ -254,7 +254,10 @@ class TipController extends Controller
             ->where('status', 'published')
             ->where('visibility', 'public')
             ->with(['user:id,name,profile_image_path'])
-            ->withCount('comments');
+            ->withCount([
+                'comments',
+                'likedUsers as likes_count',
+            ]);
 
         // 오늘 올라온 글
         $todayTipCount = (clone $baseQuery)
