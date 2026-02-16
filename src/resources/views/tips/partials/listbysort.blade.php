@@ -272,26 +272,51 @@
     const rail = root.querySelector('[data-top-rail]');
     const prevBtn = root.querySelector('[data-top-prev]');
     const nextBtn = root.querySelector('[data-top-next]');
+    const controls = root.querySelector('.tip-list-wireframe__top-controls');
     if (!rail || !prevBtn || !nextBtn) {
         return;
     }
 
-    const getStep = () => {
-        const card = rail.querySelector('.tip-list-wireframe__top-card');
-        return card ? (card.getBoundingClientRect().width + 16) : 320;
+    const getGap = () => {
+        const styles = window.getComputedStyle(rail);
+        const gap = parseFloat(styles.columnGap || styles.gap || '0');
+        return Number.isFinite(gap) ? gap : 0;
     };
 
+    const getStep = () => {
+        const card = rail.querySelector('.tip-list-wireframe__top-card');
+        return card ? (card.getBoundingClientRect().width + getGap()) : 320;
+    };
+
+    const hasHorizontalOverflow = () => (rail.scrollWidth - rail.clientWidth) > 2;
+
     const syncButtons = () => {
+        const canSlide = hasHorizontalOverflow();
+        if (controls) {
+            controls.hidden = !canSlide;
+        }
+        if (!canSlide) {
+            prevBtn.disabled = true;
+            nextBtn.disabled = true;
+            return;
+        }
+
         const maxLeft = Math.max(0, rail.scrollWidth - rail.clientWidth - 2);
         prevBtn.disabled = rail.scrollLeft <= 2;
         nextBtn.disabled = rail.scrollLeft >= maxLeft;
     };
 
     prevBtn.addEventListener('click', () => {
+        if (!hasHorizontalOverflow()) {
+            return;
+        }
         rail.scrollBy({ left: -getStep(), behavior: 'smooth' });
     });
 
     nextBtn.addEventListener('click', () => {
+        if (!hasHorizontalOverflow()) {
+            return;
+        }
         rail.scrollBy({ left: getStep(), behavior: 'smooth' });
     });
 
