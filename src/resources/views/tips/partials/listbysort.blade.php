@@ -1,3 +1,10 @@
+@php
+    $totalCount = method_exists($tipItems, 'total') ? $tipItems->total() : $tipItems->count();
+    $firstItem = method_exists($tipItems, 'firstItem') ? $tipItems->firstItem() : null;
+    $lastItem = method_exists($tipItems, 'lastItem') ? $tipItems->lastItem() : null;
+    $currentSort = request('sort', 'latest');
+@endphp
+
 <section class="tip-wireframe tip-list-wireframe" data-tip-list-wireframe>
     <div class="tip-wireframe__topbar">        
         <div class="tip-wireframe__topbar-right">
@@ -40,14 +47,15 @@
                 <p>{{ $allCount }}개의 게시글</p>
             </div>
 
-            <form class="tip-list-wireframe__sort-form" action="" method="GET" onsubmit="return false;">
+            <form class="tip-list-wireframe__sort-form" method="GET">
                 <label for="tips-sort-key">정렬</label>
-                <select id="tips-sort-key" name="sort">
-                    <option value="latest" selected>최신순</option>
-                    <option value="popular">인기순</option>
-                    <option value="likes">좋아요순</option>
+                <select id="tips-sort-key" name="sort" onchange="this.form.submit()">
+                    <option value="latest" @selected($currentSort === 'latest')>최신순</option>
+                    <option value="popular" @selected($currentSort === 'popular')>인기순</option>
+                    <option value="likes" @selected($currentSort === 'likes')>좋아요순</option>
                 </select>
             </form>
+
         </header>
 
         <div class="tip-list-wireframe__items">           
@@ -85,9 +93,21 @@
             </article>
             @endforeach
         </div>
-
         <footer class="tip-list-wireframe__pagination">
-            <span class="tip-list-wireframe__page-meta">1-12 / 총 128개</span>
+            <span class="tip-list-wireframe__page-meta">
+                @if ($firstItem !== null && $lastItem !== null)
+                    {{ $firstItem }}-{{ $lastItem }} / 총 {{ number_format($totalCount) }}개
+                @else
+                    총 {{ number_format($totalCount) }}개
+                @endif
+            </span>
+
+            @if (method_exists($tipItems, 'hasPages') && $tipItems->hasPages())
+                <div class="app-pagination">
+                    {{ $tipItems->onEachSide(1)->links('vendor.pagination.app') }}
+                </div>
+            @endif
         </footer>
+
     </section>
 </section>

@@ -237,32 +237,43 @@ class TipController extends Controller
             $category = Category::findOrFail($sort_id);
             $site_title = $category->name;
             $description = $category->description;
-            $tipQuery = Tip::query()->where('category_id', $sort_id);
+            $baseQuery  = Tip::query()->where('category_id', $sort_id);
 
         }else if($request->routeIs('tips.tag')){
             $sort = "tag";
             $tag = Tag::findOrFail($sort_id);
             $site_title = $tag->name;
             $description = $tag->description;
-            $tipQuery = Tip::query()->whereHas('tags', function($query) use($sort_id){
+            $baseQuery  = Tip::query()->whereHas('tags', function($query) use($sort_id){
                 $query->where('id', $sort_id);
             });
         
         }
         // status : published, visibility : public
-        $tipQuery = $tipQuery
+        $baseQuery  = $baseQuery 
             ->where('status', 'published')
-            ->where('visibility', 'public');
+            ->where('visibility', 'public')
+            ->with(['user:id,name,profile_image_path'])
+            ->withCount('comments');
 
         // 오늘 올라온 글
-        $todayTipCount = (clone $tipItems)
+        $todayTipCount = (clone $baseQuery)
             ->whereDate('created_at', Date::today())
             ->count();
         // 평균 좋아요
-        $avgLikeCount = round((float)((clone $tipQuery)->avg('like_count') ?? 0),1);
+        $avgLikeCount = round((float)((clone $baseQuery)->avg('like_count') ?? 0),1);
         // 평균 북마크
-        $avgBookmarkCount = round((float)((clone $tipQuery)->avg('bookmark_count') ?? 0),1);
+        $avgBookmarkCount = round((float)((clone $baseQuery)->avg('bookmark_count') ?? 0),1);
      
+        // 정렬
+        $sortKey = $request->query('sort','latest');
+        $perPage = min(max((int)$request->query('per_page', 12), 1), 50);
+        $listQuery = match ($sortKey){
+            'popular' => (clone $baseQuery)->orderByDesc('view_count')->orderByDesc('id'),
+            'likes' => (clone $baseQuery)->orderByDesc('like_count')->orderByDesc('id'),
+            default => (clone $baseQuery)->orderByDesc('created_at')->orderByDesc('id'),
+        };
+        $tipItems = $listQuery->paginate($perPage)->withQueryString();
 
 
         return view('tips.view', [
@@ -271,11 +282,11 @@ class TipController extends Controller
             'viewMode' => 'tipListBySort',
             'site_title' => $site_title,
             'description' => $description,
-            'tipItems' => (clone $tipQuery)->get(),
+            'tipItems' => $tipItems,
             'todayTipCount' => $todayTipCount,
             'avgLikeCount' => $avgLikeCount,
             'avgBookmarkCount' => $avgBookmarkCount,
-            'allCount' => $tipQuery->count(),
+            'allCount' => $tipItems->total(),
 
         ]);
 
