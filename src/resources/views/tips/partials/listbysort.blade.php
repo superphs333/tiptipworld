@@ -22,7 +22,7 @@
         </article>
 
         <article class="tip-list-wireframe__panel tip-list-wireframe__panel--snapshot">
-            <div class="tip-list-wireframe__count-line">콘텐츠 수 : {{ $tipItems->count() }}</div>
+            <div class="tip-list-wireframe__count-line">콘텐츠 수 : {{ number_format($totalCount) }}</div>
             <dl class="tip-list-wireframe__snapshot-list">
                 <div class="tip-list-wireframe__snapshot-item">
                     <dt>오늘 올라온 글</dt>
@@ -83,7 +83,7 @@
                             >
                             <span class="tip-list-wireframe__author-name">{{ $authorName }}</span>
                         </span>
-                        <span>댓글 {{ data_get($item, 'comments')?->count() ?? 0 }}</span>
+                        <span>댓글 {{ data_get($item, 'comments_count', 0) }}</span>
                         <span>{{ data_get($item,'createdDate') }}</span>
                     </div>
                     <p class="tip-list-wireframe__summary">
@@ -103,7 +103,7 @@
             </span>
 
             @if (method_exists($tipItems, 'hasPages') && $tipItems->hasPages())
-                <div class="app-pagination">
+                <div class="app-pagination app-pagination--tip">
                     {{ $tipItems->onEachSide(1)->links('vendor.pagination.app') }}
                 </div>
             @endif

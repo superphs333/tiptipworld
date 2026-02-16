@@ -317,6 +317,37 @@
     font-size: 0.82rem;
 }
 
+.tip-list-wireframe .app-pagination--tip {
+    --pagination-accent: #6b7280;
+    --pagination-accent-soft: #e9edf2;
+    --pagination-bg: #fff;
+    --pagination-surface: #f3f4f6;
+    --pagination-text: #1f2937;
+    --pagination-muted: #6b7280;
+    --pagination-line: #d7dbe2;
+}
+
+.tip-list-wireframe .app-pagination--tip .app-pagination__list {
+    border-radius: 12px;
+    padding: 8px;
+}
+
+.tip-list-wireframe .app-pagination--tip .app-pagination__btn {
+    min-width: 58px;
+    height: 34px;
+    border-radius: 8px;
+    box-shadow: none;
+}
+
+.tip-list-wireframe .app-pagination--tip .app-pagination__btn:hover {
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+.tip-list-wireframe .app-pagination--tip .app-pagination__btn.is-active {
+    box-shadow: none;
+}
+
 @media (max-width: 1023px) {
     .tip-list-wireframe__item {
         grid-template-columns: 136px minmax(0, 1fr);
@@ -354,6 +385,10 @@
 
     .tip-list-wireframe__thumb {
         max-height: 220px;
+    }
+
+    .tip-list-wireframe .app-pagination--tip .app-pagination__btn {
+        min-width: 52px;
     }
 }
 
