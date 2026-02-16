@@ -230,30 +230,55 @@ class TipController extends Controller
     public function tipListBySort(Request $request, int $sort_id){
         $sort = "";
         $site_title = "";
+        $description = "";
+        $tipItems = Tip::query();
         if($request->routeIs('tips.category')){
             $sort = "category";
             $category = Category::findOrFail($sort_id);
             $site_title = $category->name;
             $description = $category->description;
-            $tipItems = Tip::query()->where('category_id', $sort_id)->count();
+            $tipQuery = Tip::query()->where('category_id', $sort_id);
 
         }else if($request->routeIs('tips.tag')){
             $sort = "tag";
             $tag = Tag::findOrFail($sort_id);
             $site_title = $tag->name;
             $description = $tag->description;
-            $tipItems = Tip::query()->whereHas('tags', function($query) use($sort_id){
+            $tipQuery = Tip::query()->whereHas('tags', function($query) use($sort_id){
                 $query->where('id', $sort_id);
-            })->count();
+            });
         
         }
+        // status : published, visibility : public
+        $tipQuery = $tipQuery
+            ->where('status', 'published')
+            ->where('visibility', 'public');
+
+        // 오늘 올라온 글
+        $todayTipCount = (clone $tipItems)
+            ->whereDate('created_at', Date::today())
+            ->count();
+        // 평균 좋아요
+        $avgLikeCount = round((float)((clone $tipQuery)->avg('like_count') ?? 0),1);
+        // 평균 북마크
+        $avgBookmarkCount = round((float)((clone $tipQuery)->avg('bookmark_count') ?? 0),1);
+     
+
 
         return view('tips.view', [
+            'sort' => $sort,
+            'modelLabel' => 'model',
             'viewMode' => 'tipListBySort',
             'site_title' => $site_title,
             'description' => $description,
-            'tipItems' => $tipItems,
+            'tipItems' => (clone $tipQuery)->get(),
+            'todayTipCount' => $todayTipCount,
+            'avgLikeCount' => $avgLikeCount,
+            'avgBookmarkCount' => $avgBookmarkCount,
+            'allCount' => $tipQuery->count(),
+
         ]);
+
 
     }
 
