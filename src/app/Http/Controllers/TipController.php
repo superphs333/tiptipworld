@@ -232,6 +232,7 @@ class TipController extends Controller
         $site_title = "";
         $description = "";
         $tipItems = Tip::query();
+        $authUserId = Auth::id();
         if($request->routeIs('tips.category')){
             $sort = "category";
             $category = Category::findOrFail($sort_id);
@@ -249,15 +250,27 @@ class TipController extends Controller
             });
         
         }
+        $countRelations = [
+            'comments',
+            'likedUsers as likes_count',
+            'bookmarkedUsers as bookmarks_count',
+        ];
+
+        if ($authUserId) {
+            $countRelations['likedUsers as is_liked'] = function ($query) use ($authUserId) {
+                $query->where('users.id', $authUserId);
+            };
+            $countRelations['bookmarkedUsers as is_bookmarked'] = function ($query) use ($authUserId) {
+                $query->where('users.id', $authUserId);
+            };
+        }
+
         // status : published, visibility : public
         $baseQuery  = $baseQuery 
             ->where('status', 'published')
             ->where('visibility', 'public')
             ->with(['user:id,name,profile_image_path'])
-            ->withCount([
-                'comments',
-                'likedUsers as likes_count',
-            ]);
+            ->withCount($countRelations);
 
         // 오늘 올라온 글
         $todayTipCount = (clone $baseQuery)

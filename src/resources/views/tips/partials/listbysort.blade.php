@@ -75,6 +75,8 @@
                             $authorImage = data_get($item, 'user.profile_image_url', asset('images/avatar-default.svg'));
                             $likeCount = (int) data_get($item, 'like_count', data_get($item, 'likes_count', 0));
                             $bookmarkCount = (int) data_get($item, 'bookmark_count', data_get($item, 'bookmarks_count', 0));
+                            $isLiked = (int) data_get($item, 'is_liked', 0) > 0;
+                            $isBookmarked = (int) data_get($item, 'is_bookmarked', 0) > 0;
                         @endphp
                         <span class="tip-list-wireframe__author">
                             <img
@@ -94,10 +96,12 @@
                     <div class="tip-list-wireframe__engagement" aria-label="좋아요 및 북마크 자리">
                         <button
                             type="button"
-                            class="tip-list-wireframe__engagement-btn"
-                            aria-label="좋아요 기능 준비중"
-                            title="좋아요 기능 준비중"
-                            disabled
+                            class="tip-list-wireframe__engagement-btn {{ $isLiked ? 'is-liked' : '' }}"
+                            aria-label="좋아요"
+                            title="좋아요"
+                            data-tip-action="like"
+                            aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                            data-tip-id="{{ $item->id }}"
                         >
                             <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -105,14 +109,16 @@
                                 </svg>
                             </span>
                             <span class="tip-list-wireframe__engagement-label">좋아요</span>
-                            <span class="tip-list-wireframe__engagement-count">{{ number_format($likeCount) }}</span>
+                            <span class="tip-list-wireframe__engagement-count" data-like-count>{{ number_format($likeCount) }}</span>
                         </button>
                         <button
                             type="button"
-                            class="tip-list-wireframe__engagement-btn"
-                            aria-label="북마크 기능 준비중"
-                            title="북마크 기능 준비중"
-                            disabled
+                            class="tip-list-wireframe__engagement-btn {{ $isBookmarked ? 'is-bookmarked' : '' }}"
+                            aria-label="북마크"
+                            title="북마크"
+                            data-tip-action="bookmark"
+                            aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}"
+                            data-tip-id="{{ $item->id }}"
                         >
                             <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -120,7 +126,7 @@
                                 </svg>
                             </span>
                             <span class="tip-list-wireframe__engagement-label">북마크</span>
-                            <span class="tip-list-wireframe__engagement-count">{{ number_format($bookmarkCount) }}</span>
+                            <span class="tip-list-wireframe__engagement-count" data-bookmark-count>{{ number_format($bookmarkCount) }}</span>
                         </button>
                     </div>
                 </div>

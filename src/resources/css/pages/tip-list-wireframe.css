@@ -312,6 +312,8 @@
     font-size: 0.78rem;
     font-weight: 600;
     line-height: 1;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
 }
 
 .tip-list-wireframe__engagement-btn:disabled {
@@ -334,6 +336,18 @@
 
 .tip-list-wireframe__engagement-icon svg path {
     stroke: currentColor;
+}
+
+.tip-list-wireframe__engagement-btn[data-tip-action="like"].is-liked .tip-list-wireframe__engagement-icon svg path,
+.tip-list-wireframe__engagement-btn[data-tip-action="like"][aria-pressed="true"] .tip-list-wireframe__engagement-icon svg path {
+    stroke: #d11a4b;
+    fill: #d11a4b;
+}
+
+.tip-list-wireframe__engagement-btn[data-tip-action="bookmark"].is-bookmarked .tip-list-wireframe__engagement-icon svg path,
+.tip-list-wireframe__engagement-btn[data-tip-action="bookmark"][aria-pressed="true"] .tip-list-wireframe__engagement-icon svg path {
+    stroke: #111;
+    fill: #111;
 }
 
 .tip-list-wireframe__engagement-label {
