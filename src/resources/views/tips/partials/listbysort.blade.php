@@ -53,6 +53,7 @@
                     <option value="latest" @selected($currentSort === 'latest')>최신순</option>
                     <option value="popular" @selected($currentSort === 'popular')>인기순</option>
                     <option value="likes" @selected($currentSort === 'likes')>좋아요순</option>
+                    <option value="bookmarks" @selected($currentSort === 'bookmarks')>북마크순</option>
                 </select>
             </form>
 

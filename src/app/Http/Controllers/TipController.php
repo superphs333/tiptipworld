@@ -287,6 +287,7 @@ class TipController extends Controller
         $listQuery = match ($sortKey){
             'popular' => (clone $baseQuery)->orderByDesc('view_count')->orderByDesc('id'),
             'likes' => (clone $baseQuery)->orderByDesc('like_count')->orderByDesc('id'),
+            'bookmarks' => (clone $baseQuery)->orderByDesc('bookmark_count')->orderByDesc('id'),
             default => (clone $baseQuery)->orderByDesc('created_at')->orderByDesc('id'),
         };
         $tipItems = $listQuery->paginate($perPage)->withQueryString();
