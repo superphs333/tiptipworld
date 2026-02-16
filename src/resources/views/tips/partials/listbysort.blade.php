@@ -63,7 +63,7 @@
             @foreach ($tipItems as $item)
             <article class="tip-list-wireframe__item">
                 <a class="tip-list-wireframe__thumb" href="#">
-                    <img src="/images/no-thumbnail.png" alt="신입도 바로 쓰는 업무 정리 체크리스트" loading="lazy">
+                    <img src="{{ $item->thumbnailUrl }}" alt="신입도 바로 쓰는 업무 정리 체크리스트" loading="lazy">
                 </a>
                 <div class="tip-list-wireframe__item-body">
                     <div class="tip-list-wireframe__headline">
