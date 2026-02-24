@@ -27,13 +27,13 @@
             @endphp
 
             <article class="home-popular__card">
-                <a class="home-popular__thumb" href="{{ route('tip.show', ['tip_id' => $item->id]) }}">
+                <a class="home-popular__thumb" href="{{ route('tip.show', ['tip_id' => $item->id]) }}" target="_blank" rel="noopener noreferrer">
                     <img src="{{ $item->thumbnailUrl }}" alt="{{ $item->title }}" loading="lazy">
                 </a>
 
                 <div class="home-popular__body">
                     <span class="home-popular__category">{{ $categoryName }}</span>
-                    <a class="home-popular__card-title" href="{{ route('tip.show', ['tip_id' => $item->id]) }}">
+                    <a class="home-popular__card-title" href="{{ route('tip.show', ['tip_id' => $item->id]) }}" target="_blank" rel="noopener noreferrer">
                         {{ $item->title }}
                     </a>
 

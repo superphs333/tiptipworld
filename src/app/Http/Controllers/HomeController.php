@@ -9,9 +9,11 @@ class HomeController extends Controller
     public function index()
     {
         $popular_tips = HomeViewService::getpopularList();
+        $popular_tags = HomeViewService::getPopularTags();
 
         return view('home.home', [
             'popular_tips' => $popular_tips,
+            'popular_tags' => $popular_tags,
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Tip;
+use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
 
 
@@ -40,5 +41,22 @@ class HomeViewService
             ->get();
 
         return $result;
+    }
+
+
+    /**
+     * 인기 태그 가져오기 
+     * tip_tag에서 가장 많이 
+     */
+    public static function getPopularTags(int $limit = 30) : Collection{
+        $limit = max(1, min($limit, 100));
+
+        $popularTags = Tag::query()
+            ->withCount('tips')
+            ->orderByDesc('tips_count')
+            ->limit($limit)
+            ->get();
+
+        return $popularTags;
     }
 }

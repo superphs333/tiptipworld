@@ -8,8 +8,9 @@
     {{-- 최근 인기글 리스트 --}}
     <x-home.popular-tips :tips="$popular_tips" ></x-home.popular-tips>
 
-
     {{-- 인기 태그 --}}
+    <x-home.popular-tags :tags="$popular_tags"></x-home.popular-tags>
+
 
     {{-- 인기 태그 별 게시글 (3개씩) --}}
 
