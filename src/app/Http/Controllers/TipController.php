@@ -55,6 +55,13 @@ class TipController extends Controller
         ]);
     }
 
+    public function formFront(?int $tip_id = null){
+        return view('tips.view', [
+            'viewMode' => 'frontForm',
+            'site_title' => '글작성'
+        ]);
+    }
+
     public function saveTip(Request $request, FileStorageService $storage){
         $validated = $request->validate($this->validatedArr);
         $userId = Auth::id();

@@ -61,7 +61,10 @@ Route::post('/tip/comment/like/{comment_id}',[CommentController::class, 'comment
 Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDelete'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.delete');
 // 댓글 수정
 Route::patch('/tip/comment/{comment_id}',[CommentController::class, 'commentUpdate'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.update');
+// 글 작성 
+Route::get('/tips/form/{tip_id?}',[TipController::class, 'formFront'])->whereNumber('tip_id')->name('tip.formFront');
     
+
 /**
  * 관리자 전용 라우트 그룹
  */
@@ -100,8 +103,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         ->name('tip.destroy');
 
     
-    
-
     
     /**
      * Summernote

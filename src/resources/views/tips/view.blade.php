@@ -16,6 +16,10 @@
             $title = $site_title;
             $partial = 'tips.partials.listbysort';
             break;
+        case 'frontForm' :
+            $title = $site_title;
+            $partial = 'tips.partials.frontform';
+            break;
     }
 @endphp
 
