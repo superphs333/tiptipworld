@@ -1,16 +1,18 @@
 @php
+    $tone = $tone ?? 'admin';
     $formAction = $formAction ?? '';
-    $backUrl = $backUrl ?? route('admin', ['tab' => 'tips']);
+    $backUrl = $backUrl ?? ($tone === 'front' ? route('home') : route('admin', ['tab' => 'tips']));
     $submitLabel = $submitLabel ?? '게시하기';
     $tip = $data ?? null;
     $selectedCategoryId = (string) old('category_id', $tip?->category_id ?? '');
     $thumbnailUrl = (string) old('thumbnail_url', $tip?->thumbnail_url);
+    $panelClasses = 'category-panel tip-create' . ($tone === 'front' ? ' tip-create--front' : '');
     $tags = collect($tip?->tags ?? [])
         ->pluck('name')->filter()->values()->all();
 @endphp
 
 <div x-data="tipCreate()">
-    <div class="category-panel tip-create">
+    <div class="{{ $panelClasses }}">
         <div class="category-panel__content tip-create__content">
             <form class="tip-create__form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                 @csrf
