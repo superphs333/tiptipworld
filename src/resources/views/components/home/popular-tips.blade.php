@@ -22,6 +22,7 @@
                 $categoryName = data_get($item, 'category.name', '미분류');
                 $viewCount = (int) data_get($item, 'view_count', 0);
                 $likeCount = (int) data_get($item, 'like_count', 0);
+                $commentCount = (int) data_get($item, 'comment_count', 0);
                 $bookmarkCount = (int) data_get($item, 'bookmark_count', 0);
             @endphp
 
@@ -62,6 +63,12 @@
                                     <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" />
                                 </svg>
                                 {{ number_format($likeCount) }}
+                            </span>
+                            <span class="home-popular__stat" title="댓글">
+                                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M4.75 6.5a2.25 2.25 0 0 1 2.25-2.25h10a2.25 2.25 0 0 1 2.25 2.25v7.25A2.25 2.25 0 0 1 17 16h-6.2l-3.95 3.35a.55.55 0 0 1-.9-.42V16H7A2.25 2.25 0 0 1 4.75 13.75V6.5Z" stroke="currentColor" stroke-width="1.6" />
+                                </svg>
+                                {{ number_format($commentCount) }}
                             </span>
                             <span class="home-popular__stat" title="북마크">
                                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
