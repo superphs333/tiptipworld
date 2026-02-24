@@ -17,6 +17,7 @@
 
 .home-category__card {
     display: grid;
+    grid-template-rows: auto 1fr auto;
     gap: 10px;
     align-content: start;
     min-height: 142px;
@@ -50,8 +51,10 @@
 }
 
 .home-category__count {
-    margin: auto 0 0;
+    margin: 0;
     width: fit-content;
+    justify-self: end;
+    align-self: end;
     padding: 5px 10px;
     border: 1px solid #bfdbfe;
     border-radius: 999px;
