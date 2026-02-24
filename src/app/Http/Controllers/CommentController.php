@@ -174,6 +174,8 @@ class CommentController extends Controller
             $this->syncReplyCount((int) $parentId);
         }
 
+        $this->syncTipCommentCount((int) $tip_id);
+
         $authUser = Auth::user();
         $authUserId = $authUser?->id;
         $isAdmin = $authUser?->isAdmin() ?? false;
@@ -218,6 +220,8 @@ class CommentController extends Controller
             return response()->json(['message' => '삭제 권한이 없습니다.'], 403);
         }
 
+        $wasActive = $comment->status === 'active';
+
         if ($comment->status !== 'deleted') {
             $comment->update([
                 'status' => 'deleted',
@@ -233,6 +237,10 @@ class CommentController extends Controller
         // 내가 부모 댓글이면 내 reply_count도 갱신
         if ((int) $comment->depth === 0) {
             $this->syncReplyCount((int) $comment->id);
+        }
+
+        if ($wasActive) {
+            $this->syncTipCommentCount((int) $comment->tip_id);
         }
 
         return response()->json([
@@ -340,6 +348,22 @@ class CommentController extends Controller
             ->whereKey($parentId)
             ->update(['reply_count' => $count]);
     }
+
+    /**
+     * 팁의 active 댓글 개수를 comment_count에 반영
+     */
+    private function syncTipCommentCount(int $tipId): void
+    {
+        $count = Comment::query()
+            ->where('tip_id', $tipId)
+            ->where('status', 'active')
+            ->count();
+
+        Tip::query()
+            ->whereKey($tipId)
+            ->update(['comment_count' => $count]);
+    }
+
 
     /**
      * 모델 -> API 공통 스키마

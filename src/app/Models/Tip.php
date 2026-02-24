@@ -28,6 +28,7 @@ class Tip extends Model
         'view_count',
         'like_count',
         'bookmark_count',
+        'comment_count',
     ];
 
     protected $appends = [
