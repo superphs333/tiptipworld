@@ -14,7 +14,6 @@
                 $categoryCount = (int) data_get($category, 'tips_count', 0);
                 $categoryId = (int) data_get($category, 'id', 0);
                 $glyph = mb_substr($categoryName, 0, 1);
-                $tone = $loop->index % 6;
             @endphp
 
             <a
@@ -25,7 +24,6 @@
             >
                 <article
                     class="home-category__card"
-                    data-tone="{{ $tone }}"
                     role="listitem"
                     aria-label="{{ $categoryName }}"
                 >

@@ -6,10 +6,6 @@
                 인기 태그                
             </h2>
         </div>
-        <button type="button" class="home-popular__nav-btn home-tags__more" data-home-tags-more>
-            더보기
-            <span aria-hidden="true">></span>
-        </button>
     </header>
 
     <div class="home-tags__list" role="list">

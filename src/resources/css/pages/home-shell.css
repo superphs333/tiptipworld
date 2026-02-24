@@ -1,4 +1,16 @@
 .home-shell {
+    --home-ink: #0f172a;
+    --home-ink-soft: #1e293b;
+    --home-muted: #475569;
+    --home-muted-soft: #64748b;
+    --home-line: #cbd5e1;
+    --home-line-strong: #94a3b8;
+    --home-surface: #ffffff;
+    --home-surface-soft: #f8fbff;
+    --home-accent: #2563eb;
+    --home-accent-strong: #1d4ed8;
+    --home-accent-soft: #dbeafe;
+    --home-accent-wash: rgba(37, 99, 235, 0.14);
     position: relative;
     display: grid;
     gap: clamp(20px, 2.6vw, 34px);
@@ -16,8 +28,8 @@
 
 .home-shell::before {
     background:
-        radial-gradient(380px 220px at 6% 4%, rgba(15, 118, 110, 0.18), transparent 72%),
-        radial-gradient(340px 180px at 90% 0%, rgba(234, 88, 12, 0.16), transparent 70%);
+        radial-gradient(380px 220px at 6% 4%, rgba(29, 78, 216, 0.2), transparent 72%),
+        radial-gradient(340px 180px at 90% 0%, rgba(37, 99, 235, 0.15), transparent 70%);
     opacity: 0.9;
 }
 
@@ -34,10 +46,10 @@
     grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
     gap: clamp(14px, 2.2vw, 20px);
     padding: clamp(20px, 3vw, 34px);
-    border: 1px solid rgba(15, 23, 42, 0.15);
+    border: 1px solid var(--home-line);
     border-radius: 22px;
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 245, 249, 0.92) 56%, rgba(237, 254, 249, 0.95) 100%);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 251, 255, 0.94) 58%, rgba(239, 246, 255, 0.95) 100%);
     box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
     animation: homeHeroIn 0.55s ease-out both;
 }
@@ -51,13 +63,13 @@
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.16em;
-    color: #0f766e;
+    color: var(--home-accent-strong);
 }
 
 .home-hero__title {
     margin: 0;
     font-family: "Space Grotesk", "IBM Plex Sans KR", "Figtree", sans-serif;
-    color: #0f172a;
+    color: var(--home-ink);
     font-size: clamp(1.85rem, 4vw, 2.85rem);
     line-height: 1.08;
     letter-spacing: -0.03em;
@@ -67,13 +79,13 @@
 }
 
 .home-hero__title span {
-    color: #0f766e;
+    color: var(--home-accent-strong);
 }
 
 .home-hero__desc {
     margin: 16px 0 0;
     max-width: 46ch;
-    color: #334155;
+    color: var(--home-muted);
     font-size: clamp(0.95rem, 1.5vw, 1.05rem);
     line-height: 1.55;
 }
@@ -99,26 +111,26 @@
 }
 
 .home-hero__btn--primary {
-    border: 1px solid #0f766e;
-    background: #0f766e;
-    color: #ecfeff;
-    box-shadow: 0 10px 20px rgba(15, 118, 110, 0.25);
+    border: 1px solid var(--home-accent-strong);
+    background: var(--home-accent-strong);
+    color: #eff6ff;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
 }
 
 .home-hero__btn--primary:hover {
     transform: translateY(-1px);
-    background: #115e59;
+    background: var(--home-accent);
 }
 
 .home-hero__btn--ghost {
-    border: 1px solid #94a3b8;
+    border: 1px solid var(--home-line-strong);
     background: rgba(255, 255, 255, 0.72);
-    color: #0f172a;
+    color: var(--home-ink);
 }
 
 .home-hero__btn--ghost:hover {
     transform: translateY(-1px);
-    border-color: #64748b;
+    border-color: var(--home-muted-soft);
     background: #ffffff;
 }
 
@@ -129,7 +141,7 @@
 }
 
 .home-hero__stat-card {
-    border: 1px solid rgba(148, 163, 184, 0.45);
+    border: 1px solid var(--home-line);
     border-radius: 14px;
     background: rgba(255, 255, 255, 0.8);
     padding: 13px 12px;
@@ -143,7 +155,7 @@
     margin: 0;
     font-size: 11px;
     font-weight: 700;
-    color: #475569;
+    color: var(--home-muted);
     letter-spacing: 0.02em;
 }
 
@@ -152,21 +164,21 @@
     font-size: clamp(1.2rem, 2.1vw, 1.5rem);
     line-height: 1;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--home-ink);
     font-variant-numeric: tabular-nums;
 }
 
 .home-hero__stat-card--highlight {
     grid-column: span 2;
-    border-color: rgba(15, 118, 110, 0.4);
-    background: linear-gradient(140deg, rgba(240, 253, 250, 0.94) 0%, rgba(236, 253, 245, 0.92) 100%);
+    border-color: rgba(37, 99, 235, 0.42);
+    background: linear-gradient(140deg, rgba(239, 246, 255, 0.94) 0%, rgba(219, 234, 254, 0.92) 100%);
 }
 
 .home-hero__stat-strong {
     margin: 0;
     font-size: 16px;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--home-ink);
     letter-spacing: -0.02em;
     white-space: nowrap;
     overflow: hidden;
@@ -175,7 +187,7 @@
 
 .home-hero__stat-sub {
     margin: 0;
-    color: #0f766e;
+    color: var(--home-accent-strong);
     font-size: 12px;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
