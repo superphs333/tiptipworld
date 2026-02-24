@@ -56,9 +56,18 @@ class TipController extends Controller
     }
 
     public function formFront(?int $tip_id = null){
+        $categories = Category::query()
+            ->forTipForm()
+            ->get([
+                'id',
+                'name',
+            ]);
+        
         return view('tips.view', [
             'viewMode' => 'frontForm',
-            'site_title' => '글작성'
+            'site_title' => '글작성',
+            'categories' => $categories,
+            'tip_id' => $tip_id
         ]);
     }
 
