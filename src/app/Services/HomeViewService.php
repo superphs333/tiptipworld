@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Category;
 use App\Models\Tip;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
@@ -58,5 +59,26 @@ class HomeViewService
             ->get();
 
         return $popularTags;
+    }
+
+
+    /**
+     * 모든 카테고리 목록 
+     * 카테고리(타이틀, 설명), 각 카테고리에 등록된 팁개수
+     */
+    public static function getAllCategories() : Collection{
+        $categories = Category::query()
+           ->where('is_active', true)
+           ->withCount([
+                'tips as tips_count' => function($q){
+                    $q->where('status', 'published')
+                    ->where('visibility', 'public');
+                }
+           ])
+           ->orderBy('sort_order')
+           ->orderBy('id')
+           ->get();
+
+        return $categories;
     }
 }

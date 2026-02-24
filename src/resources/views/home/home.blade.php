@@ -15,6 +15,7 @@
     {{-- 인기 태그 별 게시글 (3개씩) --}}
 
     {{-- 모든 카테고리 --}}
+    <x-home.all-category :categories="$categories"></x-home.all-category>
 
     {{-- 카테고리 별 게시글 3개씩  --}}
 @endsection
