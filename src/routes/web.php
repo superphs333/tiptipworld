@@ -62,7 +62,8 @@ Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDel
 // 댓글 수정
 Route::patch('/tip/comment/{comment_id}',[CommentController::class, 'commentUpdate'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.update');
 // 글 작성 
-Route::get('/tips/form/{tip_id?}',[TipController::class, 'formFront'])->whereNumber('tip_id')->name('tip.formFront');
+Route::get('/tips/form/{tip_id?}',[TipController::class, 'formFront'])->whereNumber('tip_id')->middleware('auth')->name('tip.formFront');
+Route::post('/tip/store',[TipController::class, 'saveTip'])->middleware('auth')->name('tip.store'); // 프론트/관리자 공통 추가
     
 
 /**
@@ -96,7 +97,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/tips/form/{tip_id?}', [TipController::class, 'form'])
         ->whereNumber('tip_id')
         ->name('admin.tip.form');
-    Route::post('/tip/store',[TipController::class, 'saveTip'])->name('tip.store'); // 추가
     Route::post('/tip/update/{tip_id}',[TipController::class, 'updateTipPost'])->name('tip.update'); // 수정
     Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
         ->whereNumber('tip_id')

@@ -62,12 +62,14 @@ class TipController extends Controller
                 'id',
                 'name',
             ]);
+        $formAction = route('tip.store');
         
         return view('tips.view', [
             'viewMode' => 'frontForm',
             'site_title' => '글작성',
             'categories' => $categories,
-            'tip_id' => $tip_id
+            'tip_id' => $tip_id,
+            'formAction' => $formAction,
         ]);
     }
 
@@ -102,11 +104,18 @@ class TipController extends Controller
             $this->saveTags($tagNames, $tip->id);
         }
 
-        return redirect()->route(
-            'admin',
-            array_merge(['tab' => 'tips'], session('tips.query', []))
-        )->with('success', '팁이 성공적으로 저장되었습니다.')
-        ->withInput();
+        $submitFrom = (string) $request->input('submit_from', '');
+
+        if ($submitFrom === 'admin') {
+            return redirect()->route(
+                'admin',
+                array_merge(['tab' => 'tips'], session('tips.query', []))
+            )->with('success', '팁이 성공적으로 저장되었습니다.')
+            ->withInput();
+        }
+
+        return redirect()->route('tip.show', ['tip_id' => $tip->id])
+            ->with('success', '팁이 성공적으로 저장되었습니다.');
 
     }
 

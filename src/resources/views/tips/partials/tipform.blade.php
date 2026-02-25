@@ -16,6 +16,7 @@
         <div class="category-panel__content tip-create__content">
             <form class="tip-create__form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                <input type="hidden" name="submit_from" value="{{ $tone }}">
 
                 <div
                     class="tip-create__alerts"

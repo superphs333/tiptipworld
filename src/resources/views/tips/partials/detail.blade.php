@@ -21,9 +21,13 @@
         <article class="tip-wireframe__article">
             <header class="tip-wireframe__article-header">
                 <div class="tip-wireframe__header-top">
-                    <a target="_blank" href="{{ route('tips.category', ['category_id'=>$tip->category_id]) }}" >
+                    @if (!blank($tip->category_id))
+                        <a target="_blank" href="{{ route('tips.category', ['category_id' => $tip->category_id]) }}">
+                            <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                        </a>
+                    @else
                         <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
-                    </a>                    
+                    @endif
                     <div class="tip-wireframe__badge-row">
                         @if (filled($tip->status))
                             <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->status) }}</span>
