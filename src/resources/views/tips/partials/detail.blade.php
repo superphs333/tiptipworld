@@ -38,8 +38,21 @@
                     </div>
                 </div>
                 <h1 class="tip-wireframe__title">{{ $tip->title }}</h1>
+                @php
+                    $authorName = data_get($tip, 'user.name', '작성자 미상');
+                    $authorImage = data_get($tip, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                @endphp
+                <div class="tip-wireframe__author">
+                    <img
+                        class="tip-wireframe__author-avatar"
+                        src="{{ $authorImage }}"
+                        alt="{{ $authorName }} 프로필"
+                        loading="lazy"
+                    >
+                    <span class="tip-wireframe__author-name">{{ $authorName }}</span>
+                </div>
                 <p class="tip-wireframe__meta">
-                    {{ $tip->authorName }} · {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
+                    {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
                 </p>
                 @if (($canManageTip ?? false) === true)
                     <div class="tip-wireframe__post-actions" aria-label="게시글 관리">

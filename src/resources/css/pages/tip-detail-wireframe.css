@@ -238,6 +238,28 @@
     text-wrap: balance;
 }
 
+.tip-wireframe__author {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tip-wireframe__author-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid var(--wf-line);
+    background: #f3f4f6;
+}
+
+.tip-wireframe__author-name {
+    color: var(--wf-ink);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
 .tip-wireframe__meta {
     margin: 0;
     color: var(--wf-muted);
@@ -250,6 +272,8 @@
 .tip-wireframe__post-actions {
     display: flex;
     align-items: center;
+    width: 100%;
+    justify-content: flex-end;
     gap: 8px;
     flex-wrap: wrap;
 }
