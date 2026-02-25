@@ -63,13 +63,30 @@ class TipController extends Controller
                 'name',
             ]);
         $formAction = route('tip.store');
+        $siteTitle = '글작성';
+        $submitLabel = '게시하기';
+        $data = null;
+
+        if (!is_null($tip_id)) {
+            $data = Tip::with('tags:id,name')->findOrFail($tip_id);
+
+            if (!$this->canManageTip($data)) {
+                abort(403);
+            }
+
+            $siteTitle = '글수정';
+            $submitLabel = '수정하기';
+            $formAction = route('tip.update', ['tip_id' => $tip_id]);
+        }
         
         return view('tips.view', [
             'viewMode' => 'frontForm',
-            'site_title' => '글작성',
+            'site_title' => $siteTitle,
             'categories' => $categories,
             'tip_id' => $tip_id,
             'formAction' => $formAction,
+            'submitLabel' => $submitLabel,
+            'data' => $data,
         ]);
     }
 
@@ -121,6 +138,11 @@ class TipController extends Controller
 
     public function updateTipPost(Request $request,int $tip_id , FileStorageService $storage){
         $target_tip = Tip::findOrFail($tip_id);
+
+        if (!$this->canManageTip($target_tip)) {
+            abort(403);
+        }
+
         $validated = $request->validate($this->validatedArr);
         $validated['update_user_id'] = Auth::id();
         $validated['updated_at'] = Date::now();
@@ -154,6 +176,12 @@ class TipController extends Controller
          */
         $target_tip->update($validated);
 
+        $submitFrom = (string) $request->input('submit_from', '');
+
+        if ($submitFrom !== 'admin') {
+            return redirect()->route('tip.show', ['tip_id' => $target_tip->id])
+                ->with('success', '팁이 성공적으로 수정되었습니다.');
+        }
 
         return redirect()->route(
             'admin',
@@ -163,19 +191,34 @@ class TipController extends Controller
 
     }
 
-    public function destroy(int $tip_id, FileStorageService $storage)
+    public function destroy(Request $request, int $tip_id, FileStorageService $storage)
     {
-        try {
-            $target_tip = Tip::findOrFail($tip_id);
+        $submitFrom = (string) $request->input('submit_from', 'admin');
+        $target_tip = Tip::findOrFail($tip_id);
 
+        if (!$this->canManageTip($target_tip)) {
+            abort(403);
+        }
+
+        try {
             $storage->deleteIfExists($target_tip->thumbnail);
             $target_tip->delete();
+
+            if ($submitFrom !== 'admin') {
+                return redirect()->route('home')
+                    ->with('success', '팁이 성공적으로 삭제되었습니다.');
+            }
 
             return redirect()->route(
                 'admin',
                 array_merge(['tab' => 'tips'], session('tips.query', []))
             )->with('success', '팁이 성공적으로 삭제되었습니다.');
         } catch (\Throwable $e) {
+            if ($submitFrom !== 'admin') {
+                return redirect()->route('home')
+                    ->with('error', '삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+
             return redirect()->route(
                 'admin',
                 array_merge(['tab' => 'tips'], session('tips.query', []))
@@ -194,6 +237,20 @@ class TipController extends Controller
         $tip->tags()->sync($tagIds);
     }
 
+    private function canManageTip(Tip $tip): bool
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return false;
+        }
+
+        $isAdmin = $user->isAdmin();
+        $isOwner = (int) $user->id === (int) $tip->user_id;
+
+        return $isAdmin || $isOwner;
+    }
+
     /**
      * TIP ONE VIEW
      */
@@ -205,7 +262,8 @@ class TipController extends Controller
         ])->findOrFail($tip_id);
         $user = Auth::user();
         $is_admin = $user?->isAdmin() ?? false;
-        $isTipOwner = $user?->id == $tip->user_id;
+        $isTipOwner = (int) ($user?->id ?? 0) === (int) $tip->user_id;
+        $canManageTip = $is_admin || $isTipOwner;
         $tip_status = $tip->status;
         $tip_visibility = $tip->visibility;
 
@@ -246,6 +304,7 @@ class TipController extends Controller
             'viewMode' => 'detailView',
             'tip' => $tip,
             'tip_data_for_share' => $tip_data_for_share,
+            'canManageTip' => $canManageTip,
         ]);
     }
 

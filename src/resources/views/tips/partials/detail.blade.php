@@ -41,6 +41,26 @@
                 <p class="tip-wireframe__meta">
                     {{ $tip->authorName }} · {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
                 </p>
+                @if (($canManageTip ?? false) === true)
+                    <div class="tip-wireframe__post-actions" aria-label="게시글 관리">
+                        <a
+                            class="tip-wireframe__post-action"
+                            href="{{ route('tip.formFront', ['tip_id' => $tip->id]) }}"
+                        >수정</a>
+
+                        <form
+                            class="tip-wireframe__post-action-form"
+                            action="{{ route('tip.destroy', ['tip_id' => $tip->id]) }}"
+                            method="POST"
+                            onsubmit="return confirm('정말 삭제할까요?')"
+                        >
+                            @csrf
+                            @method('DELETE')
+                            <input type="hidden" name="submit_from" value="front">
+                            <button type="submit" class="tip-wireframe__post-action tip-wireframe__post-action--danger">삭제</button>
+                        </form>
+                    </div>
+                @endif
             </header>
 
             {{-- 썸네일 --}}
