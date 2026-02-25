@@ -1,5 +1,9 @@
 @extends('layouts.community')
 
+@once
+    @vite('resources/js/components/profile.js')
+@endonce
+
 {{-- 타이틀 --}}
 @section('title', 'TipTipWorld')
 

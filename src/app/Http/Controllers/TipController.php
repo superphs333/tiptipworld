@@ -11,6 +11,7 @@ use App\Services\TipViewCounterService;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\Comment;
+use App\Models\User;
 
 class TipController extends Controller
 {
@@ -392,6 +393,24 @@ class TipController extends Controller
         ]);
 
 
+    }
+
+    /**
+     * 사용자 피드 페이지
+     *
+     * @param integer $user_id
+     * @return void
+     */
+    public function tipUserFeed(int $user_id){
+        $user = User::findOrFail($user_id);
+        $userName = $user->name;
+        $title = $userName . "'s Feed";
+        
+        return view('tips.view',[
+            'viewMode' => 'tipUserFeed',
+            'user_id' => $user_id,
+            'site_title' => $title,
+        ]);
     }
 
     /**

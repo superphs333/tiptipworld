@@ -24,6 +24,10 @@
             $partial = 'tips.partials.frontform';
             $containerClass = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10';
             break;
+        case 'tipUserFeed' :
+            $title = $site_title;
+            $partial = 'tips.partials.userfeed';
+            break;
     }
 @endphp
 
