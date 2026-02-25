@@ -42,15 +42,12 @@
                     $authorName = data_get($tip, 'user.name', '작성자 미상');
                     $authorImage = data_get($tip, 'user.profile_image_url', asset('images/avatar-default.svg'));
                 @endphp
-                <div class="tip-wireframe__author">
-                    <img
-                        class="tip-wireframe__author-avatar"
-                        src="{{ $authorImage }}"
-                        alt="{{ $authorName }} 프로필"
-                        loading="lazy"
-                    >
-                    <span class="tip-wireframe__author-name">{{ $authorName }}</span>
-                </div>
+                <x-author-inline
+                    :name="$authorName"
+                    :avatar="$authorImage"
+                    variant="detail"
+                    class="tip-wireframe__author"
+                />
                 <p class="tip-wireframe__meta">
                     {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
                 </p>

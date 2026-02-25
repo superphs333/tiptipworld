@@ -257,7 +257,7 @@ class TipController extends Controller
     public function showPost(Request $request, int $tip_id, TipViewCounterService $tipViewCounter){
         $tip = Tip::with([
             'category:id,name',
-            'user:id,name',
+            'user:id,name,profile_image_path',
             'tags:id,name',
         ])->findOrFail($tip_id);
         $user = Auth::user();

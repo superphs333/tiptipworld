@@ -144,6 +144,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 8px;
     color: var(--home-muted-soft, #64748b);
     font-size: 12px;
@@ -151,33 +152,22 @@
 
 .home-popular__author {
     min-width: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     color: var(--home-ink-soft, #1e293b);
     font-weight: 600;
 }
 
-.home-popular__author span {
+.home-popular__author .author-inline__name {
     max-width: 120px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
 }
 
-.home-popular__avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    object-fit: cover;
-    border: 1px solid var(--home-line, #cbd5e1);
-    flex: 0 0 auto;
-}
-
 .home-popular__views {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    margin-left: auto;
     color: var(--home-muted-soft, #64748b);
     font-size: 12px;
     font-variant-numeric: tabular-nums;

@@ -79,15 +79,12 @@
                             $isLiked = (int) data_get($item, 'is_liked', 0) > 0;
                             $isBookmarked = (int) data_get($item, 'is_bookmarked', 0) > 0;
                         @endphp
-                        <span class="tip-list-wireframe__author">
-                            <img
-                                class="tip-list-wireframe__author-avatar"
-                                src="{{ $authorImage }}"
-                                alt="{{ $authorName }} 프로필"
-                                loading="lazy"
-                            >
-                            <span class="tip-list-wireframe__author-name">{{ $authorName }}</span>
-                        </span>
+                        <x-author-inline
+                            :name="$authorName"
+                            :avatar="$authorImage"
+                            variant="list"
+                            class="tip-list-wireframe__author"
+                        />
                         <span>댓글 {{ data_get($item, 'comments_count', 0) }}</span>
                         <span>{{ data_get($item,'createdDate') }}</span>
                     </div>

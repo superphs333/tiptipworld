@@ -266,20 +266,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-}
-
-.tip-list-wireframe__author-avatar {
-    width: 20px;
-    height: 20px;
-    border-radius: 999px;
-    object-fit: cover;
-    border: 1px solid var(--wf-line);
-    background: #f3f4f6;
-}
-
-.tip-list-wireframe__author-name {
     color: var(--wf-ink);
-    font-weight: 600;
 }
 
 .tip-list-wireframe__summary {

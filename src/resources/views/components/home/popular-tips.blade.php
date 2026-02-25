@@ -38,15 +38,12 @@
                     </a>
 
                     <div class="home-popular__author-row">
-                        <span class="home-popular__author">
-                            <img
-                                class="home-popular__avatar"
-                                src="{{ $authorImage }}"
-                                alt="{{ $authorName }} 프로필"
-                                loading="lazy"
-                            >
-                            <span>{{ $authorName }}</span>
-                        </span>
+                        <x-author-inline
+                            :name="$authorName"
+                            :avatar="$authorImage"
+                            variant="card"
+                            class="home-popular__author"
+                        />
                         <span class="home-popular__views" title="조회수">
                             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M2.4 12s3.6-6 9.6-6 9.6 6 9.6 6-3.6 6-9.6 6-9.6-6-9.6-6Z" stroke="currentColor" stroke-width="1.6" />

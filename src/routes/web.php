@@ -44,6 +44,8 @@ Route::get('/',[HomeController::class, 'index'])->name('home');
 // 개별페이지
 Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
     ->whereNumber('tip_id')->name('tip.show');
+// 리스트 페이지
+Route::get('/tips/',[TipController::class, 'tipList'])->name('tips.list');
 // 분류별 페이지
 Route::get('/tips/category/{category_id}',[TipController::class, 'tipListBySort'])->whereNumber('category_id')->name('tips.category');
 Route::get('/tips/tag/{tag_id}',[TipController::class, 'tipListBySort'])->whereNumber('tag_id')->name('tips.tag');
