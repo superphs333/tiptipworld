@@ -74,6 +74,7 @@
                         @php
                             $authorName = data_get($item, 'user.name', '작성자 미상');
                             $authorImage = data_get($item, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                            $authorId = (int) data_get($item, 'user.id', 0);
                             $likeCount = (int) data_get($item, 'like_count', data_get($item, 'likes_count', 0));
                             $bookmarkCount = (int) data_get($item, 'bookmark_count', data_get($item, 'bookmarks_count', 0));
                             $isLiked = (int) data_get($item, 'is_liked', 0) > 0;
@@ -82,6 +83,7 @@
                         <x-author-inline
                             :name="$authorName"
                             :avatar="$authorImage"
+                            :author-id="$authorId"
                             variant="list"
                             class="tip-list-wireframe__author"
                         />

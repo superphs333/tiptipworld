@@ -41,10 +41,12 @@
                 @php
                     $authorName = data_get($tip, 'user.name', '작성자 미상');
                     $authorImage = data_get($tip, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                    $authorId = (int) data_get($tip, 'user.id', 0);
                 @endphp
                 <x-author-inline
                     :name="$authorName"
                     :avatar="$authorImage"
+                    :author-id="$authorId"
                     variant="detail"
                     class="tip-wireframe__author"
                 />

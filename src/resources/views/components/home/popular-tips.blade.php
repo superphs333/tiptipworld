@@ -19,6 +19,7 @@
             @php
                 $authorName = data_get($item, 'user.name', '작성자 미상');
                 $authorImage = data_get($item, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                $authorId = (int) data_get($item, 'user.id', 0);
                 $categoryName = data_get($item, 'category.name', '미분류');
                 $viewCount = (int) data_get($item, 'view_count', 0);
                 $likeCount = (int) data_get($item, 'like_count', 0);
@@ -41,6 +42,7 @@
                         <x-author-inline
                             :name="$authorName"
                             :avatar="$authorImage"
+                            :author-id="$authorId"
                             variant="card"
                             class="home-popular__author"
                         />
