@@ -2,6 +2,8 @@
 @once
     @vite('resources/js/components/tip-actions.js')
     @vite('resources/js/components/tip-comments.js')
+    @vite('resources/js/components/profile.js')
+
 @endonce
 @php
     $title = null;
