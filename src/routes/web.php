@@ -8,6 +8,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SummernoteController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TipController;
+use App\Http\Controllers\UserFollowController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -76,6 +77,9 @@ Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
     ->whereNumber('tip_id')
     ->middleware('auth')
     ->name('tip.destroy'); // 프론트/관리자 공통 삭제
+
+// 팔로우
+Route::post('/user/follow/{user_id}', [UserFollowController::class, 'followUser'])->whereNumber('user_id')->middleware('auth')->name('user.follow');
     
 
 /**

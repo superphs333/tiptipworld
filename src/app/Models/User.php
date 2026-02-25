@@ -275,10 +275,10 @@ class User extends Authenticatable
             User::class,
             'user_follows',
             'follower_user_id', // 나
-            'following_user_id', // 상대방'
+            'followed_user_id', // 상대방'
         )->withTimeStamps();
     }
-    public function folowerUsers() : BelongsToMany{
+    public function followerUsers() : BelongsToMany{
         return $this->belongsToMany(
             User::class,
             'user_follows',

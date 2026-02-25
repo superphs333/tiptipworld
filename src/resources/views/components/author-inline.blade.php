@@ -4,8 +4,6 @@
     'authorId' => null,
     'profileUrl' => null,
     'variant' => 'list',
-    'showFollow' => true,
-    'followLabel' => '팔로우',
 ])
 
 @php
@@ -34,9 +32,5 @@
             <img class="author-inline__avatar" src="{{ $avatarUrl }}" alt="{{ $name }} 프로필" loading="lazy">
             <span class="author-inline__name">{{ $name }}</span>
         </span>
-    @endif
-
-    @if ($showFollow)
-        <button type="button" class="author-inline__follow" aria-label="{{ $name }} 팔로우">{{ $followLabel }}</button>
     @endif
 </span>
