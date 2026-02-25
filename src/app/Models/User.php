@@ -266,5 +266,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class);
     }
+
+    /**
+     * 팔로우 관련
+     */
+    public function followingUsers() : BelongsToMany{
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'follower_user_id', // 나
+            'following_user_id', // 상대방'
+        )->withTimeStamps();
+    }
+    public function folowerUsers() : BelongsToMany{
+        return $this->belongsToMany(
+            User::class,
+            'user_follows',
+            'followed_user_id', // 나
+            'follower_user_id', // 상대방
+        )->withTimestamps();
+    }
     
 }
