@@ -286,5 +286,13 @@ class User extends Authenticatable
             'follower_user_id', // 상대방
         )->withTimestamps();
     }
+
+    /**
+     * 팁관련
+     */
+    public function tips() : HasMany{
+        return $this->hasMany(Tip::class);
+    }
+
     
 }

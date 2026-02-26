@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use App\Services\FileStorageService;
 use App\Services\TipViewCounterService;
+use App\Services\TipService;
+use App\Services\FollowService;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\Comment;
@@ -15,6 +17,10 @@ use App\Models\User;
 
 class TipController extends Controller
 {
+    public function __construct(private FollowService $followService, private TipService $tipService, private TipViewCounterService $tipViewCounter)
+    {
+        
+    }
     private $validatedArr = [
             'category_id' => ['nullable', 'exists:categories,id'],
             'title' => ['required', 'string', 'max:120'],
@@ -402,15 +408,79 @@ class TipController extends Controller
      * @return void
      */
     public function tipUserFeed(int $user_id){
+        $title = "User {$user_id}'s Feed";
+        $currentSort = (string) request()->query('sort', 'latest');
+        $return_data = [];
+        /*
+        User 정보 가져오기
+        */
         $user = User::findOrFail($user_id);
-        $userName = $user->name;
-        $title = $userName . "'s Feed";
-        
-        return view('tips.view',[
+        $profile_image_url = $user->profile_image_url;
+        $profile_name = $user->name;
+        $follower_count = $user->followerUsers()->count();
+        $following_count = $user->followingUsers()->count();
+        $isFollowing = $this->followService->isFollowing(Auth::id(), $user_id);                
+        $registration_date = $user->created_at;
+        /*
+        글 관련
+        */
+        $tips_count = $user->tips()->count();       
+        $top5Category = $user->tips()  // 내 글들 중에서 가장 많이 나오는 카테고리 
+            ->whereNotNull('category_id')
+            ->selectRaw('category_id, COUNT(*) as tips_count')
+            ->groupBy('category_id')
+            ->orderByDesc('tips_count')
+            ->with('category:id,name')
+            ->limit(5)
+            ->get()
+            ->map(static function ($item) {
+                return [
+                    'id' => (int) $item->category_id,
+                    'name' => (string) data_get($item, 'category.name', '미분류'),
+                    'tips_count' => (int) data_get($item, 'tips_count', 0),
+                ];
+            });
+        $top5Tag = Tag::query()
+            ->withCount([
+                'tips as tips_count' =>  fn ($q) => $q->where('tips.user_id', $user_id),
+            ])
+            ->having('tips_count','>',0)
+            ->orderByDesc('tips_count')
+            ->limit(5)
+            ->get(['id', 'name'])
+            ->map(static function ($item) {
+                return [
+                    'id' => (int) $item->id,
+                    'name' => (string) $item->name,
+                    'tips_count' => (int) data_get($item, 'tips_count', 0),
+                ];
+            });
+        /*
+        팁 가져오기
+        */
+        $tipItems = $this->tipService->getUserFeed($user_id);
+
+        $return_data = [
             'viewMode' => 'tipUserFeed',
-            'user_id' => $user_id,
             'site_title' => $title,
-        ]);
+            'currentSort' => $currentSort,
+            'profileUser' => [
+                'id' => (int) $user->id,
+                'name' => (string) $profile_name,
+                'profile_image_url' => (string) $profile_image_url,
+                'joined' => $registration_date?->format('Y.m.d'),
+            ],
+            'followersCount' => (int) $follower_count,
+            'followingCount' => (int) $following_count,
+            'isFollowing' => (bool) $isFollowing,
+            'tipsCount' => (int) $tips_count,
+            'topCategories' => $top5Category,
+            'topTags' => $top5Tag,
+            'tipItems' => $tipItems,
+            'totalCount' => (int) $tipItems->count(),
+        ];
+        
+        return view('tips.view', $return_data);
     }
 
     /**

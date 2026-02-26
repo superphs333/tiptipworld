@@ -1,138 +1,22 @@
 @php
-    $currentSort = (string) request('sort', 'latest');
+    $currentSort = (string) ($currentSort ?? request('sort', 'latest'));
 
-    $profileUser = [
-        'id' => 3333,
-        'name' => 'hihi3333',
+    $profileUser = $profileUser ?? [
+        'id' => 0,
+        'name' => '작성자',
         'profile_image_url' => asset('images/avatar-default.svg'),
-        'joined' => '2026.02.01',
+        'joined' => '집계 중',
     ];
 
-    $followersCount = 128;
-    $followingCount = 47;
-    $isFollowing = false;
+    $followersCount = (int) ($followersCount ?? 0);
+    $followingCount = (int) ($followingCount ?? 0);
+    $isFollowing = (bool) ($isFollowing ?? false);
 
-    $topCategories = collect([
-        ['name' => '기획', 'tips_count' => 12],
-        ['name' => '업무 자동화', 'tips_count' => 9],
-        ['name' => '개발', 'tips_count' => 7],
-    ]);
+    $topCategories = collect($topCategories ?? []);
+    $topTags = collect($topTags ?? []);
+    $tipItems = collect($tipItems ?? []);
 
-    $topTags = collect([
-        ['name' => '업무팁', 'tips_count' => 15],
-        ['name' => '생산성', 'tips_count' => 11],
-        ['name' => '노션', 'tips_count' => 8],
-    ]);
-
-    $recentTips = collect([
-        ['title' => '회의록 템플릿 5분 세팅법'],
-        ['title' => '반복 업무를 자동화하는 체크리스트'],
-        ['title' => '신입 온보딩 문서 구조 예시'],
-        ['title' => '주간 회고를 빠르게 쓰는 프롬프트'],
-        ['title' => '팀 위키를 오래 유지하는 규칙'],
-    ]);
-
-    $tipItems = collect([
-        [
-            'id' => 501,
-            'title' => '[SEED-C20] 050 카테고리20 테스트 카드',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '추가',
-            'view_count' => 5953,
-            'like_count' => 0,
-            'comment_count' => 0,
-            'bookmark_count' => 0,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-        [
-            'id' => 502,
-            'title' => '업무 체크리스트를 템플릿으로 고정하는 방법',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '기획',
-            'view_count' => 4210,
-            'like_count' => 18,
-            'comment_count' => 4,
-            'bookmark_count' => 13,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-        [
-            'id' => 503,
-            'title' => '회의 전에 공유하면 좋은 사전질문 7개',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '업무 자동화',
-            'view_count' => 3892,
-            'like_count' => 25,
-            'comment_count' => 7,
-            'bookmark_count' => 16,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-        [
-            'id' => 504,
-            'title' => '프로젝트 킥오프 문서 기본 뼈대',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '개발',
-            'view_count' => 2675,
-            'like_count' => 12,
-            'comment_count' => 3,
-            'bookmark_count' => 9,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-        [
-            'id' => 505,
-            'title' => '회고 문서를 꾸준히 쓰게 만드는 루틴',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '기획',
-            'view_count' => 1951,
-            'like_count' => 9,
-            'comment_count' => 1,
-            'bookmark_count' => 5,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-        [
-            'id' => 506,
-            'title' => '협업 요청 메시지를 짧게 쓰는 공식',
-            'thumbnail_url' => asset('images/no-thumbnail.png'),
-            'category_name' => '커뮤니케이션',
-            'view_count' => 1634,
-            'like_count' => 6,
-            'comment_count' => 2,
-            'bookmark_count' => 4,
-            'author' => [
-                'id' => 3333,
-                'name' => 'hihi3333',
-                'profile_image_url' => asset('images/avatar-default.svg'),
-            ],
-        ],
-    ]);
-
-    $tipItems = match ($currentSort) {
-        'popular' => $tipItems->sortByDesc('view_count')->values(),
-        'likes' => $tipItems->sortByDesc('like_count')->values(),
-        'bookmarks' => $tipItems->sortByDesc('bookmark_count')->values(),
-        default => $tipItems->sortByDesc('id')->values(),
-    };
-
-    $totalCount = $tipItems->count();
+    $totalCount = (int) ($totalCount ?? $tipItems->count());
 @endphp
 
 <section class="tip-userfeed" data-tip-userfeed>
@@ -212,7 +96,7 @@
 
             <form class="tip-userfeed__sort-form" method="GET">
                 <label for="tip-userfeed-sort">정렬</label>
-                <select id="tip-userfeed-sort" name="sort" onchange="this.form.submit()">
+                <select id="tip-userfeed-sort" name="sort">
                     <option value="latest" @selected($currentSort === 'latest')>최신순</option>
                     <option value="popular" @selected($currentSort === 'popular')>조회순</option>
                     <option value="likes" @selected($currentSort === 'likes')>좋아요순</option>
