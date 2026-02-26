@@ -415,6 +415,7 @@ class TipController extends Controller
         User 정보 가져오기
         */
         $user = User::findOrFail($user_id);
+        $myFeed = $user_id === Auth::id();
         $profile_image_url = $user->profile_image_url;
         $profile_name = $user->name;
         $follower_count = $user->followerUsers()->count();
@@ -463,6 +464,7 @@ class TipController extends Controller
         $return_data = [
             'viewMode' => 'tipUserFeed',
             'site_title' => $title,
+            'myFeed' => $myFeed,
             'currentSort' => $currentSort,
             'profileUser' => [
                 'id' => (int) $user->id,

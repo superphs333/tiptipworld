@@ -46,6 +46,7 @@
                 <strong>{{ number_format($followingCount) }}</strong>
                 <span>Following</span>
             </p>
+            @if (!$myFeed)
             <span class="author-inline tip-userfeed__follow-wrap" data-author-id="{{ $profileUser['id'] }}">
                 <button
                     type="button"
@@ -55,6 +56,7 @@
                     {{ $isFollowing ? '팔로잉' : '팔로우' }}
                 </button>
             </span>
+            @endif
         </div>
     </header>
 
