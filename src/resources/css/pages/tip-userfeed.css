@@ -1,0 +1,375 @@
+.tip-userfeed {
+    --userfeed-line: #d7d7d7;
+    --userfeed-line-strong: #b8b8b8;
+    --userfeed-ink: #121212;
+    --userfeed-muted: #626262;
+    --userfeed-surface: #fff;
+    --userfeed-surface-soft: #fcfcfc;
+    --userfeed-accent: #181818;
+
+    display: grid;
+    gap: 18px;
+    color: var(--userfeed-ink);
+    font-family: "IBM Plex Sans KR", "Figtree", "Noto Sans KR", sans-serif;
+}
+
+.tip-userfeed__profile {
+    border: 1px solid var(--userfeed-line);
+    border-radius: 18px;
+    background: linear-gradient(180deg, #fff 0%, var(--userfeed-surface-soft) 100%);
+    padding: clamp(16px, 2.1vw, 24px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: center;
+}
+
+.tip-userfeed__identity {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+}
+
+.tip-userfeed__avatar {
+    width: 92px;
+    height: 92px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 1px solid rgba(18, 18, 18, 0.12);
+    background: #f2f2f2;
+}
+
+.tip-userfeed__identity-body {
+    min-width: 0;
+}
+
+.tip-userfeed__kicker {
+    margin: 0 0 5px;
+    color: var(--userfeed-muted);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.tip-userfeed__name {
+    margin: 0;
+    color: var(--userfeed-ink);
+    font-family: "Space Grotesk", "IBM Plex Sans KR", "Figtree", sans-serif;
+    font-size: clamp(1.35rem, 2.4vw, 2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.tip-userfeed__summary {
+    margin: 10px 0 0;
+    color: var(--userfeed-muted);
+    font-size: 0.9rem;
+    line-height: 1.55;
+}
+
+.tip-userfeed__relation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.tip-userfeed__relation-item {
+    margin: 0;
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    min-width: 80px;
+}
+
+.tip-userfeed__relation-item strong {
+    color: var(--userfeed-ink);
+    font-size: 1rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.tip-userfeed__relation-item span {
+    color: var(--userfeed-muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.tip-userfeed__follow-wrap {
+    gap: 0;
+}
+
+.tip-userfeed__follow-btn {
+    min-width: 72px;
+}
+
+.tip-userfeed__follow-btn.is-following {
+    border-color: var(--userfeed-line-strong);
+    background: #f4f4f4;
+    color: #3f3f3f;
+}
+
+.tip-userfeed__insight,
+.tip-userfeed__feed {
+    border: 1px solid var(--userfeed-line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fff 0%, var(--userfeed-surface-soft) 100%);
+    padding: clamp(14px, 1.9vw, 22px);
+}
+
+.tip-userfeed__section-title {
+    margin: 0;
+    color: var(--userfeed-ink);
+    font-family: "Space Grotesk", "IBM Plex Sans KR", "Figtree", sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.tip-userfeed__insight-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tip-userfeed__insight-card {
+    border: 1px solid var(--userfeed-line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 12px;
+    display: grid;
+    gap: 10px;
+    align-content: start;
+}
+
+.tip-userfeed__insight-card h3 {
+    margin: 0;
+    color: var(--userfeed-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.tip-userfeed__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tip-userfeed__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 30px;
+    border: 1px solid var(--userfeed-line);
+    border-radius: 999px;
+    background: #fff;
+    color: #1f1f1f;
+    padding: 0 10px;
+    font-size: 0.77rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tip-userfeed__chip em {
+    font-style: normal;
+    color: var(--userfeed-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.tip-userfeed__chip--empty {
+    color: var(--userfeed-muted);
+    font-weight: 600;
+}
+
+.tip-userfeed__chip--link:hover {
+    border-color: var(--userfeed-line-strong);
+    background: #f6f6f6;
+}
+
+.tip-userfeed__recent-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 6px;
+}
+
+.tip-userfeed__recent-list a {
+    display: block;
+    color: var(--userfeed-ink);
+    font-size: 0.82rem;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tip-userfeed__recent-list a:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.tip-userfeed__recent-empty {
+    color: var(--userfeed-muted);
+    font-size: 0.82rem;
+}
+
+.tip-userfeed__feed-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tip-userfeed__feed-heading p {
+    margin: 5px 0 0;
+    color: var(--userfeed-muted);
+    font-size: 0.82rem;
+}
+
+.tip-userfeed__sort-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--userfeed-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.tip-userfeed__sort-form select {
+    border: 1px solid var(--userfeed-line);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--userfeed-ink);
+    min-width: 120px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 0.84rem;
+}
+
+.tip-userfeed__sort-form select:focus {
+    outline: none;
+    border-color: var(--userfeed-line-strong);
+}
+
+.tip-userfeed__grid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.tip-userfeed__grid .home-popular__card {
+    border-color: var(--userfeed-line);
+    background: #fff;
+    min-height: 100%;
+}
+
+.tip-userfeed__grid .home-popular__thumb {
+    aspect-ratio: 16 / 10;
+    background: #f2f2f2;
+    border-bottom-color: #e5e5e5;
+}
+
+.tip-userfeed__grid .home-popular__thumb img {
+    filter: grayscale(1);
+}
+
+.tip-userfeed__grid .home-popular__body {
+    gap: 6px;
+    padding: 10px 11px;
+}
+
+.tip-userfeed__grid .home-popular__category {
+    border-color: var(--userfeed-line);
+    background: transparent;
+    color: var(--userfeed-muted);
+}
+
+.tip-userfeed__grid .home-popular__card-title {
+    font-size: 14px;
+    color: var(--userfeed-ink);
+}
+
+.tip-userfeed__grid .home-popular__author {
+    color: var(--userfeed-ink);
+}
+
+.tip-userfeed__grid .home-popular__views,
+.tip-userfeed__grid .home-popular__stat {
+    color: var(--userfeed-muted);
+}
+
+.tip-userfeed__grid .home-popular__bottom {
+    border-top-color: #e5e5e5;
+    padding-top: 6px;
+}
+
+.tip-userfeed__empty {
+    margin: 0;
+    grid-column: 1 / -1;
+    color: var(--userfeed-muted);
+    font-size: 0.92rem;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.tip-userfeed__pagination {
+    margin-top: 14px;
+}
+
+@media (max-width: 1200px) {
+    .tip-userfeed__grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 980px) {
+    .tip-userfeed__profile {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tip-userfeed__relation {
+        justify-content: flex-start;
+    }
+
+    .tip-userfeed__insight-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tip-userfeed__grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .tip-userfeed__identity {
+        grid-template-columns: 72px minmax(0, 1fr);
+    }
+
+    .tip-userfeed__avatar {
+        width: 72px;
+        height: 72px;
+    }
+
+    .tip-userfeed__name {
+        white-space: normal;
+    }
+
+    .tip-userfeed__insight-grid,
+    .tip-userfeed__grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
