@@ -38,4 +38,12 @@ class FollowService{
 
         return $following;
     }
+
+    /**
+     * 팔로우 갯수
+     */
+    public function getFollowerCount($user_id){
+        $user = User::query()->findOrFail($user_id);
+        return  $user->followerUsers()->count();
+    }
 }

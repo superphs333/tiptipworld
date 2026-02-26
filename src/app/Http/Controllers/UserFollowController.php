@@ -26,10 +26,13 @@ class UserFollowController extends Controller
         }
 
         $following = $this->followService->toggleFollow($authUserId, $user_id);
+        $following_count = $this->followService->getFollowerCount($user_id);
+
 
         return response()->json([
             'success' => true,
             'following' => $following,
+            'following_count' => $following_count,
             'target_user_id' => $user_id,
         ]);
 

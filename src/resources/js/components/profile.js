@@ -15,6 +15,7 @@ $(() => {
     // 팔로우 
     $(document).on('click','.author-inline__follow',function(e){
         e.preventDefault();
+        const $btn = $(this);
         const authorId = $(this).closest('.author-inline').data('authorId'); 
         if(!Number.isInteger(authorId) || authorId<0) return;
 
@@ -27,7 +28,18 @@ $(() => {
                 'Accept': 'application/json',
             },
             success : function(res){
+                if(res.success){
+                    const isFollowing = !!res.following;
+                    const count = Number(res.followers_count ?? res.following_count ?? 0);
 
+                    $btn.toggleClass('is-following', isFollowing)
+                        .text(isFollowing ? '팔로잉' : '팔로우');
+
+                    $('[data-followers-count]')
+                        .attr('data-count', String(count))
+                        .data('count', count)
+                        .text(count.toLocaleString('ko-KR'));
+                }
             }, 
             error : function(xhr){
 
