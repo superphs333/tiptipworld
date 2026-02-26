@@ -20,8 +20,8 @@
     border-radius: 18px;
     background: #fff;
     padding: clamp(20px, 2.5vw, 30px);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    display: flex;
+    justify-content: space-between;
     gap: 24px;
     align-items: center;
 }
@@ -31,6 +31,8 @@
     grid-template-columns: 92px minmax(0, 1fr);
     gap: 18px;
     align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .tip-userfeed__avatar {
@@ -81,6 +83,8 @@
     justify-content: flex-end;
     gap: 20px;
     flex-wrap: wrap;
+    margin-left: auto;
+    flex: 0 0 auto;
 }
 
 .tip-userfeed__relation-item {
@@ -351,12 +355,14 @@
 
 @media (max-width: 980px) {
     .tip-userfeed__profile {
-        grid-template-columns: minmax(0, 1fr);
+        flex-direction: column;
+        align-items: flex-start;
         gap: 16px;
     }
 
     .tip-userfeed__relation {
         justify-content: flex-start;
+        margin-left: 0;
     }
 
     .tip-userfeed__insight-grid {
