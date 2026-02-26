@@ -296,6 +296,15 @@
     color: var(--userfeed-muted);
 }
 
+.tip-userfeed__grid a.home-popular__category {
+    text-decoration: none;
+}
+
+.tip-userfeed__grid a.home-popular__category:hover {
+    border-color: var(--userfeed-line-strong);
+    background: #f7f7f7;
+}
+
 .tip-userfeed__grid .home-popular__card-title {
     font-size: 14px;
     color: var(--userfeed-ink);

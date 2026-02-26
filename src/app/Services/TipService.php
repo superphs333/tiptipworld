@@ -33,6 +33,7 @@ class TipService
                 'id' => (int) data_get($item, 'id', 0),
                 'title' => (string) data_get($item, 'title', ''),
                 'thumbnail_url' => (string) data_get($item, 'thumbnail_url', data_get($item, 'thumbnailUrl', asset('images/no-thumbnail.png'))),
+                'category_id' => (int) data_get($item, 'category.id', 0),
                 'category_name' => (string) data_get($item, 'category.name', '미분류'),
                 'view_count' => (int) data_get($item, 'view_count', 0),
                 'like_count' => (int) data_get($item, 'like_count', 0),

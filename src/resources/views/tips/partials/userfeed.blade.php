@@ -67,10 +67,21 @@
                 <h3>카테고리</h3>
                 <div class="tip-userfeed__chips">
                     @foreach ($topCategories as $category)
-                        <span class="tip-userfeed__chip">
-                            {{ data_get($category, 'name', '미분류') }}
-                            <em>{{ number_format((int) data_get($category, 'tips_count', 0)) }}</em>
-                        </span>
+                        @php $categoryId = (int) data_get($category, 'id', 0); @endphp
+                        @if ($categoryId > 0)
+                            <a
+                                class="tip-userfeed__chip tip-userfeed__chip--link"
+                                href="{{ route('tips.category', ['category_id' => $categoryId]) }}"
+                            >
+                                {{ data_get($category, 'name', '미분류') }}
+                                <em>{{ number_format((int) data_get($category, 'tips_count', 0)) }}</em>
+                            </a>
+                        @else
+                            <span class="tip-userfeed__chip">
+                                {{ data_get($category, 'name', '미분류') }}
+                                <em>{{ number_format((int) data_get($category, 'tips_count', 0)) }}</em>
+                            </span>
+                        @endif
                     @endforeach
                 </div>
             </article>
@@ -79,10 +90,21 @@
                 <h3>태그</h3>
                 <div class="tip-userfeed__chips">
                     @foreach ($topTags as $tag)
-                        <span class="tip-userfeed__chip">
-                            #{{ data_get($tag, 'name', '태그') }}
-                            <em>{{ number_format((int) data_get($tag, 'tips_count', 0)) }}</em>
-                        </span>
+                        @php $tagId = (int) data_get($tag, 'id', 0); @endphp
+                        @if ($tagId > 0)
+                            <a
+                                class="tip-userfeed__chip tip-userfeed__chip--link"
+                                href="{{ route('tips.tag', ['tag_id' => $tagId]) }}"
+                            >
+                                #{{ data_get($tag, 'name', '태그') }}
+                                <em>{{ number_format((int) data_get($tag, 'tips_count', 0)) }}</em>
+                            </a>
+                        @else
+                            <span class="tip-userfeed__chip">
+                                #{{ data_get($tag, 'name', '태그') }}
+                                <em>{{ number_format((int) data_get($tag, 'tips_count', 0)) }}</em>
+                            </span>
+                        @endif
                     @endforeach
                 </div>
             </article>
@@ -113,7 +135,9 @@
                     $authorName = (string) data_get($item, 'author.name', '작성자 미상');
                     $authorImage = (string) data_get($item, 'author.profile_image_url', asset('images/avatar-default.svg'));
                     $authorId = (int) data_get($item, 'author.id', 0);
+                    $tipId = (int) data_get($item, 'id', 0);
                     $categoryName = (string) data_get($item, 'category_name', '미분류');
+                    $categoryId = (int) data_get($item, 'category_id', 0);
                     $viewCount = (int) data_get($item, 'view_count', 0);
                     $likeCount = (int) data_get($item, 'like_count', 0);
                     $commentCount = (int) data_get($item, 'comment_count', 0);
@@ -121,15 +145,31 @@
                 @endphp
 
                 <article class="home-popular__card">
-                    <a class="home-popular__thumb" href="#" onclick="return false;">
-                        <img src="{{ data_get($item, 'thumbnail_url') }}" alt="{{ data_get($item, 'title') }}" loading="lazy">
-                    </a>
+                    @if ($tipId > 0)
+                        <a class="home-popular__thumb" href="{{ route('tip.show', ['tip_id' => $tipId]) }}">
+                            <img src="{{ data_get($item, 'thumbnail_url') }}" alt="{{ data_get($item, 'title') }}" loading="lazy">
+                        </a>
+                    @else
+                        <span class="home-popular__thumb">
+                            <img src="{{ data_get($item, 'thumbnail_url') }}" alt="{{ data_get($item, 'title') }}" loading="lazy">
+                        </span>
+                    @endif
 
                     <div class="home-popular__body">
-                        <span class="home-popular__category">{{ $categoryName }}</span>
-                        <a class="home-popular__card-title" href="#" onclick="return false;">
-                            {{ data_get($item, 'title') }}
-                        </a>
+                        @if ($categoryId > 0)
+                            <a class="home-popular__category" href="{{ route('tips.category', ['category_id' => $categoryId]) }}">{{ $categoryName }}</a>
+                        @else
+                            <span class="home-popular__category">{{ $categoryName }}</span>
+                        @endif
+                        @if ($tipId > 0)
+                            <a class="home-popular__card-title" href="{{ route('tip.show', ['tip_id' => $tipId]) }}">
+                                {{ data_get($item, 'title') }}
+                            </a>
+                        @else
+                            <span class="home-popular__card-title">
+                                {{ data_get($item, 'title') }}
+                            </span>
+                        @endif
 
                         <div class="home-popular__author-row">
                             <x-author-inline
