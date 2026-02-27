@@ -316,6 +316,26 @@ class TipController extends Controller
     }
 
     /**
+     * 팁 리스트 페이지
+     */
+    public function tipList(Request $request){
+        return view('tips.view', [
+            'viewMode' => 'tipList',
+            'title' => '팁 목록',
+        ]);
+    }
+
+    /**
+     * 팁 검색 결과 페이지
+     */
+    public function tipSearch(Request $request){
+        return view('tips.view',[
+            'viewMode' => 'tipSearch',
+            'title' => '팁 검색 결과',
+        ]);
+    }
+
+    /**
      * 분류별 페이지
      */
     public function tipListBySort(Request $request, int $sort_id){

@@ -4,7 +4,7 @@
     'summaryValue' => null,
     'date' => now()->format('Y.m.d'),
     'rankings' => [],
-    'action' => route('tips.list'),
+    'action' => route('tips.search'),
     'queryName' => 'query',
 ])
 

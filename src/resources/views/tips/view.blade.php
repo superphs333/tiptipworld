@@ -29,6 +29,13 @@
             $title = $site_title;
             $partial = 'tips.partials.userfeed';
             break;
+        case 'tipList' : 
+            $partial = 'tips.partials.tiplist';
+            break;
+        case 'tipSearch':
+            $title = '팁 검색';
+            $partial = 'tips.partials.tipsearch';
+            break;
     }
 @endphp
 

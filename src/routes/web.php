@@ -47,6 +47,8 @@ Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
     ->whereNumber('tip_id')->name('tip.show');
 // 리스트 페이지
 Route::get('/tips/',[TipController::class, 'tipList'])->name('tips.list');
+// 검색 페이지
+Route::get('/tips/search',[TipController::class, 'tipSearch'])->name('tips.search');
 // 사용자 피드 페이지
 Route::get('/tips/user/{user_id}',[TipController::class, 'tipUserFeed'])->name('tips.userFeed');
 // 분류별 페이지
