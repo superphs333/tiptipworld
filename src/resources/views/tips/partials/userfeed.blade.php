@@ -1,10 +1,12 @@
 @php
     $currentSort = (string) ($currentSort ?? request('sort', 'latest'));
 
+    $fallbackAvatar = asset('images/avatar-default.svg');
+
     $profileUser = $profileUser ?? [
         'id' => 0,
         'name' => '작성자',
-        'profile_image_url' => asset('images/avatar-default.svg'),
+        'profile_image_url' => $fallbackAvatar,
         'joined' => '집계 중',
     ];
 
@@ -19,7 +21,12 @@
     $totalCount = (int) ($totalCount ?? $tipItems->count());
 @endphp
 
-<section class="tip-userfeed" data-tip-userfeed>
+<section
+    class="tip-userfeed"
+    data-tip-userfeed
+    data-follow-list-url="{{ route('user.follow.list', ['user_id' => $profileUser['id']]) }}"
+    data-follow-toggle-url-base="{{ url('/user/follow') }}"
+>
     <header class="tip-userfeed__profile">
         <div class="tip-userfeed__identity">
             <img
@@ -38,14 +45,26 @@
         </div>
 
         <div class="tip-userfeed__relation">
-            <p class="tip-userfeed__relation-item">
+            <button
+                type="button"
+                class="tip-userfeed__relation-item tip-userfeed__relation-trigger"
+                data-follow-modal-open="followers"
+                aria-controls="tip-userfeed-follow-modal"
+                aria-haspopup="dialog"
+            >
                 <strong data-followers-count data-count="{{ $followersCount }}">{{ number_format($followersCount) }}</strong>
                 <span>Followers</span>
-            </p>
-            <p class="tip-userfeed__relation-item">
-                <strong>{{ number_format($followingCount) }}</strong>
+            </button>
+            <button
+                type="button"
+                class="tip-userfeed__relation-item tip-userfeed__relation-trigger"
+                data-follow-modal-open="following"
+                aria-controls="tip-userfeed-follow-modal"
+                aria-haspopup="dialog"
+            >
+                <strong data-following-count data-count="{{ $followingCount }}">{{ number_format($followingCount) }}</strong>
                 <span>Following</span>
-            </p>
+            </button>
             @if (!$myFeed)
             <span class="author-inline tip-userfeed__follow-wrap" data-author-id="{{ $profileUser['id'] }}">
                 <button
@@ -213,6 +232,78 @@
                     </div>
                 </article>
             @endforeach
+        </div>
+    </section>
+
+    <section
+        class="tip-userfeed__follow-modal"
+        id="tip-userfeed-follow-modal"
+        data-follow-modal
+        hidden
+        aria-hidden="true"
+    >
+        <div class="tip-userfeed__follow-modal-backdrop" data-follow-modal-close></div>
+
+        <div
+            class="tip-userfeed__follow-modal-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tip-userfeed-follow-modal-title"
+        >
+            <header class="tip-userfeed__follow-modal-head">
+                <h2 id="tip-userfeed-follow-modal-title">팔로워 / 팔로잉</h2>
+                <button
+                    type="button"
+                    class="tip-userfeed__follow-modal-close"
+                    data-follow-modal-close
+                    aria-label="팔로우 목록 닫기"
+                >
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </header>
+
+            <div class="tip-userfeed__follow-tabs" role="tablist" aria-label="팔로우 목록 탭">
+                <button
+                    type="button"
+                    class="tip-userfeed__follow-tab is-active"
+                    data-follow-modal-tab="followers"
+                    role="tab"
+                    aria-selected="true"
+                >
+                    팔로워
+                    <em data-follow-modal-tab-count="followers">0</em>
+                </button>
+                <button
+                    type="button"
+                    class="tip-userfeed__follow-tab"
+                    data-follow-modal-tab="following"
+                    role="tab"
+                    aria-selected="false"
+                >
+                    팔로잉
+                    <em data-follow-modal-tab-count="following">0</em>
+                </button>
+            </div>
+
+            <label class="tip-userfeed__follow-search">
+                <span class="tip-userfeed__follow-search-label">검색</span>
+                <input
+                    type="search"
+                    name="follow-search"
+                    placeholder="이름 검색"
+                    autocomplete="off"
+                    data-follow-modal-search
+                >
+            </label>
+
+            <div class="tip-userfeed__follow-body">
+                <ul class="tip-userfeed__follow-list" data-follow-modal-list></ul>
+                <p class="tip-userfeed__follow-empty" data-follow-modal-empty hidden>검색 결과가 없습니다.</p>
+            </div>
+
+            <footer class="tip-userfeed__follow-footer">
+                <p>모달을 열 때마다 최신 팔로우 목록을 다시 불러옵니다.</p>
+            </footer>
         </div>
     </section>
 </section>

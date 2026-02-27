@@ -80,6 +80,7 @@ Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
 
 // 팔로우
 Route::post('/user/follow/{user_id}', [UserFollowController::class, 'followUser'])->whereNumber('user_id')->middleware('auth')->name('user.follow');
+Route::get('/user/follows/{user_id}', [UserFollowController::class, 'followList'])->whereNumber('user_id')->name('user.follow.list');
     
 
 /**
