@@ -1,54 +1,87 @@
+@php
+    $initialCategory = (string) request()->query('category', 'all');
+    $initialSort = (string) request()->query('sort', 'latest');
+    $initialQuery = trim((string) request()->query('query', ''));
+
+    $requestTags = request()->query('tags', []);
+    if (is_string($requestTags)) {
+        $requestTags = array_filter(array_map('trim', explode(',', $requestTags)));
+    } elseif (!is_array($requestTags)) {
+        $requestTags = [];
+    }
+
+    $initialTags = array_values(array_filter(
+        array_map(static fn ($tag) => trim((string) $tag), $requestTags),
+        static fn ($tag) => $tag !== ''
+    ));
+@endphp
+
 <section class="tip-wireframe tip-list-wireframe tip-search-minimal" data-tip-search-ui>
-    <form class="tip-search-minimal__search-row" data-search-form aria-label="검색 조건">
-        <label class="tip-search-minimal__field" for="tip-search-category">
-            <span>카테고리</span>
-            <select class="tip-search-minimal__select" id="tip-search-category" data-search-category>
-                <option value="all">전체 카테고리</option>
-                <option value="backend">백엔드</option>
-                <option value="frontend">프론트엔드</option>
-                <option value="database">데이터베이스</option>
-                <option value="infra">인프라</option>
-            </select>
-        </label>
+    <form
+        id="tip-search-form"
+        class="tip-search-minimal__form"
+        method="GET"
+        action="{{ route('tips.search') }}"
+        data-search-form
+        aria-label="검색 조건"
+    >
+        <section class="tip-search-minimal__search-box" aria-label="통합 검색 영역">
+            <div class="tip-search-minimal__search-row">
+                <label class="tip-search-minimal__field" for="tip-search-category">
+                    <span>카테고리</span>
+                    <select class="tip-search-minimal__select" id="tip-search-category" name="category" data-search-category>
+                        <option value="all" @selected($initialCategory === '' || $initialCategory === 'all')>전체 카테고리</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" @selected((string) $initialCategory === (string) $category->id)>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
 
-        <label class="tip-search-minimal__field" for="tip-search-query">
-            <span>검색어</span>
-            <input
-                class="tip-search-minimal__input"
-                id="tip-search-query"
-                type="search"
-                placeholder="제목/작성자 검색"
-                autocomplete="off"
-                data-search-query
-            >
-        </label>
+                <label class="tip-search-minimal__field" for="tip-search-query">
+                    <span>검색어(제목/작성자/태그)</span>
+                    <input
+                        class="tip-search-minimal__input"
+                        id="tip-search-query"
+                        type="search"
+                        name="query"
+                        value="{{ $initialQuery }}"
+                        placeholder="제목/작성자/태그 통합 검색"
+                        autocomplete="off"
+                        data-search-query
+                    >
+                </label>
+            </div>
 
-        <button class="tip-search-minimal__btn tip-search-minimal__btn--primary" type="submit">검색</button>
+            <section class="tip-search-minimal__tag-panel" aria-label="검색에 포함할 태그">
+                <header class="tip-search-minimal__tag-head">
+                    <h2>검색 태그</h2>
+                </header>
+
+                <div class="tip-search-minimal__tag-input-wrap">
+                    <input
+                        class="tip-search-minimal__input"
+                        type="search"
+                        placeholder=""
+                        autocomplete="off"
+                        data-tag-input
+                    >
+                    <button class="tip-search-minimal__btn" type="button" data-tag-add>추가</button>
+                </div>
+
+                <div class="tip-search-minimal__tags" data-tag-list>
+                    <span class="tip-search-minimal__empty" data-tag-empty>선택된 태그 없음</span>
+                </div>
+            </section>
+        </section>
+
+        <div class="tip-search-minimal__actions">
+            <button class="tip-search-minimal__btn tip-search-minimal__btn--primary" type="submit">검색</button>
+        </div>
+
+        <div class="tip-search-minimal__tag-hidden" data-tag-hidden-inputs></div>
     </form>
-
-    <section class="tip-search-minimal__tag-panel" aria-label="태그 검색">
-        <header class="tip-search-minimal__tag-head">
-            <h2>태그</h2>
-            <span class="tip-search-minimal__tag-total">총 <strong data-tag-total>0</strong>개</span>
-        </header>
-
-        <div class="tip-search-minimal__tag-input-wrap">
-            <input
-                class="tip-search-minimal__input"
-                type="search"
-                placeholder="태그 검색/입력"
-                autocomplete="off"
-                data-tag-input
-            >
-            <button class="tip-search-minimal__btn" type="button" data-tag-add>추가</button>
-        </div>
-    </section>
-
-    <div class="tip-search-minimal__tags-outside">
-        <div class="tip-search-minimal__tags" data-tag-list>
-            <span class="tip-search-minimal__empty" data-tag-empty>선택된 태그 없음</span>
-        </div>
-    </div>
 
     <section class="tip-list-wireframe__list" aria-label="검색 결과">
         <header class="tip-list-wireframe__list-head">
@@ -56,15 +89,15 @@
                 <h2 class="tip-list-wireframe__section-title">리스트</h2>
                 <p><span data-result-count>0</span>개의 게시글</p>
             </div>
-            <form class="tip-list-wireframe__sort-form" onsubmit="return false;">
+            <div class="tip-list-wireframe__sort-form">
                 <label for="tip-search-sort">정렬</label>
-                <select id="tip-search-sort" data-search-sort>
-                    <option value="latest">최신순</option>
-                    <option value="popular">조회순</option>
-                    <option value="likes">좋아요순</option>
-                    <option value="bookmarks">북마크순</option>
+                <select id="tip-search-sort" name="sort" form="tip-search-form" data-search-sort>
+                    <option value="latest" @selected($initialSort === 'latest')>최신순</option>
+                    <option value="popular" @selected($initialSort === 'popular')>조회순</option>
+                    <option value="likes" @selected($initialSort === 'likes')>좋아요순</option>
+                    <option value="bookmarks" @selected($initialSort === 'bookmarks')>북마크순</option>
                 </select>
-            </form>
+            </div>
         </header>
 
         <div class="tip-list-wireframe__items" data-result-list></div>
@@ -215,28 +248,42 @@
             const tagAddButton = root.querySelector('[data-tag-add]');
             const tagList = root.querySelector('[data-tag-list]');
             const tagEmpty = root.querySelector('[data-tag-empty]');
-            const tagTotal = root.querySelector('[data-tag-total]');
+            const tagHiddenInputs = root.querySelector('[data-tag-hidden-inputs]');
 
             const resultList = root.querySelector('[data-result-list]');
             const resultCount = root.querySelector('[data-result-count]');
             const resultMeta = root.querySelector('[data-result-meta]');
             const template = document.getElementById('tip-search-row-template');
+            const initialTags = @json($initialTags);
 
             const state = {
-                query: '',
-                category: 'all',
-                sort: 'latest',
+                query: String(queryInput.value || '').trim(),
+                category: categorySelect.value || 'all',
+                sort: sortSelect.value || 'latest',
                 tags: [],
             };
 
             const numberFormat = (value) => new Intl.NumberFormat('ko-KR').format(Number(value) || 0);
 
+            const syncTagHiddenInputs = () => {
+                if (!tagHiddenInputs) {
+                    return;
+                }
+
+                tagHiddenInputs.innerHTML = '';
+                state.tags.forEach((tag) => {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'tags[]';
+                    hidden.value = tag;
+                    tagHiddenInputs.appendChild(hidden);
+                });
+            };
+
             const setTagStates = () => {
                 const hasTags = tagList.querySelector('[data-tag-chip]') !== null;
                 tagEmpty.hidden = hasTags;
-                if (tagTotal) {
-                    tagTotal.textContent = numberFormat(state.tags.length);
-                }
+                syncTagHiddenInputs();
             };
 
             const createTagChip = (label) => {
@@ -255,12 +302,12 @@
                 }
 
                 const key = raw.toLowerCase();
-                if (state.tags.includes(key)) {
+                if (state.tags.some((tag) => tag.toLowerCase() === key)) {
                     tagInput.value = '';
                     return;
                 }
 
-                state.tags.push(key);
+                state.tags.push(raw);
                 createTagChip(raw);
                 tagInput.value = '';
                 setTagStates();
@@ -287,13 +334,15 @@
                     mockTips.filter((tip) => {
                         const keywordMatch = keyword === ''
                             || tip.title.toLowerCase().includes(keyword)
-                            || tip.author.toLowerCase().includes(keyword);
+                            || tip.author.toLowerCase().includes(keyword)
+                            || tip.tags.some((tag) => tag.toLowerCase().includes(keyword));
 
-                        const categoryMatch = state.category === 'all' || tip.category === state.category;
+                        const hasMockCategory = ['backend', 'frontend', 'database', 'infra'].includes(state.category);
+                        const categoryMatch = state.category === 'all' || !hasMockCategory || tip.category === state.category;
 
                         const lowerTags = tip.tags.map((tag) => tag.toLowerCase());
                         const tagMatch = state.tags.length === 0
-                            || state.tags.some((tag) => lowerTags.includes(tag));
+                            || state.tags.some((tag) => lowerTags.includes(tag.toLowerCase()));
 
                         return keywordMatch && categoryMatch && tagMatch;
                     }),
@@ -341,11 +390,11 @@
                 resultMeta.textContent = `총 ${numberFormat(results.length)}개`;
             };
 
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
+            form.addEventListener('submit', () => {
                 state.query = String(queryInput.value || '').trim();
-                state.category = categorySelect.value;
-                renderResults();
+                state.category = categorySelect.value || 'all';
+                state.sort = sortSelect.value || 'latest';
+                syncTagHiddenInputs();
             });
 
             sortSelect.addEventListener('change', () => {
@@ -369,10 +418,24 @@
                 }
 
                 const target = String(chip.dataset.tagChip || '').trim();
-                state.tags = state.tags.filter((tag) => tag !== target);
+                state.tags = state.tags.filter((tag) => tag.toLowerCase() !== target);
                 chip.remove();
                 setTagStates();
                 renderResults();
+            });
+
+            initialTags.forEach((tag) => {
+                const label = String(tag || '').trim();
+                if (!label) {
+                    return;
+                }
+
+                if (state.tags.some((current) => current.toLowerCase() === label.toLowerCase())) {
+                    return;
+                }
+
+                state.tags.push(label);
+                createTagChip(label);
             });
 
             setTagStates();

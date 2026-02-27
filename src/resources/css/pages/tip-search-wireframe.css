@@ -12,9 +12,23 @@
     gap: 16px;
 }
 
+.tip-search-minimal__form {
+    display: grid;
+    gap: 16px;
+}
+
+.tip-search-minimal__search-box {
+    border: 1px solid var(--sm-line);
+    border-radius: 20px;
+    background: var(--sm-panel);
+    padding: 14px;
+    display: grid;
+    gap: 12px;
+}
+
 .tip-search-minimal__search-row {
     display: grid;
-    grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr);
     gap: 10px;
     align-items: end;
 }
@@ -73,42 +87,33 @@
 }
 
 .tip-search-minimal__tag-panel {
-    border: 1px solid var(--sm-line);
-    border-radius: 20px;
-    background: var(--sm-panel);
-    padding: 14px;
+    padding: 4px 0 0;
     display: grid;
     gap: 10px;
+}
+
+.tip-search-minimal__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.tip-search-minimal__actions .tip-search-minimal__btn--primary {
+    min-width: 112px;
 }
 
 .tip-search-minimal__tag-head {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 10px;
 }
 
 .tip-search-minimal__tag-head h2 {
     margin: 0;
-    font-size: 1.02rem;
-    letter-spacing: -0.01em;
-}
-
-.tip-search-minimal__tag-total {
-    height: 30px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid var(--sm-line);
-    background: #ffffff;
     color: var(--sm-muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.82rem;
-}
-
-.tip-search-minimal__tag-total strong {
-    color: var(--sm-ink);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
 }
 
 .tip-search-minimal__tag-input-wrap {
@@ -122,8 +127,8 @@
     box-shadow: none;
 }
 
-.tip-search-minimal__tags-outside {
-    padding: 0 2px;
+.tip-search-minimal__tag-hidden {
+    display: none;
 }
 
 .tip-search-minimal__tags {
@@ -167,10 +172,6 @@
     .tip-search-minimal__search-row {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
-
-    .tip-search-minimal__search-row .tip-search-minimal__btn--primary {
-        grid-column: 1 / -1;
-    }
 }
 
 @media (max-width: 760px) {
@@ -184,6 +185,10 @@
 
     .tip-search-minimal__tag-input-wrap {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tip-search-minimal__actions .tip-search-minimal__btn--primary {
+        width: 100%;
     }
 
 }
