@@ -37,7 +37,8 @@ class TipController extends Controller
     {
         $tabs = config('admin.tabs', []);
         $tab = 'tips';
-    
+
+
         $categories = Category::query()
             ->forTipForm()
             ->get([
@@ -329,9 +330,106 @@ class TipController extends Controller
      * 팁 검색 결과 페이지
      */
     public function tipSearch(Request $request){
-        return view('tips.view',[
+        $allowedSorts = ['latest', 'popular', 'likes', 'bookmarks'];
+        $sort = (string) $request->query('sort', 'latest');
+        if (!in_array($sort, $allowedSorts, true)) {
+            $sort = 'latest';
+        }
+
+        $category = (string) $request->query('category', 'all');
+        $query = trim((string) $request->query('query', ''));
+
+        $rawTags = $request->query('tags', []);
+        if (is_string($rawTags)) {
+            $rawTags = explode(',', $rawTags);
+        } elseif (!is_array($rawTags)) {
+            $rawTags = [];
+        }
+
+        $tags = array_values(array_filter(
+            array_unique(array_map(static fn ($tag) => trim((string) $tag), $rawTags), SORT_STRING),
+            static fn ($tag) => $tag !== ''
+        ));
+
+        $existingTags = empty($tags)
+            ? collect()
+            : Tag::query()->whereIn('name', $tags)->get(['id', 'name']);
+        $tagIds = $existingTags->pluck('id')->map(static fn ($id) => (int) $id)->all();
+
+        $authUserId = Auth::id();
+        $countRelations = [
+            'comments',
+        ];
+        if ($authUserId) {
+            $countRelations['likedUsers as is_liked'] = function ($countQuery) use ($authUserId) {
+                $countQuery->where('users.id', $authUserId);
+            };
+            $countRelations['bookmarkedUsers as is_bookmarked'] = function ($countQuery) use ($authUserId) {
+                $countQuery->where('users.id', $authUserId);
+            };
+        }
+
+        $baseQuery = Tip::query()
+            ->where('status', 'published')
+            ->where('visibility', 'public')
+            ->with([
+                'user:id,name,profile_image_path',
+                'category:id,name',
+                'tags:id,name',
+            ])
+            ->withCount($countRelations);
+
+        if ($category !== '' && $category !== 'all') {
+            $baseQuery->where('category_id', (int) $category);
+        }
+
+        if ($query !== '') {
+            $baseQuery->where(function ($searchQuery) use ($query) {
+                $searchQuery->where('title', 'like', "%{$query}%")
+                    ->orWhereHas('user', function ($userQuery) use ($query) {
+                        $userQuery->where('name', 'like', "%{$query}%");
+                    });
+            });
+        }
+
+        if (!empty($tags)) {
+            // "선택한 모든 태그 포함" 정책:
+            // 입력 태그 중 실제 존재하지 않는 태그가 하나라도 있으면 결과는 빈 목록
+            if (count($tagIds) !== count($tags)) {
+                $baseQuery->whereRaw('1 = 0');
+            } else {
+                foreach ($tagIds as $tagId) {
+                    $baseQuery->whereHas('tags', function ($tagQuery) use ($tagId) {
+                        $tagQuery->where('tags.id', $tagId);
+                    });
+                }
+            }
+        }
+
+        $listQuery = match ($sort) {
+            'popular' => (clone $baseQuery)->orderByDesc('view_count')->orderByDesc('id'),
+            'likes' => (clone $baseQuery)->orderByDesc('like_count')->orderByDesc('id'),
+            'bookmarks' => (clone $baseQuery)->orderByDesc('bookmark_count')->orderByDesc('id'),
+            default => (clone $baseQuery)->orderByDesc('created_at')->orderByDesc('id'),
+        };
+
+        $perPage = min(max((int) $request->query('per_page', 12), 1), 50);
+        $tipItems = $listQuery->paginate($perPage)->withQueryString();
+
+        $categories = Category::query()
+            ->forTipForm()
+            ->get(['id', 'name']);
+
+        return view('tips.view', [
             'viewMode' => 'tipSearch',
             'title' => '팁 검색 결과',
+            'categories' => $categories,
+            'tipItems' => $tipItems,
+            'totalCount' => (int) $tipItems->total(),
+            'initialCategory' => $category === '' ? 'all' : $category,
+            'initialSort' => $sort,
+            'initialQuery' => $query,
+            'initialTags' => $tags,
         ]);
     }
 

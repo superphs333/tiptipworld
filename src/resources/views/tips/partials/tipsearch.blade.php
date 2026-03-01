@@ -1,19 +1,16 @@
 @php
-    $initialCategory = (string) request()->query('category', 'all');
-    $initialSort = (string) request()->query('sort', 'latest');
-    $initialQuery = trim((string) request()->query('query', ''));
-
-    $requestTags = request()->query('tags', []);
-    if (is_string($requestTags)) {
-        $requestTags = array_filter(array_map('trim', explode(',', $requestTags)));
-    } elseif (!is_array($requestTags)) {
-        $requestTags = [];
-    }
-
+    $initialCategory = (string) ($initialCategory ?? 'all');
+    $initialSort = (string) ($initialSort ?? 'latest');
+    $initialQuery = trim((string) ($initialQuery ?? ''));
     $initialTags = array_values(array_filter(
-        array_map(static fn ($tag) => trim((string) $tag), $requestTags),
+        array_map(static fn ($tag) => trim((string) $tag), (array) ($initialTags ?? [])),
         static fn ($tag) => $tag !== ''
     ));
+    $totalCount = isset($tipItems) && method_exists($tipItems, 'total')
+        ? (int) $tipItems->total()
+        : (isset($tipItems) ? (int) $tipItems->count() : 0);
+    $firstItem = isset($tipItems) && method_exists($tipItems, 'firstItem') ? $tipItems->firstItem() : null;
+    $lastItem = isset($tipItems) && method_exists($tipItems, 'lastItem') ? $tipItems->lastItem() : null;
 @endphp
 
 <section class="tip-wireframe tip-list-wireframe tip-search-minimal" data-tip-search-ui>
@@ -40,17 +37,27 @@
                 </label>
 
                 <label class="tip-search-minimal__field" for="tip-search-query">
-                    <span>검색어(제목/작성자/태그)</span>
+                    <span>검색어(제목/작성자)</span>
                     <input
                         class="tip-search-minimal__input"
                         id="tip-search-query"
                         type="search"
                         name="query"
                         value="{{ $initialQuery }}"
-                        placeholder="제목/작성자/태그 통합 검색"
+                        placeholder="제목/작성자 통합 검색"
                         autocomplete="off"
                         data-search-query
                     >
+                </label>
+
+                <label class="tip-search-minimal__field tip-search-minimal__field--sort" for="tip-search-sort">
+                    <span>정렬</span>
+                    <select class="tip-search-minimal__select" id="tip-search-sort" name="sort" data-search-sort>
+                        <option value="latest" @selected($initialSort === 'latest')>최신순</option>
+                        <option value="popular" @selected($initialSort === 'popular')>조회순</option>
+                        <option value="likes" @selected($initialSort === 'likes')>좋아요순</option>
+                        <option value="bookmarks" @selected($initialSort === 'bookmarks')>북마크순</option>
+                    </select>
                 </label>
             </div>
 
@@ -58,12 +65,13 @@
                 <header class="tip-search-minimal__tag-head">
                     <h2>검색 태그</h2>
                 </header>
+                <p class="tip-search-minimal__tag-rule">선택한 태그를 모두 포함한 게시글만 검색됩니다.</p>
 
                 <div class="tip-search-minimal__tag-input-wrap">
                     <input
                         class="tip-search-minimal__input"
                         type="search"
-                        placeholder=""
+                        placeholder="태그 입력"
                         autocomplete="off"
                         data-tag-input
                     >
@@ -87,76 +95,141 @@
         <header class="tip-list-wireframe__list-head">
             <div class="tip-list-wireframe__list-heading">
                 <h2 class="tip-list-wireframe__section-title">리스트</h2>
-                <p><span data-result-count>0</span>개의 게시글</p>
-            </div>
-            <div class="tip-list-wireframe__sort-form">
-                <label for="tip-search-sort">정렬</label>
-                <select id="tip-search-sort" name="sort" form="tip-search-form" data-search-sort>
-                    <option value="latest" @selected($initialSort === 'latest')>최신순</option>
-                    <option value="popular" @selected($initialSort === 'popular')>조회순</option>
-                    <option value="likes" @selected($initialSort === 'likes')>좋아요순</option>
-                    <option value="bookmarks" @selected($initialSort === 'bookmarks')>북마크순</option>
-                </select>
+                <p>{{ number_format($totalCount) }}개의 게시글</p>
             </div>
         </header>
 
-        <div class="tip-list-wireframe__items" data-result-list></div>
+        <div class="tip-list-wireframe__items">
+            @forelse (($tipItems ?? collect()) as $item)
+                @php
+                    $authorName = data_get($item, 'user.name', '작성자 미상');
+                    $authorImage = data_get($item, 'user.profile_image_url', asset('images/avatar-default.svg'));
+                    $authorId = (int) data_get($item, 'user.id', 0);
+                    $categoryId = (int) data_get($item, 'category.id', 0);
+                    $categoryName = trim((string) data_get($item, 'category.name', ''));
+                    if ($categoryId > 0 && $categoryName === '') {
+                        $categoryName = '카테고리';
+                    }
+                    $commentCount = (int) data_get($item, 'comment_count', data_get($item, 'comments_count', 0));
+                    $likeCount = (int) data_get($item, 'like_count', data_get($item, 'likes_count', 0));
+                    $bookmarkCount = (int) data_get($item, 'bookmark_count', data_get($item, 'bookmarks_count', 0));
+                    $isLiked = (int) data_get($item, 'is_liked', 0) > 0;
+                    $isBookmarked = (int) data_get($item, 'is_bookmarked', 0) > 0;
+                    $summarySource = (string) data_get($item, 'excerpt', data_get($item, 'content', ''));
+                    $summary = \Illuminate\Support\Str::limit(trim(strip_tags($summarySource)), 110, '...');
+                    $tagItems = collect(data_get($item, 'tags', []))
+                        ->map(static function ($tag) {
+                            return [
+                                'id' => (int) data_get($tag, 'id', 0),
+                                'name' => trim((string) data_get($tag, 'name', '')),
+                            ];
+                        })
+                        ->filter(static fn ($tag) => $tag['name'] !== '')
+                        ->values();
+                @endphp
+                <article class="tip-list-wireframe__item">
+                    <a class="tip-list-wireframe__thumb" href="{{ route('tip.show', ['tip_id' => $item->id]) }}">
+                        <img src="{{ data_get($item, 'thumbnailUrl', asset('images/no-thumbnail.png')) }}" alt="{{ $item->title }}" loading="lazy">
+                    </a>
+
+                    <div class="tip-list-wireframe__item-body">
+                        @if ($categoryId > 0)
+                            <a class="tip-list-wireframe__category tip-search-minimal__result-category" href="{{ route('tips.category', ['category_id' => $categoryId]) }}">
+                                {{ $categoryName }}
+                            </a>
+                        @endif
+
+                        <div class="tip-list-wireframe__headline">
+                            <a class="tip-list-wireframe__item-title" href="{{ route('tip.show', ['tip_id' => $item->id]) }}">{{ $item->title }}</a>
+                        </div>
+
+                        <div class="tip-list-wireframe__meta">
+                            <x-author-inline
+                                :name="$authorName"
+                                :avatar="$authorImage"
+                                :author-id="$authorId"
+                                variant="list"
+                                class="tip-list-wireframe__author"
+                            />
+                            <span>댓글 {{ number_format($commentCount) }}</span>
+                            <span>{{ data_get($item, 'createdDate') }}</span>
+                        </div>
+
+                        <p class="tip-list-wireframe__summary">{{ $summary }}</p>
+
+                        @if ($tagItems->isNotEmpty())
+                            <div class="tip-wireframe__tags tip-search-minimal__result-tags" aria-label="게시글 태그">
+                                @foreach ($tagItems as $tag)
+                                    @if ($tag['id'] > 0)
+                                        <a class="tip-wireframe__tag tip-search-minimal__result-tag" href="{{ route('tips.tag', ['tag_id' => $tag['id']]) }}">#{{ $tag['name'] }}</a>
+                                    @else
+                                        <span class="tip-wireframe__tag tip-search-minimal__result-tag">#{{ $tag['name'] }}</span>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <div class="tip-list-wireframe__engagement" aria-label="좋아요 및 북마크">
+                            <button
+                                type="button"
+                                class="tip-list-wireframe__engagement-btn {{ $isLiked ? 'is-liked' : '' }}"
+                                aria-label="좋아요"
+                                title="좋아요"
+                                data-tip-action="like"
+                                aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                                data-tip-id="{{ $item->id }}"
+                            >
+                                <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                                        <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke-width="1.6" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span class="tip-list-wireframe__engagement-label">좋아요</span>
+                                <span class="tip-list-wireframe__engagement-count" data-like-count>{{ number_format($likeCount) }}</span>
+                            </button>
+                            <button
+                                type="button"
+                                class="tip-list-wireframe__engagement-btn {{ $isBookmarked ? 'is-bookmarked' : '' }}"
+                                aria-label="북마크"
+                                title="북마크"
+                                data-tip-action="bookmark"
+                                aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}"
+                                data-tip-id="{{ $item->id }}"
+                            >
+                                <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
+                                    <svg viewBox="0 0 24 24" fill="none" focusable="false">
+                                        <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke-width="1.6" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span class="tip-list-wireframe__engagement-label">북마크</span>
+                                <span class="tip-list-wireframe__engagement-count" data-bookmark-count>{{ number_format($bookmarkCount) }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            @empty
+                <article class="tip-list-wireframe__item tip-list-wireframe__item--empty">
+                    <p>검색 결과가 없습니다.</p>
+                </article>
+            @endforelse
+        </div>
 
         <footer class="tip-list-wireframe__pagination">
-            <span class="tip-list-wireframe__page-meta" data-result-meta>총 0개</span>
+            <span class="tip-list-wireframe__page-meta">
+                @if ($firstItem !== null && $lastItem !== null)
+                    {{ $firstItem }}-{{ $lastItem }} / 총 {{ number_format($totalCount) }}개
+                @else
+                    총 {{ number_format($totalCount) }}개
+                @endif
+            </span>
+            @if (isset($tipItems) && method_exists($tipItems, 'hasPages') && $tipItems->hasPages())
+                <div class="app-pagination app-pagination--tip">
+                    {{ $tipItems->onEachSide(1)->links('vendor.pagination.app') }}
+                </div>
+            @endif
         </footer>
     </section>
 </section>
-
-<template id="tip-search-row-template">
-    <article class="tip-list-wireframe__item">
-        <a class="tip-list-wireframe__thumb" href="#" data-row-link>
-            <img src="/images/no-thumbnail.png" alt="" loading="lazy" data-row-thumb>
-        </a>
-
-        <div class="tip-list-wireframe__item-body">
-            <div class="tip-list-wireframe__headline">
-                <a class="tip-list-wireframe__item-title" href="#" data-row-title-link>
-                    <span data-row-title></span>
-                </a>
-            </div>
-
-            <div class="tip-list-wireframe__meta">
-                <span class="author-inline author-inline--list tip-list-wireframe__author">
-                    <span class="author-inline__profile author-inline__profile--static">
-                        <img class="author-inline__avatar" src="/images/avatar-default.svg" alt="" loading="lazy" data-row-author-avatar>
-                        <span class="author-inline__name" data-row-author></span>
-                    </span>
-                </span>
-                <span data-row-comments></span>
-                <span data-row-date></span>
-            </div>
-
-            <p class="tip-list-wireframe__summary" data-row-summary></p>
-
-            <div class="tip-list-wireframe__engagement" aria-label="좋아요 및 북마크">
-                <button type="button" class="tip-list-wireframe__engagement-btn" aria-label="좋아요" title="좋아요" disabled>
-                    <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                            <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke-width="1.6" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                    <span class="tip-list-wireframe__engagement-label">좋아요</span>
-                    <span class="tip-list-wireframe__engagement-count" data-row-likes>0</span>
-                </button>
-                <button type="button" class="tip-list-wireframe__engagement-btn" aria-label="북마크" title="북마크" disabled>
-                    <span class="tip-list-wireframe__engagement-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" focusable="false">
-                            <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke-width="1.6" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
-                    <span class="tip-list-wireframe__engagement-label">북마크</span>
-                    <span class="tip-list-wireframe__engagement-count" data-row-bookmarks>0</span>
-                </button>
-            </div>
-        </div>
-    </article>
-</template>
 
 @once
     <script>
@@ -166,110 +239,24 @@
                 return;
             }
 
-            const mockTips = [
-                {
-                    title: 'Laravel 배포 전 체크리스트',
-                    summary: '배포 전에 꼭 확인할 항목을 체크리스트 형식으로 정리했습니다.',
-                    author: '민수',
-                    category: 'backend',
-                    categoryLabel: '백엔드',
-                    tags: ['Laravel', 'Nginx', 'Docker'],
-                    comments: 12,
-                    likes: 48,
-                    bookmarks: 31,
-                    views: 1480,
-                    date: '2026-02-20',
-                    thumb: '/images/no-thumbnail.png',
-                },
-                {
-                    title: 'Blade 템플릿 재사용 패턴 정리',
-                    summary: '컴포넌트와 파셜을 분리할 때 실무에서 자주 쓰는 규칙을 모았습니다.',
-                    author: '지연',
-                    category: 'frontend',
-                    categoryLabel: '프론트엔드',
-                    tags: ['Blade', 'Laravel'],
-                    comments: 8,
-                    likes: 29,
-                    bookmarks: 17,
-                    views: 980,
-                    date: '2026-02-18',
-                    thumb: '/images/no-thumbnail.png',
-                },
-                {
-                    title: 'MySQL 인덱스 튜닝 기초',
-                    summary: '느린 쿼리를 빠르게 만들기 위한 인덱스 설계 포인트를 설명합니다.',
-                    author: '준호',
-                    category: 'database',
-                    categoryLabel: '데이터베이스',
-                    tags: ['MySQL', '성능'],
-                    comments: 5,
-                    likes: 40,
-                    bookmarks: 26,
-                    views: 1250,
-                    date: '2026-02-14',
-                    thumb: '/images/no-thumbnail.png',
-                },
-                {
-                    title: 'Redis 캐시 무효화 전략',
-                    summary: '캐시 일관성을 지키면서 성능을 얻는 패턴을 사례 중심으로 정리했습니다.',
-                    author: '서연',
-                    category: 'backend',
-                    categoryLabel: '백엔드',
-                    tags: ['Redis', '캐시'],
-                    comments: 9,
-                    likes: 36,
-                    bookmarks: 22,
-                    views: 1100,
-                    date: '2026-02-11',
-                    thumb: '/images/no-thumbnail.png',
-                },
-                {
-                    title: 'AWS + Docker 최소 배포 파이프라인',
-                    summary: '작은 팀에서 빠르게 운영 가능한 배포 흐름을 단계별로 소개합니다.',
-                    author: '하늘',
-                    category: 'infra',
-                    categoryLabel: '인프라',
-                    tags: ['AWS', 'Docker', 'CI/CD'],
-                    comments: 14,
-                    likes: 57,
-                    bookmarks: 44,
-                    views: 1820,
-                    date: '2026-02-07',
-                    thumb: '/images/no-thumbnail.png',
-                },
-            ];
-
             const form = root.querySelector('[data-search-form]');
-            const queryInput = root.querySelector('[data-search-query]');
-            const categorySelect = root.querySelector('[data-search-category]');
             const sortSelect = root.querySelector('[data-search-sort]');
-
             const tagInput = root.querySelector('[data-tag-input]');
             const tagAddButton = root.querySelector('[data-tag-add]');
             const tagList = root.querySelector('[data-tag-list]');
             const tagEmpty = root.querySelector('[data-tag-empty]');
             const tagHiddenInputs = root.querySelector('[data-tag-hidden-inputs]');
-
-            const resultList = root.querySelector('[data-result-list]');
-            const resultCount = root.querySelector('[data-result-count]');
-            const resultMeta = root.querySelector('[data-result-meta]');
-            const template = document.getElementById('tip-search-row-template');
             const initialTags = @json($initialTags);
 
+            if (!form || !tagInput || !tagAddButton || !tagList || !tagEmpty || !tagHiddenInputs) {
+                return;
+            }
+
             const state = {
-                query: String(queryInput.value || '').trim(),
-                category: categorySelect.value || 'all',
-                sort: sortSelect.value || 'latest',
                 tags: [],
             };
 
-            const numberFormat = (value) => new Intl.NumberFormat('ko-KR').format(Number(value) || 0);
-
             const syncTagHiddenInputs = () => {
-                if (!tagHiddenInputs) {
-                    return;
-                }
-
                 tagHiddenInputs.innerHTML = '';
                 state.tags.forEach((tag) => {
                     const hidden = document.createElement('input');
@@ -311,96 +298,22 @@
                 createTagChip(raw);
                 tagInput.value = '';
                 setTagStates();
-                renderResults();
-            };
-
-            const sortResults = (items) => {
-                const list = [...items];
-                if (state.sort === 'popular') {
-                    return list.sort((a, b) => b.views - a.views);
-                }
-                if (state.sort === 'likes') {
-                    return list.sort((a, b) => b.likes - a.likes);
-                }
-                if (state.sort === 'bookmarks') {
-                    return list.sort((a, b) => b.bookmarks - a.bookmarks);
-                }
-                return list.sort((a, b) => new Date(b.date) - new Date(a.date));
-            };
-
-            const getFilteredResults = () => {
-                const keyword = state.query.toLowerCase();
-                return sortResults(
-                    mockTips.filter((tip) => {
-                        const keywordMatch = keyword === ''
-                            || tip.title.toLowerCase().includes(keyword)
-                            || tip.author.toLowerCase().includes(keyword)
-                            || tip.tags.some((tag) => tag.toLowerCase().includes(keyword));
-
-                        const hasMockCategory = ['backend', 'frontend', 'database', 'infra'].includes(state.category);
-                        const categoryMatch = state.category === 'all' || !hasMockCategory || tip.category === state.category;
-
-                        const lowerTags = tip.tags.map((tag) => tag.toLowerCase());
-                        const tagMatch = state.tags.length === 0
-                            || state.tags.some((tag) => lowerTags.includes(tag.toLowerCase()));
-
-                        return keywordMatch && categoryMatch && tagMatch;
-                    }),
-                );
-            };
-
-            const renderRow = (tip) => {
-                const fragment = template.content.cloneNode(true);
-                const thumb = fragment.querySelector('[data-row-thumb]');
-                const rowLink = fragment.querySelector('[data-row-link]');
-                const titleLink = fragment.querySelector('[data-row-title-link]');
-
-                thumb.src = tip.thumb;
-                thumb.alt = tip.title;
-                rowLink.setAttribute('aria-label', tip.title);
-                fragment.querySelector('[data-row-title]').textContent = tip.title;
-                titleLink.setAttribute('aria-label', tip.title);
-
-                fragment.querySelector('[data-row-author]').textContent = tip.author;
-                fragment.querySelector('[data-row-comments]').textContent = `댓글 ${numberFormat(tip.comments)}`;
-                fragment.querySelector('[data-row-date]').textContent = tip.date;
-                fragment.querySelector('[data-row-summary]').textContent = tip.summary;
-                fragment.querySelector('[data-row-likes]').textContent = numberFormat(tip.likes);
-                fragment.querySelector('[data-row-bookmarks]').textContent = numberFormat(tip.bookmarks);
-
-                return fragment;
-            };
-
-            const renderResults = () => {
-                const results = getFilteredResults();
-                resultList.innerHTML = '';
-
-                if (!results.length) {
-                    const empty = document.createElement('article');
-                    empty.className = 'tip-list-wireframe__item tip-list-wireframe__item--empty';
-                    empty.innerHTML = '<p>검색 결과가 없습니다.</p>';
-                    resultList.appendChild(empty);
-                } else {
-                    results.forEach((tip) => {
-                        resultList.appendChild(renderRow(tip));
-                    });
-                }
-
-                resultCount.textContent = numberFormat(results.length);
-                resultMeta.textContent = `총 ${numberFormat(results.length)}개`;
             };
 
             form.addEventListener('submit', () => {
-                state.query = String(queryInput.value || '').trim();
-                state.category = categorySelect.value || 'all';
-                state.sort = sortSelect.value || 'latest';
                 syncTagHiddenInputs();
             });
 
-            sortSelect.addEventListener('change', () => {
-                state.sort = sortSelect.value;
-                renderResults();
-            });
+            if (sortSelect) {
+                sortSelect.addEventListener('change', () => {
+                    syncTagHiddenInputs();
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                        return;
+                    }
+                    form.submit();
+                });
+            }
 
             tagAddButton.addEventListener('click', addTag);
             tagInput.addEventListener('keydown', (event) => {
@@ -421,7 +334,6 @@
                 state.tags = state.tags.filter((tag) => tag.toLowerCase() !== target);
                 chip.remove();
                 setTagStates();
-                renderResults();
             });
 
             initialTags.forEach((tag) => {
@@ -439,7 +351,6 @@
             });
 
             setTagStates();
-            renderResults();
         })();
     </script>
 @endonce
