@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use App\Services\FileStorageService;
 use App\Services\TipViewCounterService;
+use App\Services\SearchKeywordService;
 use App\Services\TipService;
 use App\Services\FollowService;
 use App\Models\Tip;
@@ -17,7 +18,7 @@ use App\Models\User;
 
 class TipController extends Controller
 {
-    public function __construct(private FollowService $followService, private TipService $tipService, private TipViewCounterService $tipViewCounter)
+    public function __construct(private FollowService $followService, private TipService $tipService, private TipViewCounterService $tipViewCounter, private SearchKeywordService $searchKeywordService)
     {
         
     }
@@ -419,6 +420,13 @@ class TipController extends Controller
         $categories = Category::query()
             ->forTipForm()
             ->get(['id', 'name']);
+
+        /*
+        인기글 저장 
+        */
+        if($query !== '' && max((int) $request->query('page', 1),1)===1){
+            $this->searchKeywordService->record($request, $query);
+        }
 
         return view('tips.view', [
             'viewMode' => 'tipSearch',
