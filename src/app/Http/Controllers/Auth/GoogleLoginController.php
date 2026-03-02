@@ -116,7 +116,7 @@ class GoogleLoginController extends Controller
         Auth::login($user, true); // 로그인 유지
         request()->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('home', absolute: false));
     }
 
     private function downloadGoogleProfileImage(string $avatarUrl): ?string

@@ -81,7 +81,7 @@ class KakaoController extends Controller
         Auth::login($user, true);
         request()->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('home', absolute: false));
     }
 
     private function downloadProfileImage(string $avatarUrl): ?string
