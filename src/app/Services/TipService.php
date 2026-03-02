@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Models\Tip;
+use App\Models\Category;
 class TipService
 {
     public static function getUserFeed(int $target_id, ?string $sortKey = null){
@@ -46,5 +48,69 @@ class TipService
                 ],
             ];
         })->values();
+    }
+
+    public static function getMyTips(Request $request) : mixed{
+
+        // 조건 : 카테고리, 노출, 상태, 검색어
+        $query = trim($request->query('query'));
+        $category = $request->query('category_id') ?? null;
+        $status = $request->query('status');
+        $visibility = $request->query('visibility');
+
+        // 정렬
+        $sortKey = $request->query('sort', 'latest');
+        
+        $categoryForSelect = Category::query()
+            ->forTipForm()->get(['id', 'name']);
+        $tips = Tip::query()
+            ->where('user_id', Auth::id())
+            ->with('category')
+            ->with('tags:id,name');
+        
+        // 쿼리 (검색어)
+        if(isset($query) && $query !== ''){
+            $tips->where(function ($searchQ) use ($query){
+                $searchQ->where('title', 'like' , "%{$query}%");
+            });
+        }
+        // 카테고리
+        if(isset($category) && $category !== ''){
+            if($category === 'uncategorized'){
+                $tips->whereNull('category_id');
+            }else{
+                $tips->where('category_id',$category);
+            }
+        }
+        // 상태
+        if($status !== null && $status !== ''){
+            $tips->where('status',$status);
+        }
+        // 노출
+        if($visibility !== null && $visibility !== ''){
+            $tips->where('visibility', $visibility);
+        }
+        // 정렬
+        $resultTips = match($sortKey){
+            'popular' => (clone $tips)->orderByDesc('tips.view_count')->orderByDesc('tips.id'),
+            'likes' => (clone $tips)->orderByDesc('tips.like_count')->orderByDesc('tips.id'),
+            'bookmarks' => (clone $tips)->orderByDesc('tips.bookmark_count')->orderByDesc('tips.id'),
+            default => (clone $tips)->orderByDesc('tips.created_at')->orderByDesc('tips.id')
+        };
+
+        return $resultTips->get()->map(static function ($item){
+            return[
+                'id' => (int) data_get($item, 'id', 0),
+                'title' => (string) data_get($item, 'title'. ''),
+                'thumbnail_url' => (string) data_get($item, 'thumbnailUrl'),
+                'category_id' => (int) data_get($item, 'category.id'),
+                'category_name' => (string) data_get($item, 'category.name'),
+                'view_count' => (int) data_get($item, 'view_count', 0),
+                'like_count' => (int) data_get($item, 'like_count', 0),
+                'comment_count' => (int) data_get($item, 'comment_count', 0),
+                'bookmark_count' => (int) data_get($item, 'bookmark_count', 0),
+            ];
+        })->values();
+        
     }
 }
