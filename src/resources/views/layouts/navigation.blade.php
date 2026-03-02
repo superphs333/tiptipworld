@@ -3,6 +3,23 @@
         $adminTabs = config('admin.tabs', []);
         $defaultAdminTab = array_key_first($adminTabs) ?? 'users';
         $adminTab = request()->route('tab') ?? request()->query('tab', $defaultAdminTab);
+        $authUserId = (int) (auth()->id() ?? 0);
+        $profileFeedUserId = (int) request()->route('user_id', 0);
+        $userTabs = $authUserId > 0
+            ? [
+                [
+                    'label' => 'Profile',
+                    'href' => route('profile.edit'),
+                    'active' => request()->routeIs('profile.*'),
+                ],
+                [
+                    'label' => 'My Tips',
+                    'href' => route('tips.userFeed', ['user_id' => $authUserId]),
+                    'active' => request()->routeIs('tips.userFeed') && $profileFeedUserId === $authUserId,
+                ],
+                
+            ]
+            : [];
         if (request()->routeIs('admin.tip.*')) {
             $adminTab = 'tips';
         }
@@ -30,12 +47,10 @@
                             $isAdmin = Auth::user()->isAdmin();
                         @endphp
                         @if (!$isAdmin || !$isAdminArea)
-                            {{-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                                {{ __('Dashboard') }}
-                            </x-nav-link> --}}
-                            <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
-                                {{ __('Profile') }}
-                            </x-nav-link>
+                            <x-user-nav-links
+                                link-component="nav-link"
+                                :items="$userTabs"
+                            />
                         @endif
                         @if ($isAdmin && $isAdminArea)
                             <x-admin-nav-links
@@ -103,12 +118,10 @@
                     $isAdmin = Auth::user()->isAdmin();
                 @endphp
                 @if (!$isAdmin || !$isAdminArea)
-                    {{-- <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-responsive-nav-link> --}}
-                    <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
+                    <x-user-nav-links
+                        link-component="responsive-nav-link"
+                        :items="$userTabs"
+                    />
                 @endif
                 @if ($isAdmin && $isAdminArea)
                     <x-admin-nav-links
@@ -129,10 +142,6 @@
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
