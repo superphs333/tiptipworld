@@ -18,7 +18,12 @@
 @endphp
 
 <x-modal name="global-search" maxWidth="4xl" focusable>
-    <section class="space-y-5 p-6 sm:p-8" aria-label="검색 모달">
+    <section
+        x-data
+        x-on:open-modal.window="if ($event.detail === 'global-search') { $refs.searchForm?.reset(); }"
+        class="space-y-5 p-6 sm:p-8"
+        aria-label="검색 모달"
+    >
         <header class="flex items-start justify-between pb-1">
             <div class="space-y-1">
                 <h2 class="text-xl font-semibold text-gray-900">{{ $title }}</h2>
@@ -36,12 +41,14 @@
             </button>
         </header>
 
-        <form method="GET" action="{{ $action }}" class="flex items-center gap-2">
+        <form method="GET" action="{{ $action }}" class="flex items-center gap-2" x-ref="searchForm">
             <input
                 type="search"
                 name="{{ $queryName }}"
-                value="{{ request($queryName) }}"
                 placeholder="검색어를 입력하세요"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
                 class="h-12 w-full rounded-lg border border-gray-300 px-4 text-sm text-gray-900 focus:border-gray-500 focus:outline-none"
             />
 
@@ -61,9 +68,9 @@
             <div class="px-1 text-sm font-semibold text-gray-800">키워드 결과</div>
 
             <div class="overflow-hidden rounded-lg border border-gray-200">
-                <div class="grid grid-cols-[70px_minmax(0,1fr)] bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
-                    <span>순위</span>
-                    <span>키워드</span>
+                <div class="flex items-center gap-4 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
+                    <span class="w-[70px] shrink-0">순위</span>
+                    <span class="min-w-0 flex-1">키워드</span>
                 </div>
 
                 <ul class="divide-y divide-gray-200">
@@ -72,9 +79,9 @@
                             $rank = data_get($row, 'rank', $index + 1);
                             $keyword = data_get($row, 'keyword', data_get($row, 'label', '-'));
                         @endphp
-                        <li class="grid grid-cols-[70px_minmax(0,1fr)] px-4 py-3 text-sm text-gray-800">
-                            <span class="font-semibold">{{ $rank }}</span>
-                            <span class="truncate">{{ $keyword }}</span>
+                        <li class="flex items-center gap-4 px-4 py-3 text-sm text-gray-800">
+                            <span class="w-[70px] shrink-0 font-semibold">{{ $rank }}</span>
+                            <span class="min-w-0 flex-1 truncate">{{ $keyword }}</span>
                         </li>
                     @endforeach
                 </ul>
