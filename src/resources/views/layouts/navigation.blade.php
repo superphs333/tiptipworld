@@ -5,18 +5,24 @@
         $adminTab = request()->route('tab') ?? request()->query('tab', $defaultAdminTab);
         $authUserId = (int) (auth()->id() ?? 0);
         $profileFeedUserId = (int) request()->route('user_id', 0);
+        $currentMyPageTab = request()->routeIs('mypage')
+            ? (string) (request()->route('tab') ?: 'profile')
+            : null;
         $userTabs = $authUserId > 0
             ? [
                 [
                     'label' => 'Profile',
-                    'href' => route('profile.edit'),
-                    'active' => request()->routeIs('profile.*'),
+                    'href' => route('mypage'),
+                    'active' => request()->routeIs('mypage')
+                        && (string) (request()->route('tab') ?: 'profile') === 'profile',
                 ],
                 [
                     'label' => 'My Tips',
-                    'href' => route('tips.userFeed', ['user_id' => $authUserId]),
-                    'active' => request()->routeIs('tips.userFeed') && $profileFeedUserId === $authUserId,
+                    'href' => route('mypage', ['tab' => 'mytips']),
+                    'active' => request()->routeIs('mypage')
+                        && (string) (request()->route('tab') ?: 'profile') === 'mytips',
                 ],
+
                 
             ]
             : [];
