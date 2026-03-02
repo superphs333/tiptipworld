@@ -26,10 +26,8 @@
                             <span>{{ Auth::user()->name }}</span>
                         </button>
                         <div x-show="open" @click.outside="open = false" class="absolute end-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
-                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">프로필</a>
+                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">마이페이지</a>
                             <a href="{{ route('tip.formFront') }}"  class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">글작성</a>
-                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">북마크</a>
-                            <a href="#" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">알림</a>                            
                             <div class="border-t border-gray-200"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
