@@ -1,7 +1,5 @@
 @props([
     'title' => '검색',
-    'summaryLabel' => '합계',
-    'summaryValue' => null,
     'date' => now()->format('Y.m.d'),
     'rankings' => [],
     'action' => route('tips.search'),
@@ -10,21 +8,12 @@
 
 @php
     $rows = collect($rankings)->take(5)->values();
-    $query = trim((string) request($queryName, ''));
-    $hasQuery = $query !== '';
 
     if ($rows->isEmpty()) {
         $rows = collect(range(1, 5))->map(static fn ($rank) => [
             'rank' => $rank,
             'keyword' => '-',
-            'count' => '-',
         ]);
-    }
-
-    $totalCount = $summaryValue;
-
-    if ($totalCount === null) {
-        $totalCount = collect($rankings)->sum(static fn ($row) => (int) data_get($row, 'count', 0));
     }
 @endphp
 
@@ -72,10 +61,9 @@
             <div class="px-1 text-sm font-semibold text-gray-800">키워드 결과</div>
 
             <div class="overflow-hidden rounded-lg border border-gray-200">
-                <div class="grid grid-cols-[70px_1fr_90px] bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
+                <div class="grid grid-cols-[70px_minmax(0,1fr)] bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
                     <span>순위</span>
                     <span>키워드</span>
-                    <span class="text-right">건수</span>
                 </div>
 
                 <ul class="divide-y divide-gray-200">
@@ -83,23 +71,14 @@
                         @php
                             $rank = data_get($row, 'rank', $index + 1);
                             $keyword = data_get($row, 'keyword', data_get($row, 'label', '-'));
-                            $count = data_get($row, 'count', data_get($row, 'value', '-'));
                         @endphp
-                        <li class="grid grid-cols-[70px_1fr_90px] px-4 py-3 text-sm text-gray-800">
+                        <li class="grid grid-cols-[70px_minmax(0,1fr)] px-4 py-3 text-sm text-gray-800">
                             <span class="font-semibold">{{ $rank }}</span>
                             <span class="truncate">{{ $keyword }}</span>
-                            <span class="text-right tabular-nums">{{ $count }}</span>
                         </li>
                     @endforeach
                 </ul>
             </div>
         </section>
-
-        <div
-            class="flex items-center justify-between border-t border-gray-200 pt-3 text-sm {{ $hasQuery ? '' : 'hidden' }}"
-        >
-            <span class="font-semibold text-gray-800">{{ $summaryLabel }}</span>
-            <span class="font-medium text-gray-700">{{ $totalCount }}</span>
-        </div>
     </section>
 </x-modal>

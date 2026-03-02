@@ -340,6 +340,10 @@ class TipController extends Controller
         $category = (string) $request->query('category', 'all');
         $query = trim((string) $request->query('query', ''));
 
+        if ($query !== '') {
+            $this->searchKeywordService->record($request, $query);
+        }
+
         $rawTags = $request->query('tags', []);
         if (is_string($rawTags)) {
             $rawTags = explode(',', $rawTags);

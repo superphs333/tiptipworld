@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev libjpeg-dev libfreetype6-dev zip libzip-dev unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo_mysql gd zip bcmath \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug
 
