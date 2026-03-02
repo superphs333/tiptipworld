@@ -30,9 +30,9 @@
                             $isAdmin = Auth::user()->isAdmin();
                         @endphp
                         @if (!$isAdmin || !$isAdminArea)
-                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                                 {{ __('Dashboard') }}
-                            </x-nav-link>
+                            </x-nav-link> --}}
                             <x-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
                                 {{ __('Profile') }}
                             </x-nav-link>
@@ -103,9 +103,9 @@
                     $isAdmin = Auth::user()->isAdmin();
                 @endphp
                 @if (!$isAdmin || !$isAdminArea)
-                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{-- <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
-                    </x-responsive-nav-link>
+                    </x-responsive-nav-link> --}}
                     <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.*')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
