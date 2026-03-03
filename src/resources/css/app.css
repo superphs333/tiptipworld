@@ -10,6 +10,7 @@
 @import "pages/tip-search-wireframe.css";
 @import "pages/tip-userfeed.css";
 @import "pages/mypage-mytips.css";
+@import "pages/mypage-myarchive.css";
 
 @tailwind base;
 @tailwind components;
