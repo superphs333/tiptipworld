@@ -137,7 +137,6 @@
             </div>
 
             <div class="bookmark-archive__identity-body">
-                <p class="bookmark-archive__kicker">MY BOOKMARKS</p>
                 <h2 class="bookmark-archive__name">보관한 게시글</h2>
                 <p class="bookmark-archive__summary">
                     북마크 {{ number_format($bookmarkCount) }}개 · 좋아요 {{ number_format($likeCount) }}개 · 총 {{ number_format(count($dummyBookmarks)) }}개
@@ -187,7 +186,7 @@
                         <h4>카테고리</h4>
                         <div class="bookmark-archive__chips">
                             @forelse ($tab['meta']['categories'] as $item)
-                                <span class="bookmark-archive__chip">
+                                <span class="bookmark-archive__chip bookmark-archive__chip--category">
                                     {{ $item['name'] }}
                                     <em>{{ number_format($item['count']) }}</em>
                                 </span>
@@ -201,7 +200,7 @@
                         <h4>태그</h4>
                         <div class="bookmark-archive__chips">
                             @forelse ($tab['meta']['tags'] as $item)
-                                <span class="bookmark-archive__chip">
+                                <span class="bookmark-archive__chip bookmark-archive__chip--tag">
                                     #{{ $item['name'] }}
                                     <em>{{ number_format($item['count']) }}</em>
                                 </span>

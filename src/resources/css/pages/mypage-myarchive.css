@@ -190,6 +190,7 @@
     display: grid;
     gap: 1rem;
     padding: 1.15rem 1.25rem;
+    align-content: start;
 }
 
 .bookmark-archive__insight-card h4 {
@@ -203,6 +204,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.65rem;
+    align-items: flex-start;
+    align-content: flex-start;
 }
 
 .bookmark-archive__chip,
@@ -224,6 +227,18 @@
     font-style: normal;
     font-weight: 700;
     color: var(--archive-muted);
+}
+
+.bookmark-archive__chip--category {
+    min-height: 1.95rem;
+    padding: 0.3rem 0.68rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    background: #f8fafc;
+}
+
+.bookmark-archive__chip--tag {
+    border-radius: 999px;
 }
 
 .bookmark-archive__empty-chip {
@@ -355,11 +370,11 @@
     min-height: 1.9rem;
     padding: 0.3rem 0.68rem;
     border: 1px solid var(--archive-border);
-    border-radius: 999px;
+    border-radius: 10px;
     font-size: 0.8rem;
     font-weight: 700;
     color: #4a5568;
-    background: #fff;
+    background: #f8fafc;
 }
 
 .bookmark-archive__card-title {
