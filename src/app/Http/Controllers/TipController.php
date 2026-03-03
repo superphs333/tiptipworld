@@ -556,36 +556,8 @@ class TipController extends Controller
         글 관련
         */
         $tips_count = $user->tips()->count();       
-        $top5Category = $user->tips()  // 내 글들 중에서 가장 많이 나오는 카테고리 
-            ->whereNotNull('category_id')
-            ->selectRaw('category_id, COUNT(*) as tips_count')
-            ->groupBy('category_id')
-            ->orderByDesc('tips_count')
-            ->with('category:id,name')
-            ->limit(5)
-            ->get()
-            ->map(static function ($item) {
-                return [
-                    'id' => (int) $item->category_id,
-                    'name' => (string) data_get($item, 'category.name', '미분류'),
-                    'tips_count' => (int) data_get($item, 'tips_count', 0),
-                ];
-            });
-        $top5Tag = Tag::query()
-            ->withCount([
-                'tips as tips_count' =>  fn ($q) => $q->where('tips.user_id', $user_id),
-            ])
-            ->having('tips_count','>',0)
-            ->orderByDesc('tips_count')
-            ->limit(5)
-            ->get(['id', 'name'])
-            ->map(static function ($item) {
-                return [
-                    'id' => (int) $item->id,
-                    'name' => (string) $item->name,
-                    'tips_count' => (int) data_get($item, 'tips_count', 0),
-                ];
-            });
+        $top5Category = $this->tipService->userTipsCategory($user_id,5);
+        $top5Tag = $this->tipService->userTipTags($user_id,5);
         /*
         팁 가져오기
         */

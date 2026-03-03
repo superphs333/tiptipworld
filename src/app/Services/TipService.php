@@ -5,7 +5,9 @@ namespace App\Services;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Tip;
-use App\Models\Category;
+use App\Models\Tag;
+use App\Models\User;
+
 class TipService
 {
     public static function getUserFeed(int $target_id, ?string $sortKey = null){
@@ -60,9 +62,7 @@ class TipService
 
         // 정렬
         $sortKey = $request->query('sort', 'latest');
-        
-        $categoryForSelect = Category::query()
-            ->forTipForm()->get(['id', 'name']);
+
         $tips = Tip::query()
             ->where('user_id', Auth::id())
             ->with('category')
@@ -112,5 +112,48 @@ class TipService
             ];
         })->values();
         
+    }
+
+    // 유저 글의 카테고리 가져오기
+    public function userTipsCategory($user_id, ?int $limit=null){
+        $user = User::findOrFail($user_id);
+        $userTipCategory = $user->tips()
+            ->whereNotNull('category_id')
+            ->selectRaw('category_id, COUNT(*) as tips_count')
+            ->groupBy('category_id')
+            ->orderByDesc('tips_count')
+            ->with('category:id,name')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get()
+            ->map(static function ($item){
+                return [
+                    'id' => (int) $item->category_id,
+                    'name' => (string) data_get($item, 'category.name', '미분류'),
+                    'tips_count' => (int) data_get($item, 'tips_count', 0)
+                ];
+            });
+        return $userTipCategory;
+    }
+
+    // 유저 글의 태그 가져오기 
+    public function userTipTags($user_id, ?int $limit=null){
+        $user = User::findOrFail($user_id);
+        $userTipTags = Tag::query()
+            ->whereHas('tips', fn ($q) => $q->where('tips.user_id', $user->id))
+            ->withCount([
+                'tips as tips_count' => fn ($q) => $q->where('tips.user_id', $user->id),
+            ])
+            ->having('tips_count','>',0)
+            ->orderByDesc('tips_count')
+            ->when($limit, fn ($q) => $q->limit($limit))
+            ->get(['id', 'name'])
+            ->map(static function ($item){
+                return [
+                    'id' => (int) $item->id,
+                    'name' => (string) $item->name, 
+                    'tips_count' => (int) data_get($item, 'tips_count', 0)
+                ];
+            });
+        return $userTipTags;
     }
 }
