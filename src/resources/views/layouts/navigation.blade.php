@@ -23,10 +23,10 @@
                         && (string) (request()->route('tab') ?: 'profile') === 'mytips',
                 ],
                 [
-                    'label' => 'Bookmarks',
-                    'href' => route('mypage', ['tab' => 'mybookmarks']),
+                    'label' => 'Archive',
+                    'href' => route('mypage', ['tab' => 'myarchive']),
                     'active' => request()->routeIs('mypage')
-                        && (string) (request()->route('tab') ?: 'profile') === 'mybookmarks',
+                        && (string) (request()->route('tab') ?: 'profile') === 'myarchive',
                 ],
 
                 

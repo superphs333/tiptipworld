@@ -4,7 +4,7 @@ return [
     'tabs' => [
         'profile' => 'Profile',
         'mytips' => 'My Tips',
-        'mybookmarks' => 'Bookmarks',
+        'myarchive' => 'Archive',
         'activity' => 'Activity',
     ],
 ];
