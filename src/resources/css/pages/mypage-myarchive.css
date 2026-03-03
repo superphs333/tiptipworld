@@ -229,11 +229,30 @@
     color: var(--archive-muted);
 }
 
+.bookmark-archive__filter-btn {
+    appearance: none;
+    font: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    transition: border-color 0.16s ease, background-color 0.16s ease, color 0.16s ease;
+}
+
+.bookmark-archive__filter-btn.is-active {
+    border-color: #1e2430;
+    background: #1e2430;
+    color: #ffffff;
+}
+
+.bookmark-archive__filter-btn.is-active em {
+    color: rgba(255, 255, 255, 0.82);
+}
+
 .bookmark-archive__chip--category {
-    min-height: 1.95rem;
-    padding: 0.3rem 0.68rem;
-    border-radius: 10px;
-    font-size: 0.88rem;
+    min-height: 1.7rem;
+    padding: 0.18rem 0.52rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.15;
     background: #f8fafc;
 }
 

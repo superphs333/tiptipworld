@@ -186,10 +186,16 @@
                         <h4>카테고리</h4>
                         <div class="bookmark-archive__chips">
                             @forelse ($tab['meta']['categories'] as $item)
-                                <span class="bookmark-archive__chip bookmark-archive__chip--category">
+                                <button
+                                    type="button"
+                                    class="bookmark-archive__chip bookmark-archive__chip--category bookmark-archive__filter-btn"
+                                    data-bookmark-filter-trigger="category"
+                                    data-filter-value="{{ $item['name'] }}"
+                                    aria-pressed="false"
+                                >
                                     {{ $item['name'] }}
                                     <em>{{ number_format($item['count']) }}</em>
-                                </span>
+                                </button>
                             @empty
                                 <span class="bookmark-archive__empty-chip">카테고리 없음</span>
                             @endforelse
@@ -200,10 +206,16 @@
                         <h4>태그</h4>
                         <div class="bookmark-archive__chips">
                             @forelse ($tab['meta']['tags'] as $item)
-                                <span class="bookmark-archive__chip bookmark-archive__chip--tag">
+                                <button
+                                    type="button"
+                                    class="bookmark-archive__chip bookmark-archive__chip--tag bookmark-archive__filter-btn"
+                                    data-bookmark-filter-trigger="tag"
+                                    data-filter-value="{{ $item['name'] }}"
+                                    aria-pressed="false"
+                                >
                                     #{{ $item['name'] }}
                                     <em>{{ number_format($item['count']) }}</em>
-                                </span>
+                                </button>
                             @empty
                                 <span class="bookmark-archive__empty-chip">태그 없음</span>
                             @endforelse
@@ -216,12 +228,14 @@
                 <header class="bookmark-archive__feed-head">
                     <div class="bookmark-archive__feed-heading">
                         <h3 class="bookmark-archive__section-title">Feed</h3>
-                        <p>{{ number_format($tab['meta']['count']) }}개의 게시글</p>
+                        <p>
+                            <span data-bookmark-visible-count>{{ number_format($tab['meta']['count']) }}</span>개의 게시글
+                        </p>
                     </div>
                 </header>
 
                 @if ($tab['meta']['count'] > 0)
-                    <div class="bookmark-archive__grid">
+                    <div class="bookmark-archive__grid" data-bookmark-grid>
                         @foreach ($tab['items'] as $item)
                             @php
                                 $toneClass = $item['thumb_tone'] === 'warm'
@@ -229,7 +243,12 @@
                                     : 'bookmark-archive__thumb--cool';
                             @endphp
 
-                            <article class="bookmark-archive__card">
+                            <article
+                                class="bookmark-archive__card"
+                                data-bookmark-item
+                                data-category="{{ $item['category'] }}"
+                                data-tags="{{ collect($item['tags'])->join('|') }}"
+                            >
                                 <div class="bookmark-archive__thumb {{ $toneClass }}" aria-hidden="true">
                                     <div class="bookmark-archive__thumb-glow"></div>
                                     <div class="bookmark-archive__thumb-icon">
@@ -293,6 +312,9 @@
                             </article>
                         @endforeach
                     </div>
+                    <div class="bookmark-archive__empty" data-bookmark-filter-empty hidden>
+                        선택한 조건에 맞는 게시글이 없습니다.
+                    </div>
                 @else
                     <div class="bookmark-archive__empty">
                         {{ $tab['label'] }}한 게시글이 없습니다.
@@ -316,6 +338,72 @@
                     return;
                 }
 
+                var normalizeValue = function (value) {
+                    return (value || '').trim();
+                };
+
+                var applyPanelFilters = function (panel) {
+                    var selectedCategory = normalizeValue(panel.getAttribute('data-selected-category'));
+                    var selectedTag = normalizeValue(panel.getAttribute('data-selected-tag'));
+                    var cards = Array.from(panel.querySelectorAll('[data-bookmark-item]'));
+                    var visibleCountNode = panel.querySelector('[data-bookmark-visible-count]');
+                    var emptyNode = panel.querySelector('[data-bookmark-filter-empty]');
+                    var grid = panel.querySelector('[data-bookmark-grid]');
+                    var visibleCount = 0;
+
+                    cards.forEach(function (card) {
+                        var cardCategory = normalizeValue(card.getAttribute('data-category'));
+                        var cardTags = normalizeValue(card.getAttribute('data-tags'))
+                            .split('|')
+                            .map(normalizeValue)
+                            .filter(Boolean);
+                        var matchesCategory = !selectedCategory || cardCategory === selectedCategory;
+                        var matchesTag = !selectedTag || cardTags.indexOf(selectedTag) > -1;
+                        var isVisible = matchesCategory && matchesTag;
+
+                        card.hidden = !isVisible;
+
+                        if (isVisible) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    if (visibleCountNode) {
+                        visibleCountNode.textContent = visibleCount.toLocaleString();
+                    }
+
+                    if (grid) {
+                        grid.hidden = visibleCount === 0;
+                    }
+
+                    if (emptyNode) {
+                        emptyNode.hidden = visibleCount > 0;
+                    }
+                };
+
+                var updateFilterButtons = function (panel) {
+                    var selectedCategory = normalizeValue(panel.getAttribute('data-selected-category'));
+                    var selectedTag = normalizeValue(panel.getAttribute('data-selected-tag'));
+                    var filterButtons = Array.from(panel.querySelectorAll('[data-bookmark-filter-trigger]'));
+
+                    filterButtons.forEach(function (button) {
+                        var filterType = button.getAttribute('data-bookmark-filter-trigger');
+                        var filterValue = normalizeValue(button.getAttribute('data-filter-value'));
+                        var isActive = false;
+
+                        if (filterType === 'category') {
+                            isActive = selectedCategory !== '' && selectedCategory === filterValue;
+                        }
+
+                        if (filterType === 'tag') {
+                            isActive = selectedTag !== '' && selectedTag === filterValue;
+                        }
+
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                };
+
                 var activateTab = function (tabKey) {
                     triggers.forEach(function (trigger) {
                         var isActive = trigger.getAttribute('data-bookmark-tab-trigger') === tabKey;
@@ -327,8 +415,40 @@
                         var isActive = panel.getAttribute('data-bookmark-tab-panel') === tabKey;
                         panel.classList.toggle('is-active', isActive);
                         panel.hidden = !isActive;
+
+                        if (isActive) {
+                            updateFilterButtons(panel);
+                            applyPanelFilters(panel);
+                        }
                     });
                 };
+
+                panels.forEach(function (panel) {
+                    panel.setAttribute('data-selected-category', '');
+                    panel.setAttribute('data-selected-tag', '');
+
+                    var filterButtons = Array.from(panel.querySelectorAll('[data-bookmark-filter-trigger]'));
+
+                    filterButtons.forEach(function (button) {
+                        button.addEventListener('click', function () {
+                            var filterType = button.getAttribute('data-bookmark-filter-trigger');
+                            var filterValue = normalizeValue(button.getAttribute('data-filter-value'));
+                            var attrName = filterType === 'category'
+                                ? 'data-selected-category'
+                                : 'data-selected-tag';
+                            var currentValue = normalizeValue(panel.getAttribute(attrName));
+                            var nextValue = currentValue === filterValue ? '' : filterValue;
+
+                            panel.setAttribute(attrName, nextValue);
+
+                            updateFilterButtons(panel);
+                            applyPanelFilters(panel);
+                        });
+                    });
+
+                    updateFilterButtons(panel);
+                    applyPanelFilters(panel);
+                });
 
                 triggers.forEach(function (trigger) {
                     trigger.addEventListener('click', function () {
