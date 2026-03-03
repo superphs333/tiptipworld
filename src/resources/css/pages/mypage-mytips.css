@@ -89,26 +89,110 @@
 
 .mytips-tags-note {
     margin-top: 10px;
-    font-size: 0.8rem;
+    font-size: 0.74rem;
     color: var(--muted);
 }
 
-.mytips-tag-input-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px;
+.mytips-tag-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-top: 14px;
 }
 
-.mytips-tag-add {
-    min-width: 92px;
+.mytips-tag-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--gray-ink);
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.mytips-tag-option:hover {
+    transform: translateY(-1px);
+    border-color: #bfd0ff;
+    background: var(--accent-soft);
+    color: var(--blue-ink);
+}
+
+.mytips-tag-option:focus-visible {
+    outline: none;
+    border-color: rgba(29, 78, 216, 0.5);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+}
+
+.mytips-tag-option.is-selected {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(29, 78, 216, 0.16);
+}
+
+.mytips-tag-option-name {
+    line-height: 1;
+}
+
+.mytips-tag-option-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border: 1px solid #c7d7fe;
+    border-radius: 999px;
+    background: var(--blue-pill);
+    color: var(--blue-ink);
+    font-size: 0.66rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.mytips-tag-option.is-selected .mytips-tag-option-count {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+}
+
+.mytips-tags-empty {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--muted);
 }
 
 .mytips-selected-tags {
     margin-top: 18px;
     min-height: 24px;
-    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mytips-selected-tags.is-empty {
+    font-size: 0.8rem;
     color: var(--muted);
+}
+
+.mytips-selected-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 0 10px;
+    border: 1px solid #dbeafe;
+    border-radius: 999px;
+    background: #f8fbff;
+    color: var(--blue-ink);
+    font-size: 0.7rem;
+    font-weight: 800;
 }
 
 .mytips-search-submit-row {
@@ -391,11 +475,6 @@
         grid-template-columns: 1fr;
     }
 
-    .mytips-tag-input-row {
-        grid-template-columns: 1fr;
-    }
-
-    .mytips-tag-add,
     .mytips-button--search {
         width: 100%;
     }

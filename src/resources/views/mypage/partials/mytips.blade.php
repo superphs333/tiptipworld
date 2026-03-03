@@ -117,12 +117,24 @@
 
                 <div class="mytips-tags-block">
                     <div class="mytips-label">검색 태그</div>
-                    <p class="mytips-tags-note">선택한 태그를 모두 포함한 게시글만 검색됩니다.</p>
-                    <div class="mytips-tag-input-row">
-                        <input class="mytips-control" type="text" value="" placeholder="태그 입력" />
-                        <button class="mytips-button mytips-button--ghost mytips-tag-add" type="button">추가</button>
+                    <p class="mytips-tags-note">내 글에 등록된 태그를 클릭해 선택하세요. 선택한 태그를 모두 포함한 게시글만 검색됩니다.</p>
+                    <div class="mytips-tag-pool" data-mytips-tag-pool>
+                        @forelse ($myTipTags as $tag)
+                            <button
+                                class="mytips-tag-option"
+                                type="button"
+                                data-mytips-tag-option
+                                data-tag-name="{{ data_get($tag, 'name', '') }}"
+                                aria-pressed="false"
+                            >
+                                <span class="mytips-tag-option-name">#{{ data_get($tag, 'name', '') }}</span>
+                                <span class="mytips-tag-option-count">{{ data_get($tag, 'tips_count', 0) }}</span>
+                            </button>
+                        @empty
+                            <p class="mytips-tags-empty">내 글에 등록된 태그가 없습니다.</p>
+                        @endforelse
                     </div>
-                    <div class="mytips-selected-tags">선택된 태그 없음</div>
+                    <div class="mytips-selected-tags is-empty" data-mytips-selected-tags>선택된 태그 없음</div>
                 </div>
 
                 <div class="mytips-search-submit-row">
@@ -211,3 +223,59 @@
         </div>
     </div>
 </section>
+
+@once
+    <script>
+        (function () {
+            var tagPools = document.querySelectorAll('[data-mytips-tag-pool]');
+
+            if (tagPools.length === 0) {
+                return;
+            }
+
+            tagPools.forEach(function (pool) {
+                var selectedTagsView = pool.parentElement.querySelector('[data-mytips-selected-tags]');
+                var tagButtons = Array.from(pool.querySelectorAll('[data-mytips-tag-option]'));
+
+                if (!selectedTagsView || tagButtons.length === 0) {
+                    return;
+                }
+
+                var renderSelectedTags = function () {
+                    var selectedButtons = tagButtons.filter(function (button) {
+                        return button.classList.contains('is-selected');
+                    });
+
+                    selectedTagsView.innerHTML = '';
+
+                    if (selectedButtons.length === 0) {
+                        selectedTagsView.classList.add('is-empty');
+                        selectedTagsView.textContent = '선택된 태그 없음';
+                        return;
+                    }
+
+                    selectedTagsView.classList.remove('is-empty');
+
+                    selectedButtons.forEach(function (button) {
+                        var selectedChip = document.createElement('span');
+
+                        selectedChip.className = 'mytips-selected-tag';
+                        selectedChip.textContent = '#' + button.dataset.tagName;
+                        selectedTagsView.appendChild(selectedChip);
+                    });
+                };
+
+                tagButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        var isSelected = button.classList.toggle('is-selected');
+
+                        button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+                        renderSelectedTags();
+                    });
+                });
+
+                renderSelectedTags();
+            });
+        }());
+    </script>
+@endonce
