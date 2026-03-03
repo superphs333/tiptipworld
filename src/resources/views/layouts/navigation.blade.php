@@ -22,6 +22,12 @@
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'mytips',
                 ],
+                [
+                    'label' => 'Bookmarks',
+                    'href' => route('mypage', ['tab' => 'mybookmarks']),
+                    'active' => request()->routeIs('mypage')
+                        && (string) (request()->route('tab') ?: 'profile') === 'mybookmarks',
+                ],
 
                 
             ]
