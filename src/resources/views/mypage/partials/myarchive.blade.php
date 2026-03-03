@@ -245,7 +245,6 @@
                                 <div class="bookmark-archive__card-body">
                                     <div class="bookmark-archive__card-top">
                                         <span class="bookmark-archive__category">{{ $item['category'] }}</span>
-                                        <span class="bookmark-archive__saved">{{ $item['saved_type'] }}</span>
                                     </div>
 
                                     <h4 class="bookmark-archive__card-title">{{ $item['title'] }}</h4>

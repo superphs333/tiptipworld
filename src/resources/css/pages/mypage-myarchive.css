@@ -346,12 +346,10 @@
 .bookmark-archive__card-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 0.7rem;
 }
 
-.bookmark-archive__category,
-.bookmark-archive__saved {
+.bookmark-archive__category {
     display: inline-flex;
     align-items: center;
     min-height: 1.9rem;
@@ -362,10 +360,6 @@
     font-weight: 700;
     color: #4a5568;
     background: #fff;
-}
-
-.bookmark-archive__saved {
-    background: var(--archive-soft);
 }
 
 .bookmark-archive__card-title {
