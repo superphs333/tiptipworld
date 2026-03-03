@@ -12,7 +12,10 @@ class MyPageController extends Controller
     public function __construct(private TipService $tip_service)
     {
     }
+
     public function index(Request $request, ?string $tab = null) : View{
+        $user = Auth()->user();
+        $user_id = Auth()->id();
         $tabs = config('mypage.tabs',[]);
         $defaultTab = array_key_first($tabs) ?? 'profile';
         $tab = $tab ?? $request->route('tab') ?? $defaultTab;
@@ -29,9 +32,12 @@ class MyPageController extends Controller
         switch($tab){
             case 'mytips' : 
                 $viewData['tips'] = $this->tip_service->getMyTips($request);
+                $viewData['myTipcategories'] = $this->tip_service->userTipsCategory($user_id);
+                $viewData['myTipTags'] = $this->tip_service->userTipTags($user_id);
                 break;
         }
 
         return view('mypage.dashboard', $viewData);
     }
 }
+        

@@ -93,9 +93,11 @@
                         <span class="mytips-label">카테고리</span>
                         <select class="mytips-control">
                             <option selected>전체 카테고리</option>
-                            <option>유지보수</option>
-                            <option>태그</option>
-                            <option>미분류</option>
+                                @foreach ($myTipcategories as $myTipcategory)
+                                    <option value="{{ data_get($myTipcategory, 'id') }}">
+                                        {{ data_get($myTipcategory, 'name') }}
+                                    </option>
+                                @endforeach
                         </select>
                     </label>
                     <label class="mytips-field mytips-field--query">

@@ -115,24 +115,29 @@ class TipService
     }
 
     // 유저 글의 카테고리 가져오기
-    public function userTipsCategory($user_id, ?int $limit=null){
+    public function userTipsCategory($user_id, ?int $limit = null)
+    {
         $user = User::findOrFail($user_id);
-        $userTipCategory = $user->tips()
-            ->whereNotNull('category_id')
+
+        return $user->tips()
             ->selectRaw('category_id, COUNT(*) as tips_count')
             ->groupBy('category_id')
             ->orderByDesc('tips_count')
             ->with('category:id,name')
             ->when($limit, fn ($q) => $q->limit($limit))
             ->get()
-            ->map(static function ($item){
+            ->map(static function ($item) {
+                $isUncategorized = $item->category_id === null;
+
                 return [
-                    'id' => (int) $item->category_id,
-                    'name' => (string) data_get($item, 'category.name', '미분류'),
-                    'tips_count' => (int) data_get($item, 'tips_count', 0)
+                    'id' => $isUncategorized ? 'uncategorized' : (int) $item->category_id,
+                    'name' => $isUncategorized
+                        ? '미분류'
+                        : (string) data_get($item, 'category.name', '미분류'),
+                    'tips_count' => (int) data_get($item, 'tips_count', 0),
                 ];
-            });
-        return $userTipCategory;
+            })
+            ->values();
     }
 
     // 유저 글의 태그 가져오기 
