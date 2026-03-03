@@ -224,9 +224,15 @@
 }
 
 .mytips-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     min-width: 78px;
     padding: 0 16px;
     font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
     transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
 }
 
@@ -237,6 +243,12 @@
 .mytips-button--ghost {
     background: var(--surface);
     color: var(--gray-ink);
+}
+
+.mytips-button--danger {
+    border-color: #fecdd3;
+    background: #fff1f2;
+    color: var(--rose-ink);
 }
 
 .mytips-button--accent {
@@ -267,6 +279,7 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    margin: 0;
 }
 
 .mytips-toolbar-label {
@@ -285,7 +298,7 @@
 
 .mytips-table {
     width: 100%;
-    min-width: 920px;
+    min-width: 1180px;
     border-collapse: separate;
     border-spacing: 0;
 }
@@ -300,8 +313,12 @@
     white-space: nowrap;
 }
 
+.mytips-metric-head {
+    text-align: right !important;
+}
+
 .mytips-table tbody td {
-    padding: 16px 12px;
+    padding: 18px 12px;
     border-bottom: 1px solid var(--line);
     vertical-align: middle;
     font-size: 0.9rem;
@@ -310,6 +327,19 @@
 
 .mytips-table tbody tr:hover td {
     background: rgba(248, 250, 252, 0.96);
+}
+
+.mytips-row-link {
+    cursor: pointer;
+}
+
+.mytips-row-link:focus-visible {
+    outline: none;
+}
+
+.mytips-row-link:focus-visible td {
+    background: rgba(239, 246, 255, 0.96);
+    box-shadow: inset 0 1px 0 rgba(191, 219, 254, 0.9), inset 0 -1px 0 rgba(191, 219, 254, 0.9);
 }
 
 .mytips-id {
@@ -334,11 +364,21 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.82);
 }
 
+.mytips-thumb img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border-radius: inherit;
+}
+
 .mytips-title-stack {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 7px;
-    min-width: 260px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .mytips-title {
@@ -346,6 +386,7 @@
     font-weight: 700;
     line-height: 1.45;
     letter-spacing: -0.02em;
+    word-break: keep-all;
 }
 
 .mytips-tag-row {
@@ -359,6 +400,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: fit-content;
+    max-width: 100%;
     min-height: 24px;
     padding: 0 9px;
     border-radius: 999px;
@@ -410,6 +453,24 @@
     white-space: nowrap;
 }
 
+.mytips-metric {
+    min-width: 76px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--gray-ink);
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.mytips-empty {
+    padding-top: 28px !important;
+    padding-bottom: 28px !important;
+    text-align: center;
+    color: var(--muted);
+    font-weight: 700;
+}
+
 .mytips-footer {
     display: flex;
     align-items: center;
@@ -423,38 +484,6 @@
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--muted);
-}
-
-.mytips-pagination {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.96);
-    padding: 6px;
-}
-
-.mytips-page {
-    min-width: 42px;
-    height: 32px;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.8rem;
-    font-weight: 800;
-}
-
-.mytips-page.is-active {
-    background: #0f172a;
-    color: #fff;
-    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.14);
-}
-
-.mytips-page.is-muted {
-    color: #c0c8d4;
 }
 
 @media (max-width: 1100px) {

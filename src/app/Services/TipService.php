@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\User;
@@ -55,17 +56,24 @@ class TipService
     public static function getMyTips(Request $request) : mixed{
 
         // 조건 : 카테고리, 노출, 상태, 검색어
-        $query = trim($request->query('query'));
+        $query = trim((string) $request->query('query', ''));
         $category = $request->query('category_id') ?? null;
         $status = $request->query('status');
         $visibility = $request->query('visibility');
+        $tagIds = collect((array) $request->query('tags', []))
+            ->map(static fn ($tagId) => (int) $tagId)
+            ->filter(static fn ($tagId) => $tagId > 0)
+            ->unique()
+            ->values()
+            ->all();
 
         // 정렬
         $sortKey = $request->query('sort', 'latest');
+        $perPage = max(1, min((int) $request->query('per_page', 20), 100));
 
         $tips = Tip::query()
             ->where('user_id', Auth::id())
-            ->with('category')
+            ->with('category:id,name')
             ->with('tags:id,name');
         
         // 쿼리 (검색어)
@@ -81,6 +89,15 @@ class TipService
             }else{
                 $tips->where('category_id',$category);
             }
+        }
+        // 태그 (선택한 태그 모두 포함)
+        if ($tagIds !== []) {
+            $tips->whereHas(
+                'tags',
+                static fn ($tagQ) => $tagQ->whereIn('tags.id', $tagIds),
+                '=',
+                count($tagIds)
+            );
         }
         // 상태
         if($status !== null && $status !== ''){
@@ -98,19 +115,45 @@ class TipService
             default => (clone $tips)->orderByDesc('tips.created_at')->orderByDesc('tips.id')
         };
 
-        return $resultTips->get()->map(static function ($item){
-            return[
-                'id' => (int) data_get($item, 'id', 0),
-                'title' => (string) data_get($item, 'title'. ''),
-                'thumbnail_url' => (string) data_get($item, 'thumbnailUrl'),
-                'category_id' => (int) data_get($item, 'category.id'),
-                'category_name' => (string) data_get($item, 'category.name'),
-                'view_count' => (int) data_get($item, 'view_count', 0),
-                'like_count' => (int) data_get($item, 'like_count', 0),
-                'comment_count' => (int) data_get($item, 'comment_count', 0),
-                'bookmark_count' => (int) data_get($item, 'bookmark_count', 0),
-            ];
-        })->values();
+        return $resultTips
+            ->paginate($perPage)
+            ->withQueryString()
+            ->through(static function ($item) {
+                $visibilityRaw = data_get($item, 'visibility', 'public');
+                $statusRaw = (string) data_get($item, 'status', 'draft');
+                $dateRaw = data_get($item, 'created_at', data_get($item, 'updated_at'));
+
+                return [
+                    'id' => (int) data_get($item, 'id', 0),
+                    'title' => (string) data_get($item, 'title', ''),
+                    'thumbnail_url' => (string) data_get($item, 'thumbnail_url', data_get($item, 'thumbnailUrl', asset('images/no-thumbnail.png'))),
+                    'category_id' => (int) data_get($item, 'category.id'),
+                    'category_name' => (string) data_get($item, 'category.name', '미분류'),
+                    'category' => (string) data_get($item, 'category.name', '미분류'),
+                    'tags' => collect(data_get($item, 'tags', []))
+                        ->map(static fn ($tag) => (string) data_get($tag, 'name', ''))
+                        ->filter()
+                        ->values()
+                        ->all(),
+                    'visibility' => match ($visibilityRaw) {
+                        'private', 0, false => '비공개',
+                        'unlisted' => '일부공개',
+                        default => '공개',
+                    },
+                    'status' => match ($statusRaw) {
+                        'draft' => '임시저장',
+                        'published' => '게시',
+                        'archived' => '보관',
+                        'deleted' => '삭제',
+                        default => $statusRaw !== '' ? $statusRaw : '-',
+                    },
+                    'date' => $dateRaw ? Carbon::parse($dateRaw)->format('y-m-d A h:i') : '-',
+                    'view_count' => (int) data_get($item, 'view_count', 0),
+                    'like_count' => (int) data_get($item, 'like_count', 0),
+                    'comment_count' => (int) data_get($item, 'comment_count', 0),
+                    'bookmark_count' => (int) data_get($item, 'bookmark_count', 0),
+                ];
+            });
         
     }
 
