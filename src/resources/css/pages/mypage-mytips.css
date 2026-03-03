@@ -1,0 +1,411 @@
+.mytips-showcase {
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --line: #e5e7eb;
+    --line-strong: #d8dde6;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --accent: #1d4ed8;
+    --accent-soft: #eef4ff;
+    --blue-pill: #eff6ff;
+    --blue-ink: #1e40af;
+    --gray-pill: #f1f5f9;
+    --gray-ink: #475569;
+    --rose: #fff1f2;
+    --rose-ink: #be123c;
+    padding: 0;
+    color: var(--ink);
+}
+
+.mytips-shell {
+    display: grid;
+    gap: 20px;
+}
+
+.mytips-panel {
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+}
+
+.mytips-panel + .mytips-panel {
+    margin-top: 0;
+}
+
+.mytips-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.mytips-panel-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.mytips-note {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.mytips-search-body {
+    padding: 22px 24px 24px;
+}
+
+.mytips-search-grid {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.15fr) minmax(360px, 3fr) minmax(160px, 0.7fr);
+    gap: 14px;
+    align-items: end;
+}
+
+.mytips-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mytips-label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.mytips-field--query .mytips-label {
+    letter-spacing: -0.01em;
+}
+
+.mytips-tags-block {
+    margin-top: 20px;
+}
+
+.mytips-tags-note {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.mytips-tag-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.mytips-tag-add {
+    min-width: 92px;
+}
+
+.mytips-selected-tags {
+    margin-top: 18px;
+    min-height: 24px;
+    font-size: 0.92rem;
+    color: var(--muted);
+}
+
+.mytips-search-submit-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 26px;
+}
+
+.mytips-control,
+.mytips-button {
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 0.92rem;
+}
+
+.mytips-control {
+    width: 100%;
+    padding: 0 14px;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
+}
+
+.mytips-control:focus {
+    border-color: rgba(29, 78, 216, 0.28);
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+}
+
+.mytips-button {
+    min-width: 78px;
+    padding: 0 16px;
+    font-weight: 700;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background-color 0.16s ease;
+}
+
+.mytips-button:hover {
+    transform: translateY(-1px);
+}
+
+.mytips-button--ghost {
+    background: var(--surface);
+    color: var(--gray-ink);
+}
+
+.mytips-button--accent {
+    border-color: #0f172a;
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+}
+
+.mytips-button--search {
+    min-width: 136px;
+    height: 52px;
+    border-radius: 18px;
+    font-size: 1rem;
+}
+
+.mytips-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.mytips-toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mytips-toolbar-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.mytips-per-page {
+    width: 66px;
+    text-align: center;
+}
+
+.mytips-table-wrap {
+    overflow-x: auto;
+}
+
+.mytips-table {
+    width: 100%;
+    min-width: 920px;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.mytips-table thead th {
+    padding: 15px 12px;
+    border-bottom: 1px solid var(--line-strong);
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.mytips-table tbody td {
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.84);
+}
+
+.mytips-table tbody tr:hover td {
+    background: rgba(248, 250, 252, 0.96);
+}
+
+.mytips-id {
+    width: 64px;
+    font-weight: 700;
+    color: var(--gray-ink);
+}
+
+.mytips-thumb {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    border: 1px solid #dbe3f2;
+    background:
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0) 35%),
+        linear-gradient(180deg, #e6efff, #f7faff);
+    display: grid;
+    place-items: center;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #3359a9;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.82);
+}
+
+.mytips-title-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 260px;
+}
+
+.mytips-title {
+    font-size: 0.96rem;
+    font-weight: 700;
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+}
+
+.mytips-tag-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mytips-chip,
+.mytips-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 24px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.mytips-chip {
+    border: 1px solid var(--line);
+    background: #ffffff;
+    color: var(--gray-ink);
+}
+
+.mytips-chip--alert {
+    border-color: #fecdd3;
+    background: var(--rose);
+    color: var(--rose-ink);
+}
+
+.mytips-badge--mint {
+    border: 1px solid #c7d7fe;
+    background: var(--blue-pill);
+    color: var(--blue-ink);
+}
+
+.mytips-badge--gray {
+    border: 1px solid #dbe1ea;
+    background: var(--gray-pill);
+    color: var(--gray-ink);
+}
+
+.mytips-badge--rose {
+    border: 1px solid #fecdd3;
+    background: var(--rose);
+    color: var(--rose-ink);
+}
+
+.mytips-author {
+    min-width: 110px;
+    font-weight: 600;
+    color: #5a5046;
+}
+
+.mytips-date {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.mytips-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 4px 0;
+    flex-wrap: wrap;
+}
+
+.mytips-count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.mytips-pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 6px;
+}
+
+.mytips-page {
+    min-width: 42px;
+    height: 32px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.mytips-page.is-active {
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.14);
+}
+
+.mytips-page.is-muted {
+    color: #c0c8d4;
+}
+
+@media (max-width: 1100px) {
+    .mytips-search-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .mytips-panel-head,
+    .mytips-search-body,
+    .mytips-toolbar {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .mytips-search-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mytips-tag-input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .mytips-tag-add,
+    .mytips-button--search {
+        width: 100%;
+    }
+
+    .mytips-button {
+        flex: 1 1 0;
+    }
+
+    .mytips-footer {
+        padding-top: 14px;
+        justify-content: center;
+    }
+}
