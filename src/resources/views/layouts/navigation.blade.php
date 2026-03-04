@@ -47,7 +47,7 @@
             $adminTab = $defaultAdminTab;
         }
         $isAdminArea = request()->is('admin*') || request()->routeIs('admin.*');
-        $showHeaderSearch = ! request()->routeIs('mypage');
+        $showHeaderSearch = ! request()->routeIs('mypage') && ! $isAdminArea;
     @endphp
 
     <!-- Primary Navigation Menu -->
