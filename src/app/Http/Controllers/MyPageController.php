@@ -35,6 +35,12 @@ class MyPageController extends Controller
                 $viewData['myTipcategories'] = $this->tip_service->userTipsCategory($user_id);
                 $viewData['myTipTags'] = $this->tip_service->userTipTags($user_id);
                 break;
+            case 'myarchive' :
+                $viewData = array_merge(
+                    $viewData,
+                    $this->tip_service->getMyArchiveViewData()
+                );
+                break;
         }
 
         return view('mypage.dashboard', $viewData);

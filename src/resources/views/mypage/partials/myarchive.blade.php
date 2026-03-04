@@ -1,134 +1,3 @@
-@php
-    $dummyBookmarks = [
-        [
-            'category' => '추가',
-            'title' => '[SEED-C20] 027 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '북마크',
-            'views' => 1215,
-            'likes' => 0,
-            'comments' => 0,
-            'bookmarks' => 0,
-            'tags' => ['seed', '카테고리20', '테스트'],
-            'thumb_tone' => 'warm',
-        ],
-        [
-            'category' => '추가',
-            'title' => '[SEED-C20] 058 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '북마크',
-            'views' => 2047,
-            'likes' => 0,
-            'comments' => 0,
-            'bookmarks' => 1,
-            'tags' => ['seed', '온보딩', '모더라'],
-            'thumb_tone' => 'cool',
-        ],
-        [
-            'category' => '추가',
-            'title' => '[SEED-C20] 024 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '좋아요',
-            'views' => 4083,
-            'likes' => 2,
-            'comments' => 0,
-            'bookmarks' => 0,
-            'tags' => ['seed', '카테고리20'],
-            'thumb_tone' => 'cool',
-        ],
-        [
-            'category' => '정리',
-            'title' => '[SEED-C20] 049 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '북마크',
-            'views' => 4116,
-            'likes' => 0,
-            'comments' => 0,
-            'bookmarks' => 0,
-            'tags' => ['정리', '체크리스트'],
-            'thumb_tone' => 'cool',
-        ],
-        [
-            'category' => '브랜딩',
-            'title' => '[SEED-C20] 003 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '좋아요',
-            'views' => 5678,
-            'likes' => 3,
-            'comments' => 0,
-            'bookmarks' => 0,
-            'tags' => ['브랜딩', '카피'],
-            'thumb_tone' => 'cool',
-        ],
-        [
-            'category' => '자동화',
-            'title' => '[SEED-C20] 080 카테고리20 테스트 팁',
-            'author' => 'hihi3333',
-            'saved_type' => '북마크',
-            'views' => 4857,
-            'likes' => 0,
-            'comments' => 0,
-            'bookmarks' => 0,
-            'tags' => ['자동화', '리포트', '운영'],
-            'thumb_tone' => 'cool',
-        ],
-    ];
-
-    $buildArchiveMeta = static function (array $items): array {
-        $collection = collect($items);
-
-        return [
-            'count' => $collection->count(),
-            'categories' => $collection
-                ->groupBy('category')
-                ->map(static fn ($group, $name) => [
-                    'name' => $name,
-                    'count' => $group->count(),
-                ])
-                ->sortByDesc('count')
-                ->values()
-                ->all(),
-            'tags' => $collection
-                ->flatMap(static fn ($item) => $item['tags'])
-                ->countBy()
-                ->map(static fn ($count, $name) => [
-                    'name' => $name,
-                    'count' => $count,
-                ])
-                ->sortByDesc('count')
-                ->values()
-                ->take(6)
-                ->all(),
-        ];
-    };
-
-    $bookmarkItems = collect($dummyBookmarks)
-        ->where('saved_type', '북마크')
-        ->values()
-        ->all();
-
-    $likeItems = collect($dummyBookmarks)
-        ->where('saved_type', '좋아요')
-        ->values()
-        ->all();
-
-    $tabSets = [
-        'bookmarks' => [
-            'label' => '북마크',
-            'items' => $bookmarkItems,
-            'meta' => $buildArchiveMeta($bookmarkItems),
-        ],
-        'likes' => [
-            'label' => '좋아요',
-            'items' => $likeItems,
-            'meta' => $buildArchiveMeta($likeItems),
-        ],
-    ];
-
-    $bookmarkCount = count($bookmarkItems);
-    $likeCount = count($likeItems);
-@endphp
-
 <section class="bookmark-archive" data-bookmark-archive>
     <header class="bookmark-archive__profile">
         <div class="bookmark-archive__identity">
@@ -139,7 +8,7 @@
             <div class="bookmark-archive__identity-body">
                 <h2 class="bookmark-archive__name">보관한 게시글</h2>
                 <p class="bookmark-archive__summary">
-                    북마크 {{ number_format($bookmarkCount) }}개 · 좋아요 {{ number_format($likeCount) }}개 · 총 {{ number_format(count($dummyBookmarks)) }}개
+                    북마크 {{ number_format($bookmarkCount) }}개 · 좋아요 {{ number_format($likeCount) }}개 · 총 {{ number_format($totalCount) }}개
                 </p>
             </div>
         </div>
@@ -190,7 +59,7 @@
                                     type="button"
                                     class="bookmark-archive__chip bookmark-archive__chip--category bookmark-archive__filter-btn"
                                     data-bookmark-filter-trigger="category"
-                                    data-filter-value="{{ $item['name'] }}"
+                                    data-filter-value="{{ (string) $item['id'] }}"
                                     aria-pressed="false"
                                 >
                                     {{ $item['name'] }}
@@ -210,7 +79,7 @@
                                     type="button"
                                     class="bookmark-archive__chip bookmark-archive__chip--tag bookmark-archive__filter-btn"
                                     data-bookmark-filter-trigger="tag"
-                                    data-filter-value="{{ $item['name'] }}"
+                                    data-filter-value="{{ (string) $item['id'] }}"
                                     aria-pressed="false"
                                 >
                                     #{{ $item['name'] }}
@@ -237,19 +106,15 @@
                 @if ($tab['meta']['count'] > 0)
                     <div class="bookmark-archive__grid" data-bookmark-grid>
                         @foreach ($tab['items'] as $item)
-                            @php
-                                $toneClass = $item['thumb_tone'] === 'warm'
-                                    ? 'bookmark-archive__thumb--warm'
-                                    : 'bookmark-archive__thumb--cool';
-                            @endphp
-
-                            <article
+                            <a
+                                href="{{ route('tip.show', ['tip_id' => $item['id']]) }}"
                                 class="bookmark-archive__card"
                                 data-bookmark-item
-                                data-category="{{ $item['category'] }}"
-                                data-tags="{{ collect($item['tags'])->join('|') }}"
+                                data-category="{{ (string) $item['category_id'] }}"
+                                data-tags="{{ implode('|', data_get($item, 'tag_ids', [])) }}"
+                                aria-label="{{ $item['title'] }} 상세 보기"
                             >
-                                <div class="bookmark-archive__thumb {{ $toneClass }}" aria-hidden="true">
+                                <div class="bookmark-archive__thumb bookmark-archive__thumb--cool" aria-hidden="true">
                                     <div class="bookmark-archive__thumb-glow"></div>
                                     <div class="bookmark-archive__thumb-icon">
                                         <svg viewBox="0 0 120 120" fill="none" focusable="false">
@@ -262,14 +127,14 @@
 
                                 <div class="bookmark-archive__card-body">
                                     <div class="bookmark-archive__card-top">
-                                        <span class="bookmark-archive__category">{{ $item['category'] }}</span>
+                                        <span class="bookmark-archive__category">{{ data_get($item, 'category_name', '미분류') }}</span>
                                     </div>
 
                                     <h4 class="bookmark-archive__card-title">{{ $item['title'] }}</h4>
 
                                     <div class="bookmark-archive__tag-row">
                                         @foreach ($item['tags'] as $tag)
-                                            <span class="bookmark-archive__tag">#{{ $tag }}</span>
+                                            <span class="bookmark-archive__tag">#{{ data_get($tag, 'name', '태그') }}</span>
                                         @endforeach
                                     </div>
 
@@ -289,7 +154,7 @@
                                     </div>
 
                                     <div class="bookmark-archive__reactions">
-                                        <span class="bookmark-archive__reaction">
+                                        <span class="bookmark-archive__reaction {{ data_get($item, 'is_liked', false) ? 'is-liked' : '' }}">
                                             <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
                                                 <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6"/>
                                             </svg>
@@ -301,7 +166,7 @@
                                             </svg>
                                             {{ number_format($item['comments']) }}
                                         </span>
-                                        <span class="bookmark-archive__reaction">
+                                        <span class="bookmark-archive__reaction {{ data_get($item, 'is_bookmarked', false) ? 'is-bookmarked' : '' }}">
                                             <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
                                                 <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6"/>
                                             </svg>
@@ -309,7 +174,7 @@
                                         </span>
                                     </div>
                                 </div>
-                            </article>
+                            </a>
                         @endforeach
                     </div>
                     <div class="bookmark-archive__empty" data-bookmark-filter-empty hidden>
@@ -342,9 +207,23 @@
                     return (value || '').trim();
                 };
 
+                var parseSelectedValues = function (value) {
+                    return normalizeValue(value)
+                        .split('|')
+                        .map(normalizeValue)
+                        .filter(Boolean);
+                };
+
+                var serializeSelectedValues = function (values) {
+                    return values
+                        .map(normalizeValue)
+                        .filter(Boolean)
+                        .join('|');
+                };
+
                 var applyPanelFilters = function (panel) {
-                    var selectedCategory = normalizeValue(panel.getAttribute('data-selected-category'));
-                    var selectedTag = normalizeValue(panel.getAttribute('data-selected-tag'));
+                    var selectedCategories = parseSelectedValues(panel.getAttribute('data-selected-category'));
+                    var selectedTags = parseSelectedValues(panel.getAttribute('data-selected-tag'));
                     var cards = Array.from(panel.querySelectorAll('[data-bookmark-item]'));
                     var visibleCountNode = panel.querySelector('[data-bookmark-visible-count]');
                     var emptyNode = panel.querySelector('[data-bookmark-filter-empty]');
@@ -357,8 +236,12 @@
                             .split('|')
                             .map(normalizeValue)
                             .filter(Boolean);
-                        var matchesCategory = !selectedCategory || cardCategory === selectedCategory;
-                        var matchesTag = !selectedTag || cardTags.indexOf(selectedTag) > -1;
+                        var matchesCategory = selectedCategories.length === 0
+                            || selectedCategories.indexOf(cardCategory) > -1;
+                        var matchesTag = selectedTags.length === 0
+                            || selectedTags.some(function (tag) {
+                                return cardTags.indexOf(tag) > -1;
+                            });
                         var isVisible = matchesCategory && matchesTag;
 
                         card.hidden = !isVisible;
@@ -382,8 +265,8 @@
                 };
 
                 var updateFilterButtons = function (panel) {
-                    var selectedCategory = normalizeValue(panel.getAttribute('data-selected-category'));
-                    var selectedTag = normalizeValue(panel.getAttribute('data-selected-tag'));
+                    var selectedCategories = parseSelectedValues(panel.getAttribute('data-selected-category'));
+                    var selectedTags = parseSelectedValues(panel.getAttribute('data-selected-tag'));
                     var filterButtons = Array.from(panel.querySelectorAll('[data-bookmark-filter-trigger]'));
 
                     filterButtons.forEach(function (button) {
@@ -392,11 +275,11 @@
                         var isActive = false;
 
                         if (filterType === 'category') {
-                            isActive = selectedCategory !== '' && selectedCategory === filterValue;
+                            isActive = selectedCategories.indexOf(filterValue) > -1;
                         }
 
                         if (filterType === 'tag') {
-                            isActive = selectedTag !== '' && selectedTag === filterValue;
+                            isActive = selectedTags.indexOf(filterValue) > -1;
                         }
 
                         button.classList.toggle('is-active', isActive);
@@ -436,10 +319,16 @@
                             var attrName = filterType === 'category'
                                 ? 'data-selected-category'
                                 : 'data-selected-tag';
-                            var currentValue = normalizeValue(panel.getAttribute(attrName));
-                            var nextValue = currentValue === filterValue ? '' : filterValue;
+                            var currentValues = parseSelectedValues(panel.getAttribute(attrName));
+                            var valueIndex = currentValues.indexOf(filterValue);
 
-                            panel.setAttribute(attrName, nextValue);
+                            if (valueIndex > -1) {
+                                currentValues.splice(valueIndex, 1);
+                            } else {
+                                currentValues.push(filterValue);
+                            }
+
+                            panel.setAttribute(attrName, serializeSelectedValues(currentValues));
 
                             updateFilterButtons(panel);
                             applyPanelFilters(panel);

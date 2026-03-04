@@ -204,4 +204,178 @@ class TipService
             });
         return $userTipTags;
     }
+
+    // 아카이브 가져오기 
+    public function getMyArchive()
+    {
+        $user = Auth()->user();
+        $userId = (int) Auth()->id();
+
+        if (! $user || $userId === 0) {
+            return collect();
+        }
+
+        $likedTips = $this->buildArchiveItems($user->likedTips(), $userId, 'like');
+        $bookmarkedTips = $this->buildArchiveItems($user->bookmarkedTips(), $userId, 'bookmark');
+
+        $likedIdMap = $likedTips
+            ->pluck('id')
+            ->mapWithKeys(static fn ($tipId) => [(int) $tipId => true]);
+
+        $bookmarkedIdMap = $bookmarkedTips
+            ->pluck('id')
+            ->mapWithKeys(static fn ($tipId) => [(int) $tipId => true]);
+
+        return $likedTips
+            ->concat($bookmarkedTips)
+            ->map(static function ($item) use ($likedIdMap, $bookmarkedIdMap) {
+                $tipId = (int) data_get($item, 'id', 0);
+
+                $item['is_liked'] = $likedIdMap->has($tipId);
+                $item['is_bookmarked'] = $bookmarkedIdMap->has($tipId);
+
+                return $item;
+            })
+            ->sortByDesc('id')
+            ->values();
+    }
+
+    /**
+     * 아카이브 화면에서 바로 사용할 수 있도록
+     * 탭별 아이템과 집계 데이터를 한 번에 구성한다.
+     */
+    public function getMyArchiveViewData(): array
+    {
+        $archiveItems = $this->getMyArchive();
+
+        $bookmarkItems = $archiveItems
+            ->where('saved_type', 'bookmark')
+            ->values();
+
+        $likeItems = $archiveItems
+            ->where('saved_type', 'like')
+            ->values();
+
+        return [
+            'tabSets' => [
+                'bookmarks' => [
+                    'label' => '북마크',
+                    'items' => $bookmarkItems->all(),
+                    'meta' => $this->buildArchiveMeta($bookmarkItems),
+                ],
+                'likes' => [
+                    'label' => '좋아요',
+                    'items' => $likeItems->all(),
+                    'meta' => $this->buildArchiveMeta($likeItems),
+                ],
+            ],
+            'bookmarkCount' => $bookmarkItems->count(),
+            'likeCount' => $likeItems->count(),
+            'totalCount' => $archiveItems->count(),
+        ];
+    }
+
+    /**
+     * 좋아요/북마크 관계 쿼리를 받아, 
+     * 아카이브 화면에서바로 쓸 수 있는 아이테 컬렉션으로 변환 
+     */
+    private function buildArchiveItems($relationQuery, int $userId, string $savedType)
+    {
+        return $relationQuery
+            ->where(function ($query) use ($userId) {
+                $query->where('tips.user_id', $userId)
+                    ->orWhere(function ($visibleQuery) {
+                        $visibleQuery->where('tips.visibility', 'public')
+                            ->where('tips.status', 'published');
+                    });
+            })
+            ->with([
+                'category:id,name',
+                'tags:id,name',
+                'user:id,name,profile_image_path',
+            ])
+            ->orderByDesc('tips.id')
+            ->get()
+            ->map(fn ($item) => $this->formatArchiveItem($item, $savedType))
+            ->values();
+    }
+
+    /**
+     * 탭에 표시할 카테고리/태그 집계 데이터를 만든다.
+     */
+    private function buildArchiveMeta($items): array
+    {
+        $collection = collect($items)->values();
+
+        return [
+            'count' => $collection->count(),
+            'categories' => $collection
+                ->groupBy(static fn ($item) => (string) data_get($item, 'category_id', 'uncategorized'))
+                ->map(static function ($group, $categoryId) {
+                    $firstItem = $group->first();
+
+                    return [
+                        'id' => $categoryId !== '' ? $categoryId : 'uncategorized',
+                        'name' => (string) data_get($firstItem, 'category_name', '미분류'),
+                        'count' => $group->count(),
+                    ];
+                })
+                ->sortByDesc('count')
+                ->values()
+                ->all(),
+            'tags' => $collection
+                ->flatMap(static fn ($item) => collect(data_get($item, 'tags', [])))
+                ->filter(static fn ($tag) => (int) data_get($tag, 'id', 0) > 0)
+                ->groupBy(static fn ($tag) => (int) data_get($tag, 'id', 0))
+                ->map(static function ($group, $tagId) {
+                    $firstTag = $group->first();
+
+                    return [
+                        'id' => $tagId,
+                        'name' => (string) data_get($firstTag, 'name', '태그'),
+                        'count' => $group->count(),
+                    ];
+                })
+                ->sortByDesc('count')
+                ->values()
+                ->take(6)
+                ->all(),
+        ];
+    }
+
+    /**
+     * Tip 모델 1개를 myarchive.blade.php에서 쓰기 쉬운 평탄한 배열 구조로 바꾸기 
+     */
+    private function formatArchiveItem($item, string $savedType): array
+    {
+        $categoryId = data_get($item, 'category_id');
+
+        // [{id: 1, name: '태그명'}, ...] 형태로 정규화
+        $tags = collect(data_get($item, 'tags', []))
+            ->map(static function ($tag) {
+                return [
+                    'id' => (int) data_get($tag, 'id', 0),
+                    'name' => (string) data_get($tag, 'name', ''),
+                ];
+            })
+            ->filter(static fn ($tag) => $tag['id'] > 0)
+            ->values();
+
+        return [
+            'id' => (int) data_get($item, 'id', 0),
+            'category_id' => $categoryId ?? 'uncategorized',
+            'category_name' => (string) data_get($item, 'category.name', '미분류'),
+            'title' => (string) data_get($item, 'title', ''),
+            'author' => (string) data_get($item, 'user.name', '작성자 미상'),
+            'saved_type' => $savedType,
+            'views' => (int) data_get($item, 'view_count', 0),
+            'likes' => (int) data_get($item, 'like_count', 0),
+            'comments' => (int) data_get($item, 'comment_count', 0),
+            'bookmarks' => (int) data_get($item, 'bookmark_count', 0),
+            'tags' => $tags->all(),
+            'tag_ids' => $tags->pluck('id')->all(),
+        ];
+    }  
+
+    
 }
