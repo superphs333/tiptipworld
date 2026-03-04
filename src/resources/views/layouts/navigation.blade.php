@@ -12,7 +12,7 @@
             ? [
                 [
                     'label' => 'Profile',
-                    'href' => route('mypage'),
+                    'href' => route('mypage', ['tab' => 'profile']),
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'profile',
                 ],
@@ -47,6 +47,7 @@
             $adminTab = $defaultAdminTab;
         }
         $isAdminArea = request()->is('admin*') || request()->routeIs('admin.*');
+        $showHeaderSearch = ! request()->routeIs('mypage');
     @endphp
 
     <!-- Primary Navigation Menu -->
@@ -86,19 +87,21 @@
 
                         <div class="flex items-center gap-3">
                 @auth
-                    <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900" aria-label="검색">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-                        </svg>
-                    </button>
+                    @if ($showHeaderSearch)
+                        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900" aria-label="검색">
+                            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="11" cy="11" r="7"></circle>
+                                <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                            </svg>
+                        </button>
+                    @endif
                     <div x-data="{ open: false }" class="relative">
                         <button type="button" @click="open = !open" aria-expanded="false" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:border-gray-400">
                             <img src="{{ Auth::user()->profile_image_url ?? asset('images/avatar-default.svg') }}" alt="프로필 이미지" class="h-6 w-6 shrink-0 rounded-full ring-1 ring-gray-300" />
                             <span>{{ Auth::user()->name }}</span>
                         </button>
                         <div x-show="open" @click.outside="open = false" class="absolute end-0 mt-2 w-48 rounded-lg border border-gray-200 bg-white shadow-lg">
-                            <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">마이페이지</a>
+                            <a href="{{ route('mypage', ['tab' => 'profile']) }}" class="block px-3 py-2 text-sm text-gray-800 hover:bg-gray-100">마이페이지</a>
                             <div class="border-t border-gray-200"></div>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
