@@ -13,7 +13,7 @@
             @php
                 $tagId = (int) data_get($tag, 'id', 0);
                 $tagName = ltrim((string) data_get($tag, 'name', '태그'), '#');
-                $tagCount = (int) data_get($tag, 'usage_count', data_get($tag, 'tips_count', data_get($tag, 'count', 0)));
+                $tagCount = (int) data_get($tag, 'tips_count', data_get($tag, 'usage_count', data_get($tag, 'count', 0)));
                 $tagUrl = $tagId > 0 ? route('tips.tag', ['tag_id' => $tagId]) : '#';
             @endphp
 
