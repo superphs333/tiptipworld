@@ -9,7 +9,7 @@
                 <p class="text-sm text-slate-600">팁 나누고 수다 떨고 같이 성장하는 공간.</p>
             </div>
 
-            <div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-slate-600 sm:grid-cols-3 lg:gap-x-12">
+            {{-- <div class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm text-slate-600 sm:grid-cols-3 lg:gap-x-12">
                 <div>
                     <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-900">커뮤니티</h3>
                     <ul class="mt-1 space-y-0.5">
@@ -50,6 +50,6 @@
                     <a href="#" class="hover:text-slate-900">이메일</a>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 </footer>

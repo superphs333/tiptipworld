@@ -1,19 +1,23 @@
 .home-shell {
-    --home-ink: #0f172a;
-    --home-ink-soft: #1e293b;
-    --home-muted: #475569;
-    --home-muted-soft: #64748b;
-    --home-line: #cbd5e1;
-    --home-line-strong: #94a3b8;
+    --home-ink: #111111;
+    --home-ink-soft: #292929;
+    --home-muted: #606060;
+    --home-muted-soft: #7c7c7c;
+    --home-line: #f1f1f1;
+    --home-line-strong: #e7e7e7;
     --home-surface: #ffffff;
-    --home-surface-soft: #f8fbff;
-    --home-accent: #2563eb;
-    --home-accent-strong: #1d4ed8;
-    --home-accent-soft: #dbeafe;
-    --home-accent-wash: rgba(37, 99, 235, 0.14);
+    --home-surface-soft: #fcfcfc;
+    --home-accent: #7b848e;
+    --home-accent-strong: #59626d;
+    --home-accent-soft: #f6f7f8;
+    --home-accent-wash: rgba(89, 98, 109, 0.06);
     position: relative;
     display: grid;
     gap: clamp(20px, 2.6vw, 34px);
+    padding: clamp(10px, 1.5vw, 18px);
+    border-radius: 30px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 1) 100%);
+    box-shadow: 0 28px 60px rgba(17, 17, 17, 0.035);
     isolation: isolate;
 }
 
@@ -28,17 +32,13 @@
 
 .home-shell::before {
     background:
-        radial-gradient(380px 220px at 6% 4%, rgba(29, 78, 216, 0.2), transparent 72%),
-        radial-gradient(340px 180px at 90% 0%, rgba(37, 99, 235, 0.15), transparent 70%);
-    opacity: 0.9;
+        radial-gradient(420px 240px at 8% 0%, rgba(246, 247, 248, 0.95), transparent 72%),
+        radial-gradient(360px 220px at 92% 2%, rgba(246, 247, 248, 0.75), transparent 72%);
+    opacity: 1;
 }
 
 .home-shell::after {
-    background-image:
-        linear-gradient(90deg, rgba(15, 23, 42, 0.06) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(15, 23, 42, 0.06) 1px, transparent 1px);
-    background-size: 24px 24px;
-    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.36), transparent 40%);
+    display: none;
 }
 
 .home-hero {
@@ -49,8 +49,10 @@
     border: 1px solid var(--home-line);
     border-radius: 22px;
     background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 251, 255, 0.94) 58%, rgba(239, 246, 255, 0.95) 100%);
-    box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+        linear-gradient(135deg, rgba(255, 255, 255, 0.995) 0%, rgba(255, 255, 255, 0.99) 60%, rgba(252, 252, 252, 0.99) 100%);
+    box-shadow:
+        0 18px 36px rgba(17, 17, 17, 0.045),
+        inset 0 1px 0 rgba(255, 255, 255, 0.96);
     animation: homeHeroIn 0.55s ease-out both;
 }
 
@@ -113,8 +115,8 @@
 .home-hero__btn--primary {
     border: 1px solid var(--home-accent-strong);
     background: var(--home-accent-strong);
-    color: #eff6ff;
-    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.24);
+    color: #ffffff;
+    box-shadow: 0 12px 22px rgba(89, 98, 109, 0.12);
 }
 
 .home-hero__btn--primary:hover {
@@ -124,14 +126,14 @@
 
 .home-hero__btn--ghost {
     border: 1px solid var(--home-line-strong);
-    background: rgba(255, 255, 255, 0.72);
+    background: #ffffff;
     color: var(--home-ink);
 }
 
 .home-hero__btn--ghost:hover {
     transform: translateY(-1px);
-    border-color: var(--home-muted-soft);
-    background: #ffffff;
+    border-color: rgba(89, 98, 109, 0.16);
+    background: var(--home-accent-soft);
 }
 
 .home-hero__stats {
@@ -143,7 +145,8 @@
 .home-hero__stat-card {
     border: 1px solid var(--home-line);
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.8);
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(17, 17, 17, 0.025);
     padding: 13px 12px;
     min-height: 82px;
     display: grid;
@@ -170,8 +173,9 @@
 
 .home-hero__stat-card--highlight {
     grid-column: span 2;
-    border-color: rgba(37, 99, 235, 0.42);
-    background: linear-gradient(140deg, rgba(239, 246, 255, 0.94) 0%, rgba(219, 234, 254, 0.92) 100%);
+    border-color: rgba(89, 98, 109, 0.1);
+    background: linear-gradient(140deg, rgba(255, 255, 255, 1) 0%, rgba(246, 247, 248, 0.98) 100%);
+    box-shadow: 0 12px 28px rgba(17, 17, 17, 0.03);
 }
 
 .home-hero__stat-strong {
@@ -226,6 +230,10 @@
 @media (max-width: 640px) {
     .home-shell {
         gap: 18px;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
     .home-shell::after {

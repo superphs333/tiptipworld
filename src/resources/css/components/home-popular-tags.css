@@ -1,7 +1,11 @@
 .home-tags {
     display: grid;
     gap: 18px;
-    padding: 8px 0;
+    padding: clamp(18px, 2vw, 24px);
+    border: 1px solid var(--home-line, #f1f1f1);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 18px 36px rgba(17, 17, 17, 0.025);
     margin-top: clamp(20px, 2.6vw, 34px);
 }
 
@@ -16,7 +20,7 @@
     font-size: 0.66em;
     font-weight: 700;
     letter-spacing: 0;
-    color: var(--home-muted-soft, #64748b);
+    color: var(--home-muted-soft, #7a7a7a);
 }
 
 .home-tags__more {
@@ -42,17 +46,18 @@
     gap: 8px;
     min-height: 36px;
     padding: 6px 8px 6px 12px;
-    border: 1px solid var(--home-line, #cbd5e1);
+    border: 1px solid var(--home-line, #f1f1f1);
     border-radius: 999px;
     text-decoration: none;
-    color: var(--home-ink-soft, #1e293b);
+    color: var(--home-ink-soft, #292929);
     background: var(--home-surface, #ffffff);
+    box-shadow: 0 6px 16px rgba(17, 17, 17, 0.02);
     transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
 }
 
 .home-tags__chip:hover {
-    border-color: var(--home-accent, #2563eb);
-    background: var(--home-surface-soft, #f8fbff);
+    border-color: rgba(89, 98, 109, 0.14);
+    background: var(--home-accent-soft, #f6f7f8);
     transform: translateY(-1px);
 }
 
@@ -78,10 +83,10 @@
     align-items: center;
     justify-content: center;
     padding: 0 7px;
-    border: 1px solid #93c5fd;
+    border: 1px solid rgba(89, 98, 109, 0.12);
     border-radius: 999px;
-    background: var(--home-accent-soft, #dbeafe);
-    color: var(--home-accent-strong, #1d4ed8);
+    background: #ffffff;
+    color: var(--home-accent-strong, #59626d);
     font-size: 11px;
     font-weight: 700;
     line-height: 1;
@@ -91,8 +96,8 @@
 .home-tags__chip:nth-child(1),
 .home-tags__chip:nth-child(2),
 .home-tags__chip:nth-child(3) {
-    border-color: var(--home-accent, #2563eb);
-    background: rgba(219, 234, 254, 0.4);
+    border-color: rgba(89, 98, 109, 0.12);
+    background: #ffffff;
 }
 
 @media (max-width: 1400px) {
@@ -115,7 +120,7 @@
 
 .home-tags__empty {
     margin: 0;
-    color: var(--home-muted-soft, #64748b);
+    color: var(--home-muted-soft, #7a7a7a);
     font-size: 14px;
     padding: 6px 2px;
 }
@@ -123,6 +128,8 @@
 @media (max-width: 640px) {
     .home-tags {
         margin-top: 18px;
+        padding: 16px;
+        border-radius: 18px;
     }
 
     .home-tags__head {
