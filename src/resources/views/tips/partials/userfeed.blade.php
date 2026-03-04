@@ -26,6 +26,7 @@
     data-tip-userfeed
     data-follow-list-url="{{ route('user.follow.list', ['user_id' => $profileUser['id']]) }}"
     data-follow-toggle-url-base="{{ url('/user/follow') }}"
+    data-user-feed-url-base="{{ url('/tips/user') }}"
 >
     <header class="tip-userfeed__profile">
         <div class="tip-userfeed__identity">

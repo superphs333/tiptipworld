@@ -564,6 +564,17 @@ body.tip-userfeed-modal-open {
     gap: 10px;
 }
 
+.tip-userfeed__follow-link {
+    flex: 1 1 auto;
+    color: inherit;
+    text-decoration: none;
+}
+
+.tip-userfeed__follow-link:hover .tip-userfeed__follow-name,
+.tip-userfeed__follow-link:focus-visible .tip-userfeed__follow-name {
+    text-decoration: underline;
+}
+
 .tip-userfeed__follow-avatar {
     width: 44px;
     height: 44px;

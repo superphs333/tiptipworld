@@ -93,6 +93,7 @@ $(() => {
 
     const listUrl = String($root.attr('data-follow-list-url') || '');
     const followToggleUrlBase = String($root.attr('data-follow-toggle-url-base') || '/user/follow').replace(/\/$/, '');
+    const userFeedUrlBase = String($root.attr('data-user-feed-url-base') || '/tips/user').replace(/\/$/, '');
     const csrfToken = String($('meta[name="csrf-token"]').attr('content') || '');
 
     const state = {
@@ -181,6 +182,7 @@ $(() => {
         const html = visibleUsers.map((user) => {
             const name = escapeHtml(user.name);
             const avatar = escapeHtml(user.avatar);
+            const profileUrl = `${userFeedUrlBase}/${encodeURIComponent(String(user.id))}`;
             const actionButton = user.isSelf
                 ? ''
                 : `
@@ -196,12 +198,12 @@ $(() => {
 
             return `
                 <li class="tip-userfeed__follow-item">
-                    <div class="tip-userfeed__follow-user">
+                    <a class="tip-userfeed__follow-user tip-userfeed__follow-link" href="${profileUrl}">
                         <img class="tip-userfeed__follow-avatar" src="${avatar}" alt="${name} 프로필" loading="lazy">
                         <div class="tip-userfeed__follow-meta">
                             <p class="tip-userfeed__follow-name">${name}</p>
                         </div>
-                    </div>
+                    </a>
                     ${actionButton}
                 </li>
             `;
