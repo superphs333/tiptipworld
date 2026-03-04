@@ -39,8 +39,9 @@ jobs:
                       # 6. 권한 부여 (라라벨 쓰기 권한)
                       sudo chmod -R 777 storage bootstrap/cache
                       
-                      # 7. 데이터베이스 마이그레이션 및 캐시 최적화
+                      # 7. 데이터베이스 마이그레이션, 시드 및 캐시 최적화
                       docker exec -w /var/www/html tiptipworld-php php artisan migrate --force
+                      docker exec -w /var/www/html tiptipworld-php php artisan db:seed --force
                       docker exec -w /var/www/html tiptipworld-php php artisan config:cache
                       docker exec -w /var/www/html tiptipworld-php php artisan route:cache
                       docker exec -w /var/www/html tiptipworld-php php artisan view:cache
