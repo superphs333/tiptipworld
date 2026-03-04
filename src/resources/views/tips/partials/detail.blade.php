@@ -132,6 +132,66 @@
 
             </section>
 
+            @php
+                $likedUsers = $tip->relationLoaded('likedUsers') ? $tip->likedUsers : collect();
+                $bookmarkedUsers = $tip->relationLoaded('bookmarkedUsers') ? $tip->bookmarkedUsers : collect();
+            @endphp
+            <section class="tip-wireframe__section tip-wireframe__reactions">
+                <div class="tip-wireframe__reaction-grid">
+                    <section class="tip-wireframe__reaction-panel" aria-label="좋아요한 사람">
+                        <div class="tip-wireframe__reaction-head">
+                            <strong class="tip-wireframe__reaction-label">좋아요한 사람</strong>
+                            <span class="tip-wireframe__reaction-count">{{ number_format($likedUsers->count()) }}</span>
+                        </div>
+                        @if ($likedUsers->isNotEmpty())
+                            <div class="tip-wireframe__reaction-users">
+                                @foreach ($likedUsers->take(6) as $reactionUser)
+                                    <x-author-inline
+                                        :name="data_get($reactionUser, 'name', '이름 없음')"
+                                        :avatar="data_get($reactionUser, 'profile_image_url')"
+                                        :author-id="data_get($reactionUser, 'id')"
+                                        :profile-url="route('tips.userFeed', ['user_id' => $reactionUser->id])"
+                                        variant="list"
+                                        class="tip-wireframe__reaction-user"
+                                    />
+                                @endforeach
+                            </div>
+                            @if ($likedUsers->count() > 6)
+                                <p class="tip-wireframe__reaction-more">외 {{ number_format($likedUsers->count() - 6) }}명</p>
+                            @endif
+                        @else
+                            <p class="tip-wireframe__reaction-empty">아직 좋아요한 사용자가 없습니다.</p>
+                        @endif
+                    </section>
+
+                    <section class="tip-wireframe__reaction-panel" aria-label="북마크한 사람">
+                        <div class="tip-wireframe__reaction-head">
+                            <strong class="tip-wireframe__reaction-label">북마크한 사람</strong>
+                            <span class="tip-wireframe__reaction-count">{{ number_format($bookmarkedUsers->count()) }}</span>
+                        </div>
+                        @if ($bookmarkedUsers->isNotEmpty())
+                            <div class="tip-wireframe__reaction-users">
+                                @foreach ($bookmarkedUsers->take(6) as $reactionUser)
+                                    <x-author-inline
+                                        :name="data_get($reactionUser, 'name', '이름 없음')"
+                                        :avatar="data_get($reactionUser, 'profile_image_url')"
+                                        :author-id="data_get($reactionUser, 'id')"
+                                        :profile-url="route('tips.userFeed', ['user_id' => $reactionUser->id])"
+                                        variant="list"
+                                        class="tip-wireframe__reaction-user"
+                                    />
+                                @endforeach
+                            </div>
+                            @if ($bookmarkedUsers->count() > 6)
+                                <p class="tip-wireframe__reaction-more">외 {{ number_format($bookmarkedUsers->count() - 6) }}명</p>
+                            @endif
+                        @else
+                            <p class="tip-wireframe__reaction-empty">아직 북마크한 사용자가 없습니다.</p>
+                        @endif
+                    </section>
+                </div>
+            </section>
+
             {{-- <section class="tip-wireframe__section">
                 <h2 class="tip-wireframe__section-title">관련 팁</h2>
                 <div class="tip-wireframe__related-grid">

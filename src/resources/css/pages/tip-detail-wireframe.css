@@ -409,6 +409,77 @@
     gap: 8px;
 }
 
+.tip-wireframe__reaction-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+}
+
+.tip-wireframe__reaction-panel {
+    border: 1px solid var(--wf-line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+    padding: 14px;
+}
+
+.tip-wireframe__reaction-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.tip-wireframe__reaction-label {
+    font-size: 0.9rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.tip-wireframe__reaction-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    padding: 2px 9px;
+    border: 1px solid rgba(18, 18, 18, 0.12);
+    border-radius: 999px;
+    background: #f7f7f7;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.tip-wireframe__reaction-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tip-wireframe__reaction-user {
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid rgba(18, 18, 18, 0.08);
+    border-radius: 999px;
+    background: #fff;
+}
+
+.tip-wireframe__reaction-user .author-inline__profile {
+    gap: 6px;
+}
+
+.tip-wireframe__reaction-user .author-inline__name {
+    max-width: 112px;
+}
+
+.tip-wireframe__reaction-more,
+.tip-wireframe__reaction-empty {
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--wf-muted);
+}
+
 .tip-wireframe__tag {
     display: inline-flex;
     align-items: center;
@@ -938,6 +1009,12 @@
 
     .tip-wireframe__related-grid {
         grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .tip-wireframe__reaction-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

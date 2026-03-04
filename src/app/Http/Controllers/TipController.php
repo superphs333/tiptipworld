@@ -303,6 +303,11 @@ class TipController extends Controller
             );
         }
 
+        $tip->loadMissing([
+            'likedUsers:id,name,profile_image_path',
+            'bookmarkedUsers:id,name,profile_image_path',
+        ]);
+
         /**
          * 조회수
          * 같은 방문자(로그인/비로그인) 기준 24시간 중복 조회 방지
