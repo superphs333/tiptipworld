@@ -161,6 +161,8 @@
                     $likeCount = (int) data_get($item, 'like_count', 0);
                     $commentCount = (int) data_get($item, 'comment_count', 0);
                     $bookmarkCount = (int) data_get($item, 'bookmark_count', 0);
+                    $isLiked = (bool) data_get($item, 'is_liked', false);
+                    $isBookmarked = (bool) data_get($item, 'is_bookmarked', false);
                 @endphp
 
                 <article class="home-popular__card">
@@ -209,24 +211,40 @@
 
                         <div class="home-popular__bottom">
                             <span class="home-popular__stats">
-                                <span class="home-popular__stat" title="좋아요">
+                                <button
+                                    type="button"
+                                    class="home-popular__stat tip-userfeed__stat-btn {{ $isLiked ? 'is-liked' : '' }}"
+                                    title="좋아요"
+                                    aria-label="좋아요"
+                                    data-tip-action="like"
+                                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
+                                    data-tip-id="{{ $tipId }}"
+                                >
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                         <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" />
                                     </svg>
-                                    {{ number_format($likeCount) }}
-                                </span>
+                                    <span data-like-count>{{ number_format($likeCount) }}</span>
+                                </button>
                                 <span class="home-popular__stat" title="댓글">
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                         <path d="M4.75 6.5a2.25 2.25 0 0 1 2.25-2.25h10a2.25 2.25 0 0 1 2.25 2.25v7.25A2.25 2.25 0 0 1 17 16h-6.2l-3.95 3.35a.55.55 0 0 1-.9-.42V16H7A2.25 2.25 0 0 1 4.75 13.75V6.5Z" stroke="currentColor" stroke-width="1.6" />
                                     </svg>
                                     {{ number_format($commentCount) }}
                                 </span>
-                                <span class="home-popular__stat" title="북마크">
+                                <button
+                                    type="button"
+                                    class="home-popular__stat tip-userfeed__stat-btn {{ $isBookmarked ? 'is-bookmarked' : '' }}"
+                                    title="북마크"
+                                    aria-label="북마크"
+                                    data-tip-action="bookmark"
+                                    aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}"
+                                    data-tip-id="{{ $tipId }}"
+                                >
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                         <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6" />
                                     </svg>
-                                    {{ number_format($bookmarkCount) }}
-                                </span>
+                                    <span data-bookmark-count>{{ number_format($bookmarkCount) }}</span>
+                                </button>
                             </span>
                         </div>
                     </div>

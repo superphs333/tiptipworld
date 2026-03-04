@@ -346,6 +346,46 @@
     padding-top: 8px;
 }
 
+.tip-userfeed__stat-btn {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font-family: inherit;
+    font-weight: inherit;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.tip-userfeed__stat-btn:disabled {
+    cursor: default;
+}
+
+.tip-userfeed__stat-btn svg path {
+    transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.tip-userfeed__stat-btn[data-tip-action="like"].is-liked,
+.tip-userfeed__stat-btn[data-tip-action="like"][aria-pressed="true"] {
+    color: #d11a4b;
+}
+
+.tip-userfeed__stat-btn[data-tip-action="like"].is-liked svg path,
+.tip-userfeed__stat-btn[data-tip-action="like"][aria-pressed="true"] svg path {
+    fill: #d11a4b;
+    stroke: #d11a4b;
+}
+
+.tip-userfeed__stat-btn[data-tip-action="bookmark"].is-bookmarked,
+.tip-userfeed__stat-btn[data-tip-action="bookmark"][aria-pressed="true"] {
+    color: var(--userfeed-ink);
+}
+
+.tip-userfeed__stat-btn[data-tip-action="bookmark"].is-bookmarked svg path,
+.tip-userfeed__stat-btn[data-tip-action="bookmark"][aria-pressed="true"] svg path {
+    fill: var(--userfeed-ink);
+    stroke: var(--userfeed-ink);
+}
+
 .tip-userfeed__empty {
     margin: 0;
     grid-column: 1 / -1;
