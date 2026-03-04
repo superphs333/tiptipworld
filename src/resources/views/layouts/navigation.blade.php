@@ -28,6 +28,12 @@
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'myarchive',
                 ],
+                [
+                    'label' => 'Notifications',
+                    'href' => route('mypage', ['tab'=>'notifications']),
+                    'active' => request()->routeIs('mypage')
+                        && (string) (request()->route('tab') ?: 'profile') === 'notifications',
+                ]
 
                 
             ]
