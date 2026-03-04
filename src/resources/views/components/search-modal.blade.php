@@ -7,14 +7,10 @@
 ])
 
 @php
-    $rows = collect($rankings)->take(5)->values();
-
-    if ($rows->isEmpty()) {
-        $rows = collect(range(1, 5))->map(static fn ($rank) => [
-            'rank' => $rank,
-            'keyword' => '-',
-        ]);
-    }
+    $rows = collect($rankings)
+        ->filter(static fn ($row) => filled(data_get($row, 'keyword', data_get($row, 'label'))))
+        ->take(5)
+        ->values();
 @endphp
 
 <x-modal name="global-search" maxWidth="4xl" focusable>
@@ -64,28 +60,30 @@
             </button>
         </form>
 
-        <section class="space-y-2" aria-label="검색 키워드 결과">
-            <div class="px-1 text-sm font-semibold text-gray-800">키워드 결과</div>
+        @if ($rows->isNotEmpty())
+            <section class="space-y-2" aria-label="검색 키워드 결과">
+                <div class="px-1 text-sm font-semibold text-gray-800">키워드 결과</div>
 
-            <div class="overflow-hidden rounded-lg border border-gray-200">
-                <div class="flex items-center gap-4 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
-                    <span class="w-[70px] shrink-0">순위</span>
-                    <span class="min-w-0 flex-1">키워드</span>
+                <div class="overflow-hidden rounded-lg border border-gray-200">
+                    <div class="flex items-center gap-4 bg-gray-50 px-4 py-2 text-xs font-semibold tracking-wide text-gray-600">
+                        <span class="w-[70px] shrink-0">순위</span>
+                        <span class="min-w-0 flex-1">키워드</span>
+                    </div>
+
+                    <ul class="divide-y divide-gray-200">
+                        @foreach ($rows as $index => $row)
+                            @php
+                                $rank = data_get($row, 'rank', $index + 1);
+                                $keyword = data_get($row, 'keyword', data_get($row, 'label', '-'));
+                            @endphp
+                            <li class="flex items-center gap-4 px-4 py-3 text-sm text-gray-800">
+                                <span class="w-[70px] shrink-0 font-semibold">{{ $rank }}</span>
+                                <span class="min-w-0 flex-1 truncate">{{ $keyword }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
-
-                <ul class="divide-y divide-gray-200">
-                    @foreach ($rows as $index => $row)
-                        @php
-                            $rank = data_get($row, 'rank', $index + 1);
-                            $keyword = data_get($row, 'keyword', data_get($row, 'label', '-'));
-                        @endphp
-                        <li class="flex items-center gap-4 px-4 py-3 text-sm text-gray-800">
-                            <span class="w-[70px] shrink-0 font-semibold">{{ $rank }}</span>
-                            <span class="min-w-0 flex-1 truncate">{{ $keyword }}</span>
-                        </li>
-                    @endforeach
-                </ul>
-            </div>
-        </section>
+            </section>
+        @endif
     </section>
 </x-modal>
