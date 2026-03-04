@@ -36,25 +36,25 @@
             </div>
 
             <aside class="home-hero__stats" aria-label="홈 요약 통계">
-                <article class="home-hero__stat-card">
-                    <p class="home-hero__stat-label">공개 팁</p>
+                {{-- <article class="home-hero__stat-card">
+                    <p class="home-hero__stat-label">팁</p>
                     <p class="home-hero__stat-value">{{ number_format($totalTips) }}</p>
-                </article>
-                <article class="home-hero__stat-card">
+                </article> --}}
+                {{-- <article class="home-hero__stat-card">
                     <p class="home-hero__stat-label">활성 카테고리</p>
                     <p class="home-hero__stat-value">{{ number_format($totalCategories) }}</p>
                 </article>
                 <article class="home-hero__stat-card">
                     <p class="home-hero__stat-label">집계 태그</p>
                     <p class="home-hero__stat-value">{{ number_format($totalTags) }}</p>
-                </article>
-                <article class="home-hero__stat-card home-hero__stat-card--highlight">
+                </article> --}}
+                {{-- <article class="home-hero__stat-card home-hero__stat-card--highlight">
                     <p class="home-hero__stat-label">최다 팁 카테고리</p>
                     <p class="home-hero__stat-strong">{{ data_get($topCategory, 'name', '집계 중') }}</p>
                     <p class="home-hero__stat-sub">
                         {{ number_format((int) data_get($topCategory, 'tips_count', 0)) }}개 팁
                     </p>
-                </article>
+                </article> --}}
             </aside>
         </section>
 
