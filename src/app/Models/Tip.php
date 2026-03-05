@@ -51,6 +51,12 @@ class Tip extends Model
     // Tip - Tag (M:N) => pivot : tip_tag (tip_id, tag_id)
     public function tags() : BelongsToMany
     {
+        return $this->allTags()->where('tags.is_blocked', false);
+    }
+
+    // Tip - Tag 전체 관계(저장/동기화용)
+    public function allTags() : BelongsToMany
+    {
         return $this->belongsToMany(Tag::class, 'tip_tag','tip_id', 'tag_id')->withTimestamps();
     }
 

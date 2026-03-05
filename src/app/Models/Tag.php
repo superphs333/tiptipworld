@@ -29,6 +29,11 @@ class Tag extends Model
         return $this->belongsToMany(Tip::class, 'tip_tag', 'tag_id', 'tip_id')->withTimestamps();
     }
 
+    public function scopeVisible($query)
+    {
+        return $query->where('is_blocked', false);
+    }
+
     protected function createdDate() : Attribute
     {
         return Attribute::make(

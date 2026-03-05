@@ -1,4 +1,13 @@
 <section class="tip-wireframe" data-tip-wireframe data-tip-id="{{ $tip->id }}">
+    @if (session('warning'))
+        <div class="tip-create__alerts" x-data="{ showWarning: true }">
+            <div class="tip-create__alert tip-create__alert--error" role="alert" x-show="showWarning">
+                <button class="tip-create__alert-close" type="button" aria-label="닫기" @click="showWarning = false">×</button>
+                {{ session('warning') }}
+            </div>
+        </div>
+    @endif
+
     <div class="tip-wireframe__topbar">
         {{-- <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a> --}}
         <div class="tip-wireframe__topbar-right">

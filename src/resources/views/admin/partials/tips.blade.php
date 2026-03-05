@@ -52,6 +52,7 @@
                 x-data="{
                     showErrors: {{ $errors->any() ? 'true' : 'false' }},
                     showError: {{ session('error') ? 'true' : 'false' }},
+                    showWarning: {{ session('warning') ? 'true' : 'false' }},
                     showSuccess: {{ session('success') ? 'true' : 'false' }},
                 }"
             >
@@ -70,6 +71,13 @@
                     <div class="tip-panel__alert tip-panel__alert--error" x-show="showError">
                         <button class="tip-panel__alert-close" type="button" aria-label="닫기" @click="showError = false">×</button>
                         {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (session('warning'))
+                    <div class="tip-panel__alert tip-panel__alert--error" x-show="showWarning">
+                        <button class="tip-panel__alert-close" type="button" aria-label="닫기" @click="showWarning = false">×</button>
+                        {{ session('warning') }}
                     </div>
                 @endif
 

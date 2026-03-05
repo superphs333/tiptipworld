@@ -53,6 +53,7 @@ class HomeViewService
         $limit = max(1, min($limit, 100));
 
         $popularTags = Tag::query()
+            ->visible()
             ->withCount('tips')
             ->orderByDesc('tips_count')
             ->limit($limit)

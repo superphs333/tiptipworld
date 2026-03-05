@@ -123,25 +123,30 @@ class TipController extends Controller
         /**
          * 태그 저장 (in tips, tip_tag)
          */
-        // JSON 문자열("['tag1', 'tag2']")을 PHP 배열로 변환
-        $tagNames = $request->filled('tags') ? json_decode($request->input('tags'), true) : [];
-
-        if(!empty($tagNames)){
-            $this->saveTags($tagNames, $tip->id);
+        $blockedTagWarning = null;
+        if ($request->has('tags')) {
+            $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
+                $tip->id,
+                (string) $request->input('tags', '')
+            );
         }
 
         $submitFrom = (string) $request->input('submit_from', '');
 
         if ($submitFrom === 'admin') {
-            return redirect()->route(
+            $redirect = redirect()->route(
                 'admin',
                 array_merge(['tab' => 'tips'], session('tips.query', []))
             )->with('success', '팁이 성공적으로 저장되었습니다.')
             ->withInput();
+
+            return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
         }
 
-        return redirect()->route('tip.show', ['tip_id' => $tip->id])
+        $redirect = redirect()->route('tip.show', ['tip_id' => $tip->id])
             ->with('success', '팁이 성공적으로 저장되었습니다.');
+
+        return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
 
     }
 
@@ -174,9 +179,12 @@ class TipController extends Controller
         /**
          * 태그
          */
-        $tagNames = $request->filled('tags') ? json_decode($request->input('tags'), true) : [];
-        if(!empty($tagNames)){
-            $this->saveTags($tagNames, $tip_id);
+        $blockedTagWarning = null;
+        if ($request->has('tags')) {
+            $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
+                $tip_id,
+                (string) $request->input('tags', '')
+            );
         }
 
 
@@ -188,15 +196,19 @@ class TipController extends Controller
         $submitFrom = (string) $request->input('submit_from', '');
 
         if ($submitFrom !== 'admin') {
-            return redirect()->route('tip.show', ['tip_id' => $target_tip->id])
+            $redirect = redirect()->route('tip.show', ['tip_id' => $target_tip->id])
                 ->with('success', '팁이 성공적으로 수정되었습니다.');
+
+            return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
         }
 
-        return redirect()->route(
+        $redirect = redirect()->route(
             'admin',
             array_merge(['tab' => 'tips'], session('tips.query', []))
         )->with('success', '팁이 성공적으로 수정되었습니다.')
         ->withInput();
+
+        return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
 
     }
 
@@ -235,15 +247,13 @@ class TipController extends Controller
         }
     }
 
-    private function saveTags($tagNames, $tip_id){
-        $tagIds = [];
-        foreach($tagNames as $tagName){
-            $tag = Tag::firstOrCreate(['name'=>$tagName]);
-            $tagIds[] = $tag->id;
+    private function withBlockedTagWarning($redirect, ?string $warningMessage)
+    {
+        if ($warningMessage === null || trim($warningMessage) === '') {
+            return $redirect;
         }
-        // 팁모델에 연결
-        $tip = Tip::findOrFail($tip_id);
-        $tip->tags()->sync($tagIds);
+
+        return $redirect->with('warning', $warningMessage);
     }
 
     private function canManageTip(Tip $tip): bool
@@ -363,7 +373,7 @@ class TipController extends Controller
 
         $existingTags = empty($tags)
             ? collect()
-            : Tag::query()->whereIn('name', $tags)->get(['id', 'name']);
+            : Tag::query()->visible()->whereIn('name', $tags)->get(['id', 'name']);
         $tagIds = $existingTags->pluck('id')->map(static fn ($id) => (int) $id)->all();
 
         $authUserId = Auth::id();
@@ -468,11 +478,11 @@ class TipController extends Controller
 
         }else if($request->routeIs('tips.tag')){
             $sort = "tag";
-            $tag = Tag::findOrFail($sort_id);
+            $tag = Tag::query()->visible()->findOrFail($sort_id);
             $site_title = $tag->name;
             $description = $tag->description;
             $baseQuery  = Tip::query()->whereHas('tags', function($query) use($sort_id){
-                $query->where('id', $sort_id);
+                $query->where('tags.id', $sort_id);
             });
         
         }
