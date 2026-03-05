@@ -11,7 +11,7 @@
 @import "pages/tip-userfeed.css";
 @import "pages/mypage-mytips.css";
 @import "pages/mypage-myarchive.css";
-/* @import "pages/mypage-notifications.css"; */
+@import "pages/mypage-notifications.css";
 
 @tailwind base;
 @tailwind components;
