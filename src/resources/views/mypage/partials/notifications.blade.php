@@ -30,6 +30,10 @@
 
     $currentStatus = (string) data_get($notificationFilters, 'status', 'all');
     $currentType = (string) data_get($notificationFilters, 'type', 'all');
+    $digest = trim((string) data_get($notificationSummary, 'digest', ''));
+    if ($digest === '') {
+        $digest = '새 알림이 없습니다.';
+    }
 
     $buildFilterUrl = static function (string $status, string $type): string {
         return route('mypage', [
@@ -55,7 +59,7 @@
             <div class="notifications-board__summary-copy">
                 <h3 class="notifications-board__title">알림함</h3>
                 <p class="notifications-board__digest">
-                    {{ (string) data_get($notificationSummary, 'digest', '새 알림이 없습니다.') }}
+                    {{ $digest }}
                 </p>
             </div>
         </div>
