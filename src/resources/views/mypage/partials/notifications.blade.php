@@ -1,14 +1,16 @@
 @php
     $notificationSummary = $notificationSummary ?? [
-        'unread_count' => 5,
-        'total_count' => 24,
-        'digest' => '새 댓글 2건, 답글 1건, 새 팔로워 1명',
+        'unread_count' => 0,
+        'total_count' => 0,
+        'digest' => null,
     ];
 
     $notificationFilters = $notificationFilters ?? [
         'status' => 'all',
         'type' => 'all',
     ];
+
+    $notificationGroups = $notificationGroups ?? [];
 
     $statusFilters = [
         'all' => '전체',
@@ -26,100 +28,16 @@
         'system' => '시스템',
     ];
 
-    $notificationGroups = $notificationGroups ?? [
-        [
-            'label' => '오늘',
-            'items' => [
-                [
-                    'type' => 'comment',
-                    'badge' => 'HG',
-                    'actor_name' => '홍길동',
-                    'message' => '회원님의 글에 댓글을 남겼습니다.',
-                    'target' => '"Laravel 정리"',
-                    'meta' => '새 댓글 1개',
-                    'created_at_human' => '5분 전',
-                    'is_unread' => true,
-                    'action_label' => '댓글 보기',
-                ],
-                [
-                    'type' => 'reply',
-                    'badge' => 'KC',
-                    'actor_name' => '김코드',
-                    'message' => '회원님의 댓글에 답글을 남겼습니다.',
-                    'target' => '"그 부분은 Service에서 처리하는 게 좋아요"',
-                    'meta' => '답글 스레드',
-                    'created_at_human' => '18분 전',
-                    'is_unread' => true,
-                    'action_label' => '답글 보기',
-                ],
-                [
-                    'type' => 'like',
-                    'badge' => 'PS',
-                    'actor_name' => '박설계 외 2명',
-                    'message' => '회원님의 글을 좋아합니다.',
-                    'target' => '"Blade 컴포넌트 가이드"',
-                    'meta' => '좋아요 3개',
-                    'created_at_human' => '42분 전',
-                    'is_unread' => false,
-                    'action_label' => '글 보기',
-                ],
-            ],
-        ],
-        [
-            'label' => '최근 7일',
-            'items' => [
-                [
-                    'type' => 'follow',
-                    'badge' => 'LM',
-                    'actor_name' => '이메이커',
-                    'message' => '회원님을 새로 팔로우했습니다.',
-                    'target' => '프로필 피드에서 새 글을 확인해보세요.',
-                    'meta' => '팔로워 +1',
-                    'created_at_human' => '어제 14:20',
-                    'is_unread' => true,
-                    'action_label' => '프로필 보기',
-                ],
-                [
-                    'type' => 'bookmark',
-                    'badge' => 'JH',
-                    'actor_name' => '정한빛',
-                    'message' => '회원님의 글을 북마크했습니다.',
-                    'target' => '"Tailwind 팁 모음"',
-                    'meta' => '북마크 1개',
-                    'created_at_human' => '2일 전',
-                    'is_unread' => false,
-                    'action_label' => '글 보기',
-                ],
-                [
-                    'type' => 'system',
-                    'badge' => 'SYS',
-                    'actor_name' => '시스템',
-                    'message' => '작성한 글이 정상적으로 게시되었습니다.',
-                    'target' => '"알림 페이지 구성안"',
-                    'meta' => '게시 완료',
-                    'created_at_human' => '3일 전',
-                    'is_unread' => false,
-                    'action_label' => '글 보기',
-                ],
-            ],
-        ],
-        [
-            'label' => '이전',
-            'items' => [
-                [
-                    'type' => 'system',
-                    'badge' => 'ADM',
-                    'actor_name' => '운영팀',
-                    'message' => '신고한 댓글의 검토가 완료되었습니다.',
-                    'target' => '처리 결과를 확인해 주세요.',
-                    'meta' => '신고 처리',
-                    'created_at_human' => '8일 전',
-                    'is_unread' => false,
-                    'action_label' => '결과 보기',
-                ],
-            ],
-        ],
-    ];
+    $currentStatus = (string) data_get($notificationFilters, 'status', 'all');
+    $currentType = (string) data_get($notificationFilters, 'type', 'all');
+
+    $buildFilterUrl = static function (string $status, string $type): string {
+        return route('mypage', [
+            'tab' => 'notifications',
+            'status' => $status,
+            'type' => $type,
+        ]);
+    };
 @endphp
 
 <section class="notifications-board">
@@ -143,41 +61,46 @@
         </div>
 
         <div class="notifications-board__summary-actions">
-            <button type="button" class="notify-btn notify-btn--ghost">알림 설정</button>
-            <button type="button" class="notify-btn notify-btn--solid">모두 읽음 처리</button>
+            <a href="{{ route('mypage', ['tab' => 'notifications']) }}" class="notify-btn notify-btn--ghost">
+                필터 초기화
+            </a>
+            <form method="POST" action="{{ route('notifications.readAll') }}">
+                @csrf
+                @method('PATCH')
+                <button type="submit" class="notify-btn notify-btn--solid">모두 읽음 처리</button>
+            </form>
         </div>
     </header>
 
     <div class="notifications-board__filters">
         <div class="notifications-board__status-list">
             @foreach ($statusFilters as $filterKey => $filterLabel)
-                <button
-                    type="button"
+                <a
+                    href="{{ $buildFilterUrl($filterKey, $currentType) }}"
                     @class([
                         'notifications-board__status-chip',
-                        'is-active' => (string) data_get($notificationFilters, 'status', 'all') === $filterKey,
+                        'is-active' => $currentStatus === $filterKey,
                     ])
                 >
                     {{ $filterLabel }}
-                </button>
+                </a>
             @endforeach
         </div>
 
         <div class="notifications-board__type-row">
             <div class="notifications-board__type-list">
                 @foreach ($typeFilters as $filterKey => $filterLabel)
-                    <button
-                        type="button"
+                    <a
+                        href="{{ $buildFilterUrl($currentStatus, $filterKey) }}"
                         @class([
                             'notifications-board__type-chip',
-                            'is-active' => (string) data_get($notificationFilters, 'type', 'all') === $filterKey,
+                            'is-active' => $currentType === $filterKey,
                         ])
                     >
                         {{ $filterLabel }}
-                    </button>
+                    </a>
                 @endforeach
             </div>
-
             <button type="button" class="notifications-board__sort-btn">최신순</button>
         </div>
     </div>
@@ -186,7 +109,7 @@
         @forelse ($notificationGroups as $group)
             <section class="notifications-board__group">
                 <div class="notifications-board__group-head">
-                    <h4 class="notifications-board__group-title">{{ data_get($group, 'label') }}</h4>
+                    <h4 class="notifications-board__group-title">{{ (string) data_get($group, 'label', '') }}</h4>
                     <span class="notifications-board__group-count">
                         {{ number_format(count((array) data_get($group, 'items', []))) }}개
                     </span>
@@ -200,6 +123,8 @@
                                 ? $type
                                 : 'system';
                             $isUnread = (bool) data_get($item, 'is_unread', false);
+                            $notificationId = (string) data_get($item, 'id', '');
+                            $actionUrl = (string) data_get($item, 'action_url', route('mypage', ['tab' => 'notifications']));
                         @endphp
 
                         <article @class(['notification-card', 'is-unread' => $isUnread])>
@@ -228,9 +153,11 @@
                                             <p class="notification-card__message">
                                                 {{ (string) data_get($item, 'message', '') }}
                                             </p>
-                                            <p class="notification-card__target">
-                                                {{ (string) data_get($item, 'target', '') }}
-                                            </p>
+                                            @if (filled(data_get($item, 'target')))
+                                                <p class="notification-card__target">
+                                                    {{ (string) data_get($item, 'target', '') }}
+                                                </p>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -241,12 +168,21 @@
                                     </time>
 
                                     <div class="notification-card__actions">
-                                        <button type="button" class="notify-btn notify-btn--ghost notify-btn--small">
-                                            {{ $isUnread ? '읽음 처리' : '보관' }}
-                                        </button>
-                                        <button type="button" class="notify-btn notify-btn--solid notify-btn--small">
+                                        @if ($isUnread && $notificationId !== '')
+                                            <form method="POST" action="{{ route('notifications.read', ['notificationId' => $notificationId]) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="notify-btn notify-btn--ghost notify-btn--small">
+                                                    읽음 처리
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="notify-btn notify-btn--ghost notify-btn--small">읽음</span>
+                                        @endif
+
+                                        <a href="{{ $actionUrl }}" class="notify-btn notify-btn--solid notify-btn--small">
                                             {{ (string) data_get($item, 'action_label', '보기') }}
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -259,7 +195,7 @@
                 <div class="notifications-board__empty-badge">0</div>
                 <h3 class="notifications-board__empty-title">새 알림이 없습니다.</h3>
                 <p class="notifications-board__empty-copy">
-                    댓글, 답글, 팔로우, 시스템 알림이 도착하면 이곳에 표시됩니다.
+                    댓글, 답글, 팔로우, 좋아요, 북마크 알림이 도착하면 이곳에 표시됩니다.
                 </p>
             </div>
         @endforelse

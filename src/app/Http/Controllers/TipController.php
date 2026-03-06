@@ -11,6 +11,7 @@ use App\Services\TipViewCounterService;
 use App\Services\SearchKeywordService;
 use App\Services\TipService;
 use App\Services\FollowService;
+use App\Services\UserNotificationService;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\Comment;
@@ -18,7 +19,13 @@ use App\Models\User;
 
 class TipController extends Controller
 {
-    public function __construct(private FollowService $followService, private TipService $tipService, private TipViewCounterService $tipViewCounter, private SearchKeywordService $searchKeywordService)
+    public function __construct(
+        private FollowService $followService,
+        private TipService $tipService,
+        private TipViewCounterService $tipViewCounter,
+        private SearchKeywordService $searchKeywordService,
+        private UserNotificationService $userNotificationService,
+    )
     {
         
     }
@@ -616,6 +623,12 @@ class TipController extends Controller
         $likeCount = $tip->likedUsers()->count();
         $tip->update(['like_count' => $likeCount]);
 
+        // 좋아요가 새로 생성된 경우에만 알림 전송
+        $actor = Auth::user();
+        if ($liked && $actor instanceof User) {
+            $this->userNotificationService->notifyLike($tip, $actor);
+        }
+
         return response()->json([
             'success' => true,
             'tip_id' => $tip->id,
@@ -637,6 +650,12 @@ class TipController extends Controller
 
         $bookmarkCount = $tip->bookmarkedUsers()->count();
         $tip->update(['bookmark_count' => $bookmarkCount]);
+
+        // 북마크가 새로 생성된 경우에만 알림 전송
+        $actor = Auth::user();
+        if ($bookmarked && $actor instanceof User) {
+            $this->userNotificationService->notifyBookmark($tip, $actor);
+        }
 
         return response()->json([
             'success' => true,

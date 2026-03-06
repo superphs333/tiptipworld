@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use App\Models\Tip;
+use App\Models\User;
+use App\Services\UserNotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +13,10 @@ use Illuminate\Support\Str;
 
 class CommentController extends Controller
 {
+    public function __construct(private UserNotificationService $userNotificationService)
+    {
+    }
+
     /**
      * 댓글 목록 조회
      *
@@ -109,7 +115,7 @@ class CommentController extends Controller
             return response()->json(['message' => '댓글을 입력해주세요.'], 422);
         }
 
-        Tip::findOrFail($tip_id);
+        $tip = Tip::query()->findOrFail($tip_id);
 
         $parentIdInput = isset($validated['parent_id']) ? (int) $validated['parent_id'] : null;
         $replyToIdInput = isset($validated['reply_to_id']) ? (int) $validated['reply_to_id'] : null;
@@ -175,6 +181,27 @@ class CommentController extends Controller
         }
 
         $this->syncTipCommentCount((int) $tip_id);
+
+        // 알림 생성
+        $actor = Auth::user();
+        if ($actor instanceof User) {
+            if ($depth === 0) {
+                // 일반 댓글: 글 작성자에게 알림
+                $this->userNotificationService->notifyComment($tip, $comment, $actor);
+            } else {
+                // 답글: reply_to 대상 작성자(없으면 parent)에게 알림
+                $targetCommentId = $replyToId ?? $parentId;
+                if ($targetCommentId !== null) {
+                    $targetComment = Comment::query()
+                        ->with('user:id,name,profile_image_path')
+                        ->find($targetCommentId);
+
+                    if ($targetComment instanceof Comment) {
+                        $this->userNotificationService->notifyReply($tip, $comment, $targetComment, $actor);
+                    }
+                }
+            }
+        }
 
         $authUser = Auth::user();
         $authUserId = $authUser?->id;

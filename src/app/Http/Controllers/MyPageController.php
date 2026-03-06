@@ -5,11 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Services\TipService;
+use App\Services\UserNotificationService;
 
 
 class MyPageController extends Controller
 {
-    public function __construct(private TipService $tip_service)
+    public function __construct(
+        private TipService $tip_service,
+        private UserNotificationService $userNotificationService,
+    )
     {
     }
 
@@ -40,6 +44,17 @@ class MyPageController extends Controller
                     $viewData,
                     $this->tip_service->getMyArchiveViewData()
                 );
+                break;
+            case 'notifications' :
+                if ($user !== null) {
+                    $status = (string) $request->query('status', 'all');
+                    $type = (string) $request->query('type', 'all');
+
+                    $viewData = array_merge(
+                        $viewData,
+                        $this->userNotificationService->getBoardData($user, $status, $type)
+                    );
+                }
                 break;
         }
 

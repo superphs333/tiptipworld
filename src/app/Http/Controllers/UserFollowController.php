@@ -4,11 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Services\FollowService;
+use App\Services\UserNotificationService;
 
 class UserFollowController extends Controller
 {
-    public function __construct(private FollowService $followService)
+    public function __construct(
+        private FollowService $followService,
+        private UserNotificationService $userNotificationService,
+    )
     {
     }
 
@@ -49,6 +54,16 @@ class UserFollowController extends Controller
 
         $following = $this->followService->toggleFollow($authUserId, $user_id);
         $followersCount = $this->followService->getFollowerCount($user_id);
+
+        // 팔로우가 새로 생성된 경우에만 알림 전송
+        if ($following) {
+            $actor = Auth::user();
+            $targetUser = User::query()->find($user_id);
+
+            if ($actor instanceof User && $targetUser instanceof User) {
+                $this->userNotificationService->notifyFollow($targetUser, $actor);
+            }
+        }
 
         return response()->json([
             'success' => true,

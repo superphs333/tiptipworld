@@ -10,6 +10,7 @@ use App\Http\Controllers\SummernoteController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TipController;
 use App\Http\Controllers\UserFollowController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -90,7 +91,13 @@ Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
 // 팔로우
 Route::post('/user/follow/{user_id}', [UserFollowController::class, 'followUser'])->whereNumber('user_id')->middleware('auth')->name('user.follow');
 Route::get('/user/follows/{user_id}', [UserFollowController::class, 'followList'])->whereNumber('user_id')->name('user.follow.list');
-    
+
+// 알림 : 읽음 처리
+Route::patch('/notifications/{notificationId}/read', [NotificationController::class, 'markAsRead'])
+    ->name('notifications.read');
+
+Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+    ->name('notifications.readAll');
 
 /**
  * 관리자 전용 라우트 그룹
