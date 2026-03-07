@@ -102,7 +102,7 @@ Route::patch('/notifications/read-all', [NotificationController::class, 'markAll
 /**
  * 관리자 전용 라우트 그룹
  */
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['admin', 'auth'])->group(function () {
     Route::get('/admin/{tab?}', [AdminDashboard::class, 'index'])
         ->whereIn('tab', array_keys(config('admin.tabs', [])))
         ->name('admin');                    

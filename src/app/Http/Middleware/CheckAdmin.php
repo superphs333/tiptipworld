@@ -19,7 +19,7 @@ class CheckAdmin
 
         // 로그인 되어있고 admin 역할이어야 통과
         if (!$user || !$user->isAdmin()) {
-            abort(403, 'Unauthorized');
+            return redirect()->route('home');
         }
 
         return $next($request);
