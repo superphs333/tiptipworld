@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use App\Models\Tip;
 use App\Models\Tag;
 use App\Models\User;
@@ -169,6 +170,140 @@ class TipService
                 ];
             });
         
+    }
+
+    /**
+     * 특정 카테고리의 공개된 글 목록
+     */
+    public function getCategoryTips(int $categoryId, int $limit = 30, int $days = 7): Collection
+    {
+        $categoryId = max(1, $categoryId);
+        $limit = max(1, min($limit, 100));
+        $days = max(1, min($days, 30));
+
+        $result = Tip::query()
+            ->where('tips.category_id', $categoryId)
+            ->where('tips.status', 'published')
+            ->where('tips.visibility', 'public')
+            //->where('tips.created_at', '>=', now()->subDays($days))
+            ->with([
+                'user:id,name,profile_image_path',
+                'category:id,name',
+            ])
+            ->orderByDesc('tips.id')
+            ->limit($limit)
+            ->get();
+
+        return $result;
+    }
+
+    /**
+     * 특정 카테고리 인기글 목록
+     *
+     * engagement = views * 1 + likes * 3 + comments * 5 + bookmarks * 8
+     */
+    public function getCategoryPopularTips(int $categoryId, int $limit = 10, int $days = 7): Collection
+    {
+        $categoryId = max(1, $categoryId);
+        $limit = max(1, min($limit, 50));
+        $days = max(1, min($days, 30));
+        $authUserId = Auth::id();
+
+        $query = Tip::query()
+            ->where('tips.category_id', $categoryId)
+            ->where('tips.status', 'published')
+            ->where('tips.visibility', 'public')
+            //->where('tips.created_at', '>=', now()->subDays($days))
+            ->select('tips.*')
+            ->selectRaw("
+                (tips.view_count * 1)
+                + (tips.like_count * 3)
+                + (tips.comment_count * 5)
+                + (tips.bookmark_count * 8)
+                as engagement
+            ")
+            ->with([
+                'user:id,name,profile_image_path',
+                'category:id,name',
+            ]);
+
+        if ($authUserId) {
+            $query->withCount([
+                'likedUsers as is_liked' => function ($countQuery) use ($authUserId) {
+                    $countQuery->where('users.id', $authUserId);
+                },
+                'bookmarkedUsers as is_bookmarked' => function ($countQuery) use ($authUserId) {
+                    $countQuery->where('users.id', $authUserId);
+                },
+            ]);
+        }
+
+        $result = $query
+            ->orderByDesc('engagement')
+            ->orderByDesc('tips.id')
+            ->limit($limit)
+            ->get();
+
+        return $result;
+    }
+
+    /**
+     * 특정 카테고리 인기글 기준 유저 랭킹
+     */
+    public function getCategoryPopularUserRanking(
+        int $categoryId,
+        int $popularTipLimit = 30,
+        int $userLimit = 10,
+        int $days = 7
+    ): Collection {
+        $categoryId = max(1, $categoryId);
+        $popularTipLimit = max(1, min($popularTipLimit, 100));
+        $userLimit = max(1, min($userLimit, 50));
+        $days = max(1, min($days, 30));
+
+        $popularTipsSubQuery = Tip::query()
+            ->where('tips.category_id', $categoryId)
+            ->where('tips.status', 'published')
+            ->where('tips.visibility', 'public')
+            //->where('tips.created_at', '>=', now()->subDays($days))
+            ->select([
+                'tips.id',
+                'tips.user_id',
+                'tips.view_count',
+                'tips.like_count',
+                'tips.comment_count',
+                'tips.bookmark_count',
+            ])
+            ->selectRaw("
+                (tips.view_count * 1)
+                + (tips.like_count * 3)
+                + (tips.comment_count * 5)
+                + (tips.bookmark_count * 8)
+                as engagement
+            ")
+            ->orderByDesc('engagement')
+            ->orderByDesc('tips.id')
+            ->limit($popularTipLimit);
+
+        $result = User::query()
+            ->joinSub($popularTipsSubQuery, 'popular_tips', function ($join) {
+                $join->on('users.id', '=', 'popular_tips.user_id');
+            })
+            ->select('users.id', 'users.name', 'users.profile_image_path')
+            ->selectRaw('COUNT(popular_tips.id) as tips_count')
+            ->selectRaw('SUM(popular_tips.engagement) as engagement_sum')
+            ->selectRaw('SUM(popular_tips.view_count) as view_count_sum')
+            ->selectRaw('SUM(popular_tips.like_count) as like_count_sum')
+            ->selectRaw('SUM(popular_tips.comment_count) as comment_count_sum')
+            ->selectRaw('SUM(popular_tips.bookmark_count) as bookmark_count_sum')
+            ->groupBy('users.id', 'users.name', 'users.profile_image_path')
+            ->orderByDesc('engagement_sum')
+            ->orderByDesc('tips_count')
+            ->orderBy('users.id')
+            ->limit($userLimit)
+            ->get();
+
+        return $result;
     }
 
     // 유저 글의 카테고리 가져오기

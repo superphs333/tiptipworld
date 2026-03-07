@@ -59,7 +59,6 @@ class HomeViewService
         return $result;
     }
 
-
     /**
      * 인기 태그 가져오기 
      * tip_tag에서 가장 많이 
@@ -96,5 +95,32 @@ class HomeViewService
            ->get();
 
         return $categories;
+    }
+
+    /**
+     * 공개된 팁 기준으로 태그가 가장 많이 사용된 카테고리 1개
+     */
+    public static function getTopTagCategory() : ?Category
+    {
+        $topCategory = Category::query()
+            ->where('categories.is_active', true)
+            ->leftJoin('tips', function ($join) {
+                $join->on('tips.category_id', '=', 'categories.id')
+                    ->where('tips.status', 'published')
+                    ->where('tips.visibility', 'public');
+            })
+            ->leftJoin('tip_tag', 'tip_tag.tip_id', '=', 'tips.id')
+            ->leftJoin('tags', function ($join) {
+                $join->on('tags.id', '=', 'tip_tag.tag_id')
+                    ->where('tags.is_blocked', false);
+            })
+            ->select('categories.id', 'categories.name')
+            ->selectRaw('COUNT(tags.id) as tags_count')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('tags_count')
+            ->orderBy('categories.id')
+            ->first();
+
+        return $topCategory;
     }
 }

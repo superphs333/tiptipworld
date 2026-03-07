@@ -11,12 +11,14 @@ class HomeController extends Controller
         $popular_tips = HomeViewService::getpopularList();
         $popular_tags = HomeViewService::getPopularTags();
         $all_categories = HomeViewService::getAllCategories();
+        $top_tag_category = HomeViewService::getTopTagCategory();
 
 
         return view('home.home', [
             'popular_tips' => $popular_tips,
             'popular_tags' => $popular_tags,
-            'categories' => $all_categories
+            'categories' => $all_categories,
+            'top_tag_category' => $top_tag_category,
         ]);
     }
 }
