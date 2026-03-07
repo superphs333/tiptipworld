@@ -11,14 +11,13 @@ class CategorySeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function (): void {
-            $nextSortOrder = (int) (Category::query()->max('sort_order') ?? 0);
-
-            foreach ($this->defaultCategories() as $attributes) {
+            foreach ($this->defaultCategories() as $index => $attributes) {
+                $sortOrder = $index + 1;
                 $category = Category::query()->firstWhere('name', $attributes['name']);
 
                 if ($category === null) {
                     Category::query()->create($attributes + [
-                        'sort_order' => ++$nextSortOrder,
+                        'sort_order' => $sortOrder,
                     ]);
 
                     continue;
@@ -27,11 +26,8 @@ class CategorySeeder extends Seeder
                 $category->fill([
                     'description' => $attributes['description'],
                     'is_active' => $attributes['is_active'],
+                    'sort_order' => $sortOrder,
                 ]);
-
-                if ($category->sort_order === null) {
-                    $category->sort_order = ++$nextSortOrder;
-                }
 
                 $category->save();
             }
@@ -41,6 +37,16 @@ class CategorySeeder extends Seeder
     private function defaultCategories(): array
     {
         return [
+            [
+                'name' => '청소',
+                'description' => '집 안 곳곳을 빠르게 정리하는 실전 청소 팁',
+                'is_active' => true,
+            ],
+            [
+                'name' => '피부',
+                'description' => '피부 컨디션을 지키는 데일리 케어 팁',
+                'is_active' => true,
+            ],
             [
                 'name' => '생활',
                 'description' => '일상에서 바로 적용할 수 있는 기본 생활 팁',
