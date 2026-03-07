@@ -7,19 +7,20 @@
             </a>
 
             <div class="flex items-center gap-3">
+                <button
+                    x-data
+                    type="button"
+                    class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900"
+                    aria-label="검색"
+                    @click.prevent="$dispatch('open-modal', 'global-search')"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"></circle>
+                        <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
+                    </svg>
+                </button>
+
                 @auth
-                    <button
-                        x-data
-                        type="button"
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:text-gray-900"
-                        aria-label="검색"
-                        @click.prevent="$dispatch('open-modal', 'global-search')"
-                    >
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <circle cx="11" cy="11" r="7"></circle>
-                            <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-                        </svg>
-                    </button>
                     <div x-data="{ open: false }" class="relative">
                         <button type="button" @click="open = !open" aria-expanded="false" class="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-800 shadow-sm hover:border-gray-400">
                             <img src="{{ Auth::user()->profile_image_url ?? asset('images/avatar-default.svg') }}" alt="프로필 이미지" class="h-6 w-6 shrink-0 rounded-full ring-1 ring-gray-300" />
