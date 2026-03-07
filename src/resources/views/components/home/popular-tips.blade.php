@@ -25,6 +25,8 @@
                 $likeCount = (int) data_get($item, 'like_count', 0);
                 $commentCount = (int) data_get($item, 'comment_count', 0);
                 $bookmarkCount = (int) data_get($item, 'bookmark_count', 0);
+                $isLiked = (int) data_get($item, 'is_liked', 0) > 0;
+                $isBookmarked = (int) data_get($item, 'is_bookmarked', 0) > 0;
             @endphp
 
             <article class="home-popular__card">
@@ -57,7 +59,11 @@
 
                     <div class="home-popular__bottom">
                         <span class="home-popular__stats">
-                            <span class="home-popular__stat" title="좋아요">
+                            <span
+                                class="home-popular__stat {{ $isLiked ? 'is-liked' : '' }}"
+                                title="좋아요"
+                                aria-label="{{ $isLiked ? '좋아요함' : '좋아요' }}"
+                            >
                                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6" />
                                 </svg>
@@ -69,7 +75,11 @@
                                 </svg>
                                 {{ number_format($commentCount) }}
                             </span>
-                            <span class="home-popular__stat" title="북마크">
+                            <span
+                                class="home-popular__stat {{ $isBookmarked ? 'is-bookmarked' : '' }}"
+                                title="북마크"
+                                aria-label="{{ $isBookmarked ? '북마크함' : '북마크' }}"
+                            >
                                 <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                     <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6" />
                                 </svg>

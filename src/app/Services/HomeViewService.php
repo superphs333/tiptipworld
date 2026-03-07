@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Tip;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 
 class HomeViewService
@@ -19,8 +20,9 @@ class HomeViewService
     {
         $limit = max(1, min($limit, 50));
         $days = max(1, min($days, 30));
+        $authUserId = Auth::id();
 
-        $result = Tip::query()
+        $query = Tip::query()
             ->where('tips.status', 'published')
             ->where('tips.visibility', 'public')
             //->where('tips.created_at', '>=', now()->subDays($days))
@@ -35,7 +37,20 @@ class HomeViewService
             ->with([
                 'user:id,name,profile_image_path',
                 'category:id,name',
-            ])
+            ]);
+
+        if ($authUserId) {
+            $query->withCount([
+                'likedUsers as is_liked' => function ($countQuery) use ($authUserId) {
+                    $countQuery->where('users.id', $authUserId);
+                },
+                'bookmarkedUsers as is_bookmarked' => function ($countQuery) use ($authUserId) {
+                    $countQuery->where('users.id', $authUserId);
+                },
+            ]);
+        }
+
+        $result = $query
             ->orderByDesc('engagement')
             ->orderByDesc('tips.id')
             ->limit($limit)

@@ -234,6 +234,28 @@
     height: 14px;
 }
 
+.home-popular__stat svg path {
+    transition: fill 0.2s ease, stroke 0.2s ease;
+}
+
+.home-popular__stat.is-liked {
+    color: #d11a4b;
+}
+
+.home-popular__stat.is-liked svg path {
+    fill: #d11a4b;
+    stroke: #d11a4b;
+}
+
+.home-popular__stat.is-bookmarked {
+    color: var(--home-ink, #111111);
+}
+
+.home-popular__stat.is-bookmarked svg path {
+    fill: var(--home-ink, #111111);
+    stroke: var(--home-ink, #111111);
+}
+
 .home-popular__empty {
     margin: 0;
     color: var(--home-muted-soft, #7a7a7a);
