@@ -42,14 +42,14 @@
                     <p class="home-hero__stat-value">{{ number_format($totalTips) }}</p>
                 </article>
                 <article class="home-hero__stat-card home-hero__stat-card--highlight">
-                    <p class="home-hero__stat-label">최다 팁 카테고리</p>
+                    <p class="home-hero__stat-label">팁 수 1위 카테고리</p>
                     <p class="home-hero__stat-strong">{{ data_get($topCategory, 'name', '집계 중') }}</p>
                     <p class="home-hero__stat-sub">
                         {{ number_format((int) data_get($topCategory, 'tips_count', 0)) }}개 팁
                     </p>
                 </article>
                 <article class="home-hero__stat-card">
-                    <p class="home-hero__stat-label">최다 태그 카테고리</p>
+                    <p class="home-hero__stat-label">태그 수 1위 카테고리</p>
                     <p class="home-hero__stat-strong">{{ $topTagCategoryName }}</p>
                     <p class="home-hero__stat-sub">{{ number_format($topTagCount) }}개 태그</p>
                 </article>
