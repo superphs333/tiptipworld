@@ -3,6 +3,7 @@
     @vite('resources/js/components/tip-actions.js')
     @vite('resources/js/components/tip-comments.js')
     @vite('resources/js/components/profile.js')
+    @vite('resources/js/components/tip-reaction-modal.js')
     @vite('resources/js/components/userfeed.js')
 
 @endonce

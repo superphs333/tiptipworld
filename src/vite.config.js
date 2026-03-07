@@ -12,6 +12,7 @@ export default defineConfig({
                 'resources/js/components/tip-actions.js',
                 'resources/js/components/tip-comments.js',
                 'resources/js/components/profile.js',
+                'resources/js/components/tip-reaction-modal.js',
                 'resources/js/components/userfeed.js',
             ],
             refresh: true,

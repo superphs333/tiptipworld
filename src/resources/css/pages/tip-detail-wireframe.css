@@ -450,6 +450,23 @@
     line-height: 1.3;
 }
 
+.tip-wireframe__reaction-count--button {
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.tip-wireframe__reaction-count--button:hover:not(:disabled) {
+    border-color: rgba(18, 18, 18, 0.22);
+    background: #f2f2f2;
+}
+
+.tip-wireframe__reaction-count--button:disabled {
+    cursor: default;
+    opacity: 0.72;
+}
+
 .tip-wireframe__reaction-users {
     display: flex;
     flex-wrap: wrap;
@@ -472,12 +489,225 @@
     max-width: 112px;
 }
 
-.tip-wireframe__reaction-more,
+.tip-wireframe__reaction-more-btn {
+    margin: 10px 0 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--wf-muted);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.tip-wireframe__reaction-more-btn:hover,
+.tip-wireframe__reaction-more-btn:focus-visible {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
 .tip-wireframe__reaction-empty {
     margin: 10px 0 0;
     font-size: 0.82rem;
     line-height: 1.5;
     color: var(--wf-muted);
+}
+
+body.tip-wireframe-reaction-modal-open {
+    overflow: hidden;
+}
+
+.tip-wireframe__reaction-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 32px;
+}
+
+.tip-wireframe__reaction-modal[hidden] {
+    display: none;
+}
+
+.tip-wireframe__reaction-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 10, 10, 0.5);
+}
+
+.tip-wireframe__reaction-modal-dialog {
+    position: relative;
+    width: min(100%, 760px);
+    max-height: min(86vh, 860px);
+    border: 1px solid var(--wf-line);
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 26px 40px rgba(0, 0, 0, 0.22);
+    display: grid;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    overflow: hidden;
+}
+
+.tip-wireframe__reaction-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 20px 24px 14px;
+    border-bottom: 1px solid var(--wf-line);
+}
+
+.tip-wireframe__reaction-modal-head h2 {
+    margin: 0;
+    color: var(--wf-ink);
+    font-family: "Space Grotesk", "IBM Plex Sans KR", "Figtree", sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.tip-wireframe__reaction-modal-close {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--wf-line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--wf-ink);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.tip-wireframe__reaction-modal-close:hover {
+    background: #f7f7f7;
+}
+
+.tip-wireframe__reaction-modal-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 14px 24px 0;
+}
+
+.tip-wireframe__reaction-modal-tab {
+    border: 1px solid var(--wf-line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--wf-muted);
+    height: 38px;
+    padding: 0 16px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.tip-wireframe__reaction-modal-tab em {
+    font-style: normal;
+    color: var(--wf-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.tip-wireframe__reaction-modal-tab.is-active {
+    border-color: #bdbdbd;
+    background: #f4f4f4;
+    color: var(--wf-ink);
+}
+
+.tip-wireframe__reaction-modal-search {
+    display: grid;
+    gap: 8px;
+    padding: 14px 24px;
+}
+
+.tip-wireframe__reaction-modal-search-label {
+    color: var(--wf-muted);
+    font-size: 0.77rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.tip-wireframe__reaction-modal-search input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid var(--wf-line);
+    border-radius: 10px;
+    padding: 0 14px;
+    background: #fff;
+    color: var(--wf-ink);
+    font-size: 0.92rem;
+}
+
+.tip-wireframe__reaction-modal-search input:focus {
+    outline: none;
+    border-color: var(--wf-line-strong);
+}
+
+.tip-wireframe__reaction-modal-body {
+    min-height: 300px;
+    overflow: auto;
+    border-top: 1px solid #f2f2f2;
+    position: relative;
+}
+
+.tip-wireframe__reaction-modal-list {
+    list-style: none;
+    margin: 0;
+    padding: 10px 16px;
+    display: grid;
+}
+
+.tip-wireframe__reaction-modal-item {
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.tip-wireframe__reaction-modal-item:last-child {
+    border-bottom: 0;
+}
+
+.tip-wireframe__reaction-modal-user {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: inherit;
+    text-decoration: none;
+    padding: 12px 10px;
+}
+
+.tip-wireframe__reaction-modal-user:hover .tip-wireframe__reaction-modal-name,
+.tip-wireframe__reaction-modal-user:focus-visible .tip-wireframe__reaction-modal-name {
+    text-decoration: underline;
+}
+
+.tip-wireframe__reaction-modal-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.15);
+    object-fit: cover;
+    background: #f7f7f7;
+}
+
+.tip-wireframe__reaction-modal-name {
+    margin: 0;
+    font-size: 0.87rem;
+    font-weight: 700;
+    color: var(--wf-ink);
+    line-height: 1.2;
+}
+
+.tip-wireframe__reaction-modal-empty {
+    margin: 0;
+    min-height: 180px;
+    display: grid;
+    place-items: center;
+    color: var(--wf-muted);
+    font-size: 0.84rem;
 }
 
 .tip-wireframe__tag {
@@ -1009,6 +1239,30 @@
 
     .tip-wireframe__related-grid {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tip-wireframe__reaction-modal {
+        padding: 0;
+        align-items: end;
+    }
+
+    .tip-wireframe__reaction-modal-dialog {
+        width: 100%;
+        max-height: min(88vh, 760px);
+        border-radius: 18px 18px 0 0;
+        border-bottom: 0;
+    }
+
+    .tip-wireframe__reaction-modal-head,
+    .tip-wireframe__reaction-modal-tabs,
+    .tip-wireframe__reaction-modal-search {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .tip-wireframe__reaction-modal-user {
+        padding-left: 4px;
+        padding-right: 4px;
     }
 }
 

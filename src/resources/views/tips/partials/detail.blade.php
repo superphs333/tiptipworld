@@ -144,17 +144,26 @@
             @php
                 $likedUsers = $tip->relationLoaded('likedUsers') ? $tip->likedUsers : collect();
                 $bookmarkedUsers = $tip->relationLoaded('bookmarkedUsers') ? $tip->bookmarkedUsers : collect();
+                $previewUserLimit = 6;
+                $likedUsersCount = $likedUsers->count();
+                $bookmarkedUsersCount = $bookmarkedUsers->count();
+                $defaultAvatar = asset('images/avatar-default.svg');
             @endphp
             <section class="tip-wireframe__section tip-wireframe__reactions">
                 <div class="tip-wireframe__reaction-grid">
                     <section class="tip-wireframe__reaction-panel" aria-label="좋아요한 사람">
                         <div class="tip-wireframe__reaction-head">
                             <strong class="tip-wireframe__reaction-label">좋아요한 사람</strong>
-                            <span class="tip-wireframe__reaction-count">{{ number_format($likedUsers->count()) }}</span>
+                            <button
+                                type="button"
+                                class="tip-wireframe__reaction-count tip-wireframe__reaction-count--button"
+                                data-reaction-modal-open="likes"
+                                @disabled($likedUsersCount === 0)
+                            >{{ number_format($likedUsersCount) }}</button>
                         </div>
                         @if ($likedUsers->isNotEmpty())
                             <div class="tip-wireframe__reaction-users">
-                                @foreach ($likedUsers->take(6) as $reactionUser)
+                                @foreach ($likedUsers->take($previewUserLimit) as $reactionUser)
                                     <x-author-inline
                                         :name="data_get($reactionUser, 'name', '이름 없음')"
                                         :avatar="data_get($reactionUser, 'profile_image_url')"
@@ -165,8 +174,12 @@
                                     />
                                 @endforeach
                             </div>
-                            @if ($likedUsers->count() > 6)
-                                <p class="tip-wireframe__reaction-more">외 {{ number_format($likedUsers->count() - 6) }}명</p>
+                            @if ($likedUsersCount > $previewUserLimit)
+                                <button
+                                    type="button"
+                                    class="tip-wireframe__reaction-more-btn"
+                                    data-reaction-modal-open="likes"
+                                >+{{ number_format($likedUsersCount - $previewUserLimit) }}명 더보기</button>
                             @endif
                         @else
                             <p class="tip-wireframe__reaction-empty">아직 좋아요한 사용자가 없습니다.</p>
@@ -176,11 +189,16 @@
                     <section class="tip-wireframe__reaction-panel" aria-label="북마크한 사람">
                         <div class="tip-wireframe__reaction-head">
                             <strong class="tip-wireframe__reaction-label">북마크한 사람</strong>
-                            <span class="tip-wireframe__reaction-count">{{ number_format($bookmarkedUsers->count()) }}</span>
+                            <button
+                                type="button"
+                                class="tip-wireframe__reaction-count tip-wireframe__reaction-count--button"
+                                data-reaction-modal-open="bookmarks"
+                                @disabled($bookmarkedUsersCount === 0)
+                            >{{ number_format($bookmarkedUsersCount) }}</button>
                         </div>
                         @if ($bookmarkedUsers->isNotEmpty())
                             <div class="tip-wireframe__reaction-users">
-                                @foreach ($bookmarkedUsers->take(6) as $reactionUser)
+                                @foreach ($bookmarkedUsers->take($previewUserLimit) as $reactionUser)
                                     <x-author-inline
                                         :name="data_get($reactionUser, 'name', '이름 없음')"
                                         :avatar="data_get($reactionUser, 'profile_image_url')"
@@ -191,13 +209,131 @@
                                     />
                                 @endforeach
                             </div>
-                            @if ($bookmarkedUsers->count() > 6)
-                                <p class="tip-wireframe__reaction-more">외 {{ number_format($bookmarkedUsers->count() - 6) }}명</p>
+                            @if ($bookmarkedUsersCount > $previewUserLimit)
+                                <button
+                                    type="button"
+                                    class="tip-wireframe__reaction-more-btn"
+                                    data-reaction-modal-open="bookmarks"
+                                >+{{ number_format($bookmarkedUsersCount - $previewUserLimit) }}명 더보기</button>
                             @endif
                         @else
                             <p class="tip-wireframe__reaction-empty">아직 북마크한 사용자가 없습니다.</p>
                         @endif
                     </section>
+                </div>
+            </section>
+
+            <section
+                class="tip-wireframe__reaction-modal"
+                data-reaction-modal
+                hidden
+                aria-hidden="true"
+            >
+                <div class="tip-wireframe__reaction-modal-backdrop" data-reaction-modal-close></div>
+
+                <div
+                    class="tip-wireframe__reaction-modal-dialog"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="tip-wireframe-reaction-modal-title"
+                >
+                    <header class="tip-wireframe__reaction-modal-head">
+                        <h2 id="tip-wireframe-reaction-modal-title">반응한 사람</h2>
+                        <button
+                            type="button"
+                            class="tip-wireframe__reaction-modal-close"
+                            data-reaction-modal-close
+                            aria-label="반응 사용자 목록 닫기"
+                        >
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </header>
+
+                    <div class="tip-wireframe__reaction-modal-tabs" role="tablist" aria-label="반응 목록 탭">
+                        <button
+                            type="button"
+                            class="tip-wireframe__reaction-modal-tab is-active"
+                            data-reaction-modal-tab="likes"
+                            role="tab"
+                            aria-selected="true"
+                        >
+                            좋아요
+                            <em>{{ number_format($likedUsersCount) }}</em>
+                        </button>
+                        <button
+                            type="button"
+                            class="tip-wireframe__reaction-modal-tab"
+                            data-reaction-modal-tab="bookmarks"
+                            role="tab"
+                            aria-selected="false"
+                        >
+                            북마크
+                            <em>{{ number_format($bookmarkedUsersCount) }}</em>
+                        </button>
+                    </div>
+
+                    <label class="tip-wireframe__reaction-modal-search">
+                        <span class="tip-wireframe__reaction-modal-search-label">검색</span>
+                        <input
+                            type="search"
+                            name="reaction-search"
+                            placeholder="이름 검색"
+                            autocomplete="off"
+                            data-reaction-modal-search
+                        >
+                    </label>
+
+                    <div class="tip-wireframe__reaction-modal-body">
+                        <ul class="tip-wireframe__reaction-modal-list" data-reaction-modal-list="likes">
+                            @foreach ($likedUsers as $reactionUser)
+                                <li
+                                    class="tip-wireframe__reaction-modal-item"
+                                    data-reaction-item
+                                    data-reaction-name="{{ data_get($reactionUser, 'name', '이름 없음') }}"
+                                >
+                                    <a
+                                        class="tip-wireframe__reaction-modal-user"
+                                        href="{{ route('tips.userFeed', ['user_id' => $reactionUser->id]) }}"
+                                    >
+                                        <img
+                                            class="tip-wireframe__reaction-modal-avatar"
+                                            src="{{ data_get($reactionUser, 'profile_image_url', $defaultAvatar) }}"
+                                            alt="{{ data_get($reactionUser, 'name', '이름 없음') }} 프로필"
+                                            loading="lazy"
+                                        >
+                                        <span class="tip-wireframe__reaction-modal-name">{{ data_get($reactionUser, 'name', '이름 없음') }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <ul class="tip-wireframe__reaction-modal-list" data-reaction-modal-list="bookmarks" hidden>
+                            @foreach ($bookmarkedUsers as $reactionUser)
+                                <li
+                                    class="tip-wireframe__reaction-modal-item"
+                                    data-reaction-item
+                                    data-reaction-name="{{ data_get($reactionUser, 'name', '이름 없음') }}"
+                                >
+                                    <a
+                                        class="tip-wireframe__reaction-modal-user"
+                                        href="{{ route('tips.userFeed', ['user_id' => $reactionUser->id]) }}"
+                                    >
+                                        <img
+                                            class="tip-wireframe__reaction-modal-avatar"
+                                            src="{{ data_get($reactionUser, 'profile_image_url', $defaultAvatar) }}"
+                                            alt="{{ data_get($reactionUser, 'name', '이름 없음') }} 프로필"
+                                            loading="lazy"
+                                        >
+                                        <span class="tip-wireframe__reaction-modal-name">{{ data_get($reactionUser, 'name', '이름 없음') }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p class="tip-wireframe__reaction-modal-empty" data-reaction-modal-empty hidden>
+                            검색 결과가 없습니다.
+                        </p>
+                    </div>
                 </div>
             </section>
 
