@@ -75,10 +75,17 @@
                             @php
                                 $rank = data_get($row, 'rank', $index + 1);
                                 $keyword = data_get($row, 'keyword', data_get($row, 'label', '-'));
+                                $keywordSearchUrl = route('tips.search', [$queryName => $keyword]);
                             @endphp
                             <li class="flex items-center gap-4 px-4 py-3 text-sm text-gray-800">
                                 <span class="w-[70px] shrink-0 font-semibold">{{ $rank }}</span>
-                                <span class="min-w-0 flex-1 truncate">{{ $keyword }}</span>
+                                <a
+                                    href="{{ $keywordSearchUrl }}"
+                                    class="min-w-0 flex-1 truncate text-gray-800 hover:text-gray-900 hover:underline"
+                                    aria-label="{{ $keyword }} 검색 결과로 이동"
+                                >
+                                    {{ $keyword }}
+                                </a>
                             </li>
                         @endforeach
                     </ul>
