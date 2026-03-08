@@ -11,25 +11,25 @@
         $userTabs = $authUserId > 0
             ? [
                 [
-                    'label' => 'Profile',
+                    'label' => __('Profile'),
                     'href' => route('mypage', ['tab' => 'profile']),
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'profile',
                 ],
                 [
-                    'label' => 'My Tips',
+                    'label' => __('My Tips'),
                     'href' => route('mypage', ['tab' => 'mytips']),
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'mytips',
                 ],
                 [
-                    'label' => 'Archive',
+                    'label' => __('Archive'),
                     'href' => route('mypage', ['tab' => 'myarchive']),
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'myarchive',
                 ],
                 [
-                    'label' => 'Notifications',
+                    'label' => __('Notifications'),
                     'href' => route('mypage', ['tab' => 'notifications']),
                     'active' => request()->routeIs('mypage')
                         && (string) (request()->route('tab') ?: 'profile') === 'notifications',
@@ -102,7 +102,7 @@
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="block w-full px-3 py-2 text-left text-sm text-gray-800 hover:bg-gray-100">
-                                    sign out
+                                    {{ __('Log Out') }}
                                 </button>
                             </form>
                         </div>
