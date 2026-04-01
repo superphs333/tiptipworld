@@ -51,7 +51,9 @@ class Tag extends Model
     }
 
     public static function getTags(array $filters = [], int $perPage = 20){
-        $q = Tag::query()->with('tips');
+        $q = Tag::query()->withCount([
+            'tips as usage_count',
+        ]);
 
         /**
          * 필터
