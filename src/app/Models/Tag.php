@@ -70,6 +70,10 @@ class Tag extends Model
             }
         }
 
-        return $q->orderBy('id')->paginate($perPage)->withQueryString();
+        return $q
+            ->orderByDesc('usage_count')
+            ->orderBy('id')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 }
