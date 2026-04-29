@@ -4,25 +4,29 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
-use App\Http\Controllers\Auth\GoogleLoginController;
-use App\Http\Controllers\Auth\KakaoController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('auth/google', [GoogleLoginController::class, 'redirect'])
+    Route::get('auth/google', [SocialLoginController::class, 'redirect'])
+        ->defaults('provider', 'google')
         ->name('auth.google.redirect');
 
-    Route::get('auth/google/callback', [GoogleLoginController::class, 'callback'])
+    Route::get('auth/google/callback', [SocialLoginController::class, 'callback'])
+        ->defaults('provider', 'google')
         ->name('auth.google.callback');
 
-    Route::get('/auth/kakao/redirect',[KakaoController::class, 'redirect'])->name('kakao.redirect');
-    Route::get('/auth/kakao/callback',[KakaoController::class, 'callback'])->name('kakao.callback');
-
+    Route::get('/auth/kakao/redirect', [SocialLoginController::class, 'redirect'])
+        ->defaults('provider', 'kakao')
+        ->name('kakao.redirect');
+    Route::get('/auth/kakao/callback', [SocialLoginController::class, 'callback'])
+        ->defaults('provider', 'kakao')
+        ->name('kakao.callback');
 
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
