@@ -20,7 +20,7 @@ function removeHiddenBackdrops() {
     });
 }
 
-function uploadSingleImage(file, uploadUrl) {
+function uploadSingleImage(file, uploadUrl, tipId = '', draftKey = '') {
     return new Promise((resolve, reject) => {
         if (!file.type || !file.type.startsWith('image/')) {
             reject(new Error('이미지 파일만 업로드할 수 있어요.'));
@@ -35,6 +35,12 @@ function uploadSingleImage(file, uploadUrl) {
 
         const formData = new FormData();
         formData.append('image', file);
+        if (tipId) {
+            formData.append('tip_id', tipId);
+        }
+        if (draftKey) {
+            formData.append('draft_key', draftKey);
+        }
 
         const token = getCsrfToken();
         const headers = token ? { 'X-CSRF-TOKEN': token } : {};
@@ -64,12 +70,12 @@ function uploadSingleImage(file, uploadUrl) {
     });
 }
 
-async function uploadImagesSequentially(files, editorElement, uploadUrl) {
+async function uploadImagesSequentially(files, editorElement, uploadUrl, tipId, draftKey) {
     const failed = [];
 
     for (const file of files) {
         try {
-            const response = await uploadSingleImage(file, uploadUrl);
+            const response = await uploadSingleImage(file, uploadUrl, tipId, draftKey);
             $(editorElement).summernote('insertImage', response.url, ($image) => {
                 $image.attr('alt', response.alt ?? '');
             });
@@ -116,6 +122,8 @@ function mountSummernote(element) {
     const placeholder = element.dataset.summernotePlaceholder || '내용을 입력하세요.';
     const height = Number.parseInt(element.dataset.summernoteHeight || '500', 10);
     const uploadUrl = element.dataset.summernoteUploadUrl || '';
+    const tipId = element.dataset.summernoteTipId || '';
+    const draftKey = element.dataset.summernoteDraftKey || '';
 
     $editor.summernote({
         placeholder,
@@ -140,7 +148,7 @@ function mountSummernote(element) {
                     return;
                 }
 
-                uploadImagesSequentially(Array.from(files), this, uploadUrl);
+                uploadImagesSequentially(Array.from(files), this, uploadUrl, tipId, draftKey);
             },
         },
     });

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Services\FileStorageService;
+use App\Services\Media\ProfileImageService;
 use App\Models\Role;
 use App\Models\Tip;
 use App\Models\Comment;
@@ -67,11 +67,11 @@ class User extends Authenticatable
      */
     public function getProfileImageUrlAttribute(): string
     {
-        if (!$this->profile_image_path) {
+        if (blank($this->profile_image_path)) {
             return asset('images/avatar-default.svg');
         }
 
-        return app(FileStorageService::class)->url($this->profile_image_path);
+        return app(ProfileImageService::class)->url($this->profile_image_path);
     }
 
     /**

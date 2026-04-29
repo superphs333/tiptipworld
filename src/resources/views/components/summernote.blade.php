@@ -5,6 +5,8 @@
     data-summernote-placeholder="{{ $placeholder }}"
     data-summernote-height="{{ $height }}"
     data-summernote-upload-url="{{ route('summernote.uploadImage', absolute: false) }}"
+    data-summernote-tip-id="{{ $tipId ?? '' }}"
+    data-summernote-draft-key="{{ $draftKey ?? '' }}"
     {{ $attributes }}
 >{{ $fieldValue() }}</textarea>
 

@@ -3,20 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Comment;
+use App\Models\Tag;
+use App\Models\Tip;
+use App\Models\User;
+use App\Services\FollowService;
+use App\Services\Media\EditorImageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use App\Services\FileStorageService;
-use App\Services\TipViewCounterService;
+use Illuminate\Support\Facades\DB;
+use App\Services\Media\TipThumbnailService;
 use App\Services\SearchKeywordService;
 use App\Services\TipService;
-use App\Services\FollowService;
+use App\Services\TipViewCounterService;
 use App\Services\UserNotificationService;
-use App\Models\Tip;
-use App\Models\Tag;
-use App\Models\Comment;
-use App\Models\User;
+use Throwable;
 
+/**
+ * 팁 게시글과 관련된 주요 화면/기능 담당
+ *
+ * [담당기능]
+ * - 관리자/프론트 글쓰기 폼 출력
+ * - 탭 저장/수정/삭제
+ * - 썸네일 이미지 저장/삭제
+ * - 에디터 이미지 draft -> 실제 게시글 경로 정리
+ * - 팁 상세 조회
+ * - 팁 목록/검색/분류별 목록/사용자 피드
+ * - 좋아요/북마크 토글
+ */
 class TipController extends Controller
 {
     public function __construct(
@@ -25,6 +40,8 @@ class TipController extends Controller
         private TipViewCounterService $tipViewCounter,
         private SearchKeywordService $searchKeywordService,
         private UserNotificationService $userNotificationService,
+        private EditorImageService $editorImages,
+        private TipThumbnailService $tipThumbnails,
     )
     {
         
@@ -38,6 +55,7 @@ class TipController extends Controller
             'status' => ['required', 'in:draft,published,archived,deleted'],
             'visibility' => ['required', 'in:public,unlisted,private'],
             'thumbnail_delete' => ['nullable', 'in:true,false'],
+            'editor_draft_key' => ['nullable', 'string', 'max:80', 'regex:/^[A-Za-z0-9_-]+$/'],
     ];
 
     // 추가/업데이트 폼
@@ -45,7 +63,6 @@ class TipController extends Controller
     {
         $tabs = config('admin.tabs', []);
         $tab = 'tips';
-
 
         $categories = Category::query()
             ->forTipForm()
@@ -67,7 +84,7 @@ class TipController extends Controller
             'headerTitle' => $tabs[$tab] ?? 'Tips',
             'tabView' => 'admin.partials.tips.create',
             'data' => $data,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -106,37 +123,61 @@ class TipController extends Controller
         ]);
     }
 
-    public function saveTip(Request $request, FileStorageService $storage){
+    public function saveTip(Request $request){
         $validated = $request->validate($this->validatedArr);
+        $draftKey = $validated['editor_draft_key'] ?? null;
+        unset($validated['editor_draft_key']);
+        $user = $request->user();
         $userId = Auth::id();
         $created_at = Date::now();
         $validated['user_id'] = $userId;
         $validated['created_at'] = $created_at;
-        
-
-
-        if ($request->hasFile('thumbnail')) {
-            $tip_thumbnail_url = $storage->storeUploaded($validated['thumbnail'], 'tip-cover');
-            $validated['thumbnail'] = $tip_thumbnail_url;
-        }
-
-        
-        /**
-         * Tip 저장
-         */
-        $tip = Tip::create($validated);
-        
-
-        /**
-         * 태그 저장 (in tips, tip_tag)
-         */
+        $thumbnailFile = $request->file('thumbnail');
         $blockedTagWarning = null;
-        if ($request->has('tags')) {
-            $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
-                $tip->id,
-                (string) $request->input('tags', '')
-            );
+        $storedThumbnailPath = null;
+        $tip = null;
+
+        try {
+            DB::beginTransaction();
+
+            if ($thumbnailFile !== null) {
+                $validated['thumbnail'] = null;
+            }
+
+            $tip = Tip::create($validated);
+
+            if ($thumbnailFile !== null) {
+                $storedThumbnailPath = $this->tipThumbnails->store($tip, $thumbnailFile);
+                $tip->thumbnail = $storedThumbnailPath;
+                $tip->save();
+            }
+
+            if ($request->has('tags')) {
+                $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
+                    $tip->id,
+                    (string) $request->input('tags', '')
+                );
+            }
+
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            if ($storedThumbnailPath !== null) {
+                try {
+                    $this->tipThumbnails->deletePath($storedThumbnailPath);
+                } catch (Throwable) {
+                }
+            }
+
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('error', '팁 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         }
+
+        $this->syncEditorDraftImages($user, $tip, $draftKey);
 
         $submitFrom = (string) $request->input('submit_from', '');
 
@@ -157,48 +198,81 @@ class TipController extends Controller
 
     }
 
-    public function updateTipPost(Request $request,int $tip_id , FileStorageService $storage){
+    public function updateTipPost(Request $request,int $tip_id){
         $target_tip = Tip::findOrFail($tip_id);
+        $previousContent = (string) $target_tip->content;
 
         if (!$this->canManageTip($target_tip)) {
             abort(403);
         }
 
         $validated = $request->validate($this->validatedArr);
+        $draftKey = $validated['editor_draft_key'] ?? null;
+        unset($validated['editor_draft_key']);
         $validated['update_user_id'] = Auth::id();
         $validated['updated_at'] = Date::now();
-
-        /**
-        * 썸네일 저장 (name : thumbnail) 
-        */
-        $thumbnail_deleted = $request->boolean('thumbnail_delete');
-        if ($request->hasFile('thumbnail')) {
-            $storage->deleteIfExists($target_tip->thumbnail);
-            $tip_thumbnail_url = $storage->storeUploaded($validated['thumbnail'], 'tip-cover');
-            $validated['thumbnail'] = $tip_thumbnail_url;
-        }
-        if($thumbnail_deleted){
-            $storage->deleteIfExists($target_tip->thumbnail);
-            $validated['thumbnail'] = null;
-        }
-            
-
-        /**
-         * 태그
-         */
+        $thumbnailFile = $request->file('thumbnail');
+        $thumbnailDeleted = $request->boolean('thumbnail_delete') && $thumbnailFile === null;
+        $oldThumbnailPath = $target_tip->thumbnail;
+        $newThumbnailPath = null;
         $blockedTagWarning = null;
-        if ($request->has('tags')) {
-            $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
-                $tip_id,
-                (string) $request->input('tags', '')
-            );
+
+        try {
+            DB::beginTransaction();
+
+            unset($validated['thumbnail']);
+
+            if ($thumbnailFile !== null) {
+                $newThumbnailPath = $this->tipThumbnails->store($target_tip, $thumbnailFile);
+                $validated['thumbnail'] = $newThumbnailPath;
+            }
+
+            if ($thumbnailDeleted) {
+                $validated['thumbnail'] = null;
+            }
+
+            if ($request->has('tags')) {
+                $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
+                    $tip_id,
+                    (string) $request->input('tags', '')
+                );
+            }
+
+            $target_tip->update($validated);
+            DB::commit();
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            if ($newThumbnailPath !== null) {
+                try {
+                    $this->tipThumbnails->deletePath($newThumbnailPath);
+                } catch (Throwable) {
+                }
+            }
+
+            report($e);
+
+            $submitFrom = (string) $request->input('submit_from', '');
+
+            if ($submitFrom !== 'admin') {
+                return redirect()->route('tip.show', ['tip_id' => $target_tip->id])
+                    ->withInput()
+                    ->with('error', '팁 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+
+            return redirect()->route(
+                'admin',
+                array_merge(['tab' => 'tips'], session('tips.query', []))
+            )->withInput()
+            ->with('error', '팁 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
         }
 
+        $this->syncEditorDraftImages($request->user(), $target_tip, $draftKey);
+        $this->cleanupRemovedEditorImages($request->user(), $target_tip, $previousContent);
 
-        /**
-         * 수정
-         */
-        $target_tip->update($validated);
+        if ($newThumbnailPath !== null || $thumbnailDeleted) {
+            $this->tipThumbnails->deletePath($oldThumbnailPath);
+        }
 
         $submitFrom = (string) $request->input('submit_from', '');
 
@@ -219,7 +293,7 @@ class TipController extends Controller
 
     }
 
-    public function destroy(Request $request, int $tip_id, FileStorageService $storage)
+    public function destroy(Request $request, int $tip_id)
     {
         $submitFrom = (string) $request->input('submit_from', 'admin');
         $target_tip = Tip::findOrFail($tip_id);
@@ -229,7 +303,8 @@ class TipController extends Controller
         }
 
         try {
-            $storage->deleteIfExists($target_tip->thumbnail);
+            $this->editorImages->deleteAllTipImages($request->user(), $target_tip);
+            $this->tipThumbnails->remove($target_tip, false);
             $target_tip->delete();
 
             if ($submitFrom !== 'admin') {
@@ -261,6 +336,37 @@ class TipController extends Controller
         }
 
         return $redirect->with('warning', $warningMessage);
+    }
+
+    private function syncEditorDraftImages(User $actor, Tip $tip, ?string $draftKey = null): void
+    {
+        if (blank($draftKey)) {
+            return;
+        }
+
+        try {
+            $relocatedContent = $this->editorImages->relocateDraftImages($actor, $tip, (string) $tip->content, $draftKey);
+        } catch (Throwable $e) {
+            report($e);
+
+            return;
+        }
+
+        if ($relocatedContent === $tip->content) {
+            return;
+        }
+
+        $tip->content = $relocatedContent;
+        $tip->save();
+    }
+
+    private function cleanupRemovedEditorImages(User $actor, Tip $tip, string $previousContent): void
+    {
+        try {
+            $this->editorImages->deleteRemovedTipImages($actor, $tip, $previousContent, (string) $tip->content);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 
     private function canManageTip(Tip $tip): bool

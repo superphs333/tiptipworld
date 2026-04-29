@@ -13,19 +13,25 @@ class Summernote extends Component
     public ?string $value;
     public string $placeholder;
     public int $height;
+    public ?int $tipId;
+    public ?string $draftKey;
 
     public function __construct(
         string $name,
         ?string $id = null,
         ?string $value = null,
         string $placeholder = '내용을 입력하세요.',
-        int $height = 500
+        int $height = 500,
+        ?int $tipId = null,
+        ?string $draftKey = null
     ) {
         $this->name = $name;
         $this->id = $id ?: $this->makeId($name);
         $this->value = $value;
         $this->placeholder = $placeholder;
         $this->height = $height;
+        $this->tipId = $tipId;
+        $this->draftKey = $draftKey;
     }
 
     public function render(): View

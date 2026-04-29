@@ -134,6 +134,57 @@ class R2ImageStorageService
         return $stored ? $path : null;
     }
 
+    // 주어진 경로의 파일이 R2에 실제로 존재하는지 확인
+    public function exists(?string $path): bool
+    {
+        if (blank($path)) {
+            return false;
+        }
+
+        return Storage::disk(self::DISK)->fileExists(ltrim($path, '/'));
+    }
+
+    // R2 내부에서 파일을 다른 경로로 이동 
+    public function move(string $sourcePath, string $destinationPath): void
+    {
+        // 원본/대상 경로를 정리 : 앞뒤 공백 제거, 맨 앞 / 제거, 비어 있으면 예외 발생 
+        $sourcePath = $this->normalizeStoredPath($sourcePath, '원본 이미지 경로');
+        $destinationPath = $this->normalizeStoredPath($destinationPath, '대상 이미지 경로');
+
+        // 원본과 대상이 같으면 이는 원하는 상태이므로 아무 것도 하지 않음 
+        if ($sourcePath === $destinationPath) {
+            return;
+        }
+
+        $disk = Storage::disk(self::DISK);
+
+        if (! $disk->fileExists($sourcePath)) {
+            throw new RuntimeException('이동할 R2 이미지가 존재하지 않습니다.');
+        }
+
+        if (! $disk->move($sourcePath, $destinationPath)) {
+            throw new RuntimeException('R2 이미지 이동에 실패했습니다.');
+        }
+
+        // move()가 성공해도 실제 상태를 한 번 더 검증
+            // 원본이 아직 남아 있거나, 대상 파일이 안 생겼으면 -> 실제 이동이 정상 완료되지 않은 것으로 판단 
+        if ($disk->fileExists($sourcePath) || ! $disk->fileExists($destinationPath)) {
+            throw new RuntimeException('R2 이미지가 실제로 이동되지 않았습니다.');
+        }
+    }
+
+    // 특정 prefix(폴더 경로) 아래의 모든 파일 목록 조회 
+    public function files(string $prefix): array
+    {
+        // prefix 앞뒤 / 제거, 빈 값이면 예외
+        $prefix = $this->normalizePrefix($prefix);
+
+        return array_map(
+            static fn (string $path): string => ltrim($path, '/'),
+            Storage::disk(self::DISK)->allFiles($prefix),
+        );
+    }
+
     public function delete(?string $path): void
     {
         if (blank($path)) {
@@ -198,6 +249,17 @@ class R2ImageStorageService
         }
 
         return $prefix;
+    }
+
+    private function normalizeStoredPath(string $path, string $fieldName): string
+    {
+        $path = ltrim(trim($path), '/');
+
+        if ($path === '') {
+            throw new InvalidArgumentException($fieldName . '가 비어 있습니다.');
+        }
+
+        return $path;
     }
 
     private function sanitizeFilename(string $filename): string

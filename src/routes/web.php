@@ -87,6 +87,9 @@ Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
     ->whereNumber('tip_id')
     ->middleware('auth')
     ->name('tip.destroy'); // 프론트/관리자 공통 삭제
+Route::post('/summernote/uploades/image',[SummernoteController::class, 'uploadImage'])
+    ->middleware('auth')
+    ->name('summernote.uploadImage');
 
 // 팔로우
 Route::post('/user/follow/{user_id}', [UserFollowController::class, 'followUser'])->whereNumber('user_id')->middleware('auth')->name('user.follow');
@@ -130,14 +133,5 @@ Route::middleware(['admin', 'auth'])->group(function () {
     Route::get('/admin/tips/form/{tip_id?}', [TipController::class, 'form'])
         ->whereNumber('tip_id')
         ->name('admin.tip.form');
-
-    
-    
-    /**
-     * Summernote
-     */
-    // 이미지 올렸을 때
-    Route::post('/summernote/uploades/image',[SummernoteController::class, 'uploadImage'])->name('summernote.uploadImage');
-
 
 });

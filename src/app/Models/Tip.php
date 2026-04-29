@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use App\Models\Category;
 use App\Models\Tag;
 use Carbon\Carbon;
-use App\Services\FileStorageService;
+use App\Services\Media\TipThumbnailService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Tip extends Model
@@ -105,10 +105,11 @@ class Tip extends Model
     // 썸네일 이미지 
     public function getThumbnailUrlAttribute() : string
     {
-        if(!$this->thumbnail){
+        if (blank($this->thumbnail)) {
             return asset('images/no-thumbnail.png');
         }
-        return app(FileStorageService::class)->url($this->thumbnail);
+
+        return app(TipThumbnailService::class)->url($this->thumbnail);
     }
 
     // 생성일

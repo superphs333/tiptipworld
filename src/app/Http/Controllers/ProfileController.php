@@ -14,22 +14,18 @@ use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
-use App\Services\FileStorageService;
+use App\Services\Media\ProfileImageService;
 
 
 
 
 class ProfileController extends Controller
 {
-
-    private SocialAccountRevoker $revoker;
-
-    public function __construct(SocialAccountRevoker $revoker)
-    {
-        $this->revoker = $revoker;
+    public function __construct(
+        private SocialAccountRevoker $revoker,
+        private ProfileImageService $profileImages,
+    ) {
     }
-
-
 
     /**
      * Display the user's profile form.
@@ -57,21 +53,13 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    /**
-     * Update the user's profile image.
-     */
-    public function updateImage(Request $request, FileStorageService $storage): RedirectResponse
+    public function updateImage(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'profile_image' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
         ]);
 
-        $user = $request->user();
-
-        $storage->deleteIfExists($user->profile_image_path);
-        $user->profile_image_path = $storage->storeUploaded($validated['profile_image'], 'profile');
-
-        $user->save();
+        $this->profileImages->replace($request->user(), $validated['profile_image']);
 
         return Redirect::route('profile.edit')->with('status', 'profile-image-updated');
     }
@@ -79,13 +67,9 @@ class ProfileController extends Controller
     /**
      * Remove the user's profile image.
      */
-    public function destroyImage(Request $request, FileStorageService $storage): RedirectResponse
+    public function destroyImage(Request $request): RedirectResponse
     {
-        $user = $request->user();
-
-        $storage->deleteIfExists($user->profile_image_path);
-        $user->profile_image_path = null;
-        $user->save();
+        $this->profileImages->remove($request->user());
 
         return Redirect::route('profile.edit')->with('status', 'profile-image-removed');
     }
@@ -100,6 +84,8 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        $this->profileImages->remove($user, false);
 
         Auth::logout();
 
@@ -127,6 +113,8 @@ class ProfileController extends Controller
             return Redirect::route('profile.edit')
                 ->withErrors(['confirmation' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'socialDeletion');
         }
+
+        $this->profileImages->remove($user, false);
 
         Auth::logout();
 

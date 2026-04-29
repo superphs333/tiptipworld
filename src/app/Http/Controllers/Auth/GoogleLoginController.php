@@ -4,23 +4,21 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Services\FileStorageService;
+use App\Services\Media\ProfileImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use Throwable;
 
 class GoogleLoginController extends Controller
 {
-    private FileStorageService $storage;
-
-    public function __construct(FileStorageService $storage)
-    {
-        $this->storage = $storage;
+    public function __construct(
+        private ProfileImageService $profileImages,
+    ) {
     }
+
     /**
      * Redirect the user to Google's OAuth screen.
      */
@@ -78,6 +76,7 @@ class GoogleLoginController extends Controller
              */
             $user->provider = 'google';
             $user->social_meta = json_encode(['token' => $googleUser->token]);
+            $user->save();
 
             /**
              * 프로필 이미지 등록
@@ -85,11 +84,7 @@ class GoogleLoginController extends Controller
             $googleAvatarUrl = $googleUser->getAvatar();
 
             if (! $user->profile_image_path && $googleAvatarUrl) {
-                $downloadedPath = $this->downloadGoogleProfileImage($googleAvatarUrl);
-
-                if ($downloadedPath) {
-                    $user->profile_image_path = $downloadedPath;
-                }
+                $this->profileImages->importFromUrl($user, $googleAvatarUrl, 'google-profile');
             }
 
             if (! $user->email_verified_at) {
@@ -117,46 +112,5 @@ class GoogleLoginController extends Controller
         request()->session()->regenerate();
 
         return redirect()->intended(route('home', absolute: false));
-    }
-
-    private function downloadGoogleProfileImage(string $avatarUrl): ?string
-    {
-        try {
-            $response = Http::timeout(10)->get($avatarUrl);
-        } catch (Throwable) {
-            return null;
-        }
-
-        if (! $response->successful()) {
-            return null;
-        }
-
-        $contentType = $response->header('Content-Type', '');
-
-        if (! str_starts_with($contentType, 'image/')) {
-            return null;
-        }
-
-        $extension = $this->resolveImageExtension($contentType);
-
-        if (! $extension) {
-            return null;
-        }
-
-        return $this->storage->storeRemote($response->body(), 'profile_google', $extension);
-    }
-
-    private function resolveImageExtension(string $contentType): ?string
-    {
-        $mime = strtolower(trim(explode(';', $contentType, 2)[0] ?? $contentType));
-
-        return match ($mime) {
-            'image/jpeg', 'image/jpg' => 'jpg',
-            'image/png' => 'png',
-            'image/webp' => 'webp',
-            'image/gif' => 'gif',
-            'image/avif' => 'avif',
-            default => null,
-        };
     }
 }

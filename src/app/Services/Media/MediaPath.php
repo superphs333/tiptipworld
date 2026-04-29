@@ -25,11 +25,11 @@ final class MediaPath
         return self::build('posts', (string) $postId, 'editor');
     }
 
-    // 아직 저장되지 않은 임시 게시글의 에디터 이미지 저장 경로 : media/posts/drafts/{userId}/editor
-    // 사용목적 : 게시글 작성 중 이미지 업로드, 아직 postId가 없는 상태에서 에디터 이미지 업로드, 임시 저장 또는 draft 상태의 이미지 관리 
-    public static function draftPostEditor(int|string $userId): string
+    // 아직 저장되지 않은 임시 게시글의 에디터 이미지 저장 경로
+    // - 개별 draft 경로 : media/posts/drafts/{userId}/{draftKey}/editor
+    public static function draftPostEditor(int|string $userId, string $draftKey): string
     {
-        return self::build('posts', 'drafts', (string) $userId, 'editor');
+        return self::build('posts', 'drafts', (string) $userId, $draftKey, 'editor');
     }
 
     // 게시글 썸네일 이미지 저장 경로 : media/posts/30/thumbnails

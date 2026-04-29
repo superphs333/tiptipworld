@@ -9,6 +9,9 @@
     $panelClasses = 'category-panel tip-create' . ($tone === 'front' ? ' tip-create--front' : '');
     $tags = collect($tip?->tags ?? [])
         ->pluck('name')->filter()->values()->all();
+    $editorDraftKey = $tip?->id
+        ? null
+        : (string) old('editor_draft_key', (string) \Illuminate\Support\Str::uuid());
 @endphp
 
 <div x-data="tipCreate()">
@@ -17,6 +20,9 @@
             <form class="tip-create__form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="submit_from" value="{{ $tone }}">
+                @if ($editorDraftKey !== null)
+                    <input type="hidden" name="editor_draft_key" value="{{ $editorDraftKey }}">
+                @endif
 
                 <div
                     class="tip-create__alerts"
@@ -167,7 +173,7 @@
                                     <h3 class="tip-create__card-title">본문</h3>
                                 </div>
                             </div>
-                            <x-summernote required name="content" :value="$tip?->content ?? ''"/>
+                            <x-summernote required name="content" :value="$tip?->content ?? ''" :tip-id="$tip?->id" :draft-key="$editorDraftKey"/>
                         </section>
                     </div>
 
