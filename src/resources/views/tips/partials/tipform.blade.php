@@ -19,6 +19,9 @@
         <div class="category-panel__content tip-create__content">
             <form class="tip-create__form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                @if ($tip?->exists)
+                    @method('PATCH')
+                @endif
                 <input type="hidden" name="submit_from" value="{{ $tone }}">
                 @if ($editorDraftKey !== null)
                     <input type="hidden" name="editor_draft_key" value="{{ $editorDraftKey }}">

@@ -77,14 +77,14 @@ Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDel
 // 댓글 수정
 Route::patch('/tip/comment/{comment_id}',[CommentController::class, 'commentUpdate'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.update');
 // 글 작성 
-Route::get('/tips/form/{tip_id?}',[TipController::class, 'formFront'])->whereNumber('tip_id')->middleware('auth')->name('tip.formFront');
-Route::post('/tip/store',[TipController::class, 'saveTip'])->middleware('auth')->name('tip.store'); // 프론트/관리자 공통 추가
-Route::post('/tip/update/{tip_id}',[TipController::class, 'updateTipPost'])
-    ->whereNumber('tip_id')
+Route::get('/tips/form/{tip?}',[TipController::class, 'formFront'])->whereNumber('tip')->middleware('auth')->name('tip.formFront');
+Route::post('/tips',[TipController::class, 'store'])->middleware('auth')->name('tip.store'); // 프론트/관리자 공통 추가
+Route::patch('/tips/{tip}',[TipController::class, 'update'])
+    ->whereNumber('tip')
     ->middleware('auth')
     ->name('tip.update'); // 프론트/관리자 공통 수정
-Route::delete('/tips/delete/{tip_id}', [TipController::class, 'destroy'])
-    ->whereNumber('tip_id')
+Route::delete('/tips/{tip}', [TipController::class, 'destroy'])
+    ->whereNumber('tip')
     ->middleware('auth')
     ->name('tip.destroy'); // 프론트/관리자 공통 삭제
 Route::post('/summernote/uploades/image',[SummernoteController::class, 'uploadImage'])
@@ -130,8 +130,8 @@ Route::middleware(['admin', 'auth'])->group(function () {
      * Tips
      */
     // 팁 생성/수정 페이지
-    Route::get('/admin/tips/form/{tip_id?}', [TipController::class, 'form'])
-        ->whereNumber('tip_id')
+    Route::get('/admin/tips/form/{tip?}', [TipController::class, 'form'])
+        ->whereNumber('tip')
         ->name('admin.tip.form');
 
 });

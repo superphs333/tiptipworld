@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Tip;
+use App\Policies\TipPolicy;
 use App\Services\SearchKeywordService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Gate::policy(Tip::class, TipPolicy::class);
+
         View::composer('components.search-modal', function ($view) {
             $searchKeywordService = app(SearchKeywordService::class);
 

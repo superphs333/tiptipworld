@@ -292,10 +292,10 @@
                             @php
                                 $tipId = data_get($tip, 'id', '-');
                                 $editUrl = is_numeric($tipId)
-                                    ? route('admin.tip.form', ['tip_id' => $tipId])
+                                    ? route('admin.tip.form', ['tip' => $tipId])
                                     : route('admin.tip.form');
                                 $deleteUrl = is_numeric($tipId)
-                                    ? route('tip.destroy', ['tip_id' => $tipId])
+                                    ? route('tip.destroy', ['tip' => $tipId])
                                     : null;
                                 $title = data_get($tip, 'title', '-');
                                 $summary = data_get($tip, 'summary', data_get($tip, 'excerpt', ''));

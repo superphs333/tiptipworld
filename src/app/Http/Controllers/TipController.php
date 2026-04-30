@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyTipRequest;
+use App\Http\Requests\StoreTipRequest;
+use App\Http\Requests\UpdateTipRequest;
 use App\Models\Category;
 use App\Models\Comment;
 use App\Models\Tag;
 use App\Models\Tip;
 use App\Models\User;
 use App\Services\FollowService;
-use App\Services\Media\EditorImageService;
+use App\Services\SearchKeywordService;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\DB;
-use App\Services\Media\TipThumbnailService;
-use App\Services\SearchKeywordService;
 use App\Services\TipService;
+use App\Services\TipWriteService;
 use App\Services\TipViewCounterService;
 use App\Services\UserNotificationService;
 use Throwable;
@@ -37,29 +39,17 @@ class TipController extends Controller
     public function __construct(
         private FollowService $followService,
         private TipService $tipService,
+        private TipWriteService $tipWriteService,
         private TipViewCounterService $tipViewCounter,
         private SearchKeywordService $searchKeywordService,
         private UserNotificationService $userNotificationService,
-        private EditorImageService $editorImages,
-        private TipThumbnailService $tipThumbnails,
     )
     {
         
     }
-    private $validatedArr = [
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'title' => ['required', 'string', 'max:120'],
-            'thumbnail' => ['nullable', 'image', 'max:5120', 'mimes:jpg,jpeg,png,webp'],
-            'content' => ['required', 'string'],
-            'excerpt' => ['nullable', 'string', 'max:255'],
-            'status' => ['required', 'in:draft,published,archived,deleted'],
-            'visibility' => ['required', 'in:public,unlisted,private'],
-            'thumbnail_delete' => ['nullable', 'in:true,false'],
-            'editor_draft_key' => ['nullable', 'string', 'max:80', 'regex:/^[A-Za-z0-9_-]+$/'],
-    ];
 
     // 추가/업데이트 폼
-    public function form(?int $tip_id = null)
+    public function form(?Tip $tip = null)
     {
         $tabs = config('admin.tabs', []);
         $tab = 'tips';
@@ -71,16 +61,14 @@ class TipController extends Controller
                 'name',
             ]);
 
-        //$formAction = is_null($tip_id) ? 'tip.store' : 'tip.update';
-        $formAction = is_null($tip_id) ? route('tip.store') : route('tip.update', $tip_id);
-
-        $data = !is_null($tip_id) ? Tip::find($tip_id) : null;
+        $data = $tip?->loadMissing('tags:id,name');
+        $formAction = $tip === null ? route('tip.store') : route('tip.update', $tip);
 
         return view('admin.dashboard', [
             'tab' => $tab,
-            'mode' => is_null($tip_id) ? 'create' : 'update',
+            'mode' => $tip === null ? 'create' : 'update',
             'formAction' => $formAction,
-            'tip_id' => $tip_id,
+            'tip_id' => $tip?->id,
             'headerTitle' => $tabs[$tab] ?? 'Tips',
             'tabView' => 'admin.partials.tips.create',
             'data' => $data,
@@ -88,7 +76,8 @@ class TipController extends Controller
         ]);
     }
 
-    public function formFront(?int $tip_id = null){
+    public function formFront(?Tip $tip = null)
+    {
         $categories = Category::query()
             ->forTipForm()
             ->get([
@@ -100,232 +89,116 @@ class TipController extends Controller
         $submitLabel = '게시하기';
         $data = null;
 
-        if (!is_null($tip_id)) {
-            $data = Tip::with('tags:id,name')->findOrFail($tip_id);
+        if ($tip !== null) {
+            $this->authorize('update', $tip);
 
-            if (!$this->canManageTip($data)) {
-                abort(403);
-            }
-
+            $data = $tip->loadMissing('tags:id,name');
             $siteTitle = '글수정';
             $submitLabel = '수정하기';
-            $formAction = route('tip.update', ['tip_id' => $tip_id]);
+            $formAction = route('tip.update', $tip);
         }
         
         return view('tips.view', [
             'viewMode' => 'frontForm',
             'site_title' => $siteTitle,
             'categories' => $categories,
-            'tip_id' => $tip_id,
+            'tip_id' => $tip?->id,
             'formAction' => $formAction,
             'submitLabel' => $submitLabel,
             'data' => $data,
         ]);
     }
 
-    public function saveTip(Request $request){
-        $validated = $request->validate($this->validatedArr);
-        $draftKey = $validated['editor_draft_key'] ?? null;
-        unset($validated['editor_draft_key']);
-        $user = $request->user();
-        $userId = Auth::id();
-        $created_at = Date::now();
-        $validated['user_id'] = $userId;
-        $validated['created_at'] = $created_at;
-        $thumbnailFile = $request->file('thumbnail');
-        $blockedTagWarning = null;
-        $storedThumbnailPath = null;
-        $tip = null;
-
+    public function store(StoreTipRequest $request): RedirectResponse
+    {
         try {
-            DB::beginTransaction();
-
-            if ($thumbnailFile !== null) {
-                $validated['thumbnail'] = null;
-            }
-
-            $tip = Tip::create($validated);
-
-            if ($thumbnailFile !== null) {
-                $storedThumbnailPath = $this->tipThumbnails->store($tip, $thumbnailFile);
-                $tip->thumbnail = $storedThumbnailPath;
-                $tip->save();
-            }
-
-            if ($request->has('tags')) {
-                $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
-                    $tip->id,
-                    (string) $request->input('tags', '')
-                );
-            }
-
-            DB::commit();
+            $result = $this->tipWriteService->create(
+                actor: $request->user(),
+                attributes: $request->payload(),
+                thumbnailFile: $request->thumbnailFile(),
+                tagsPayload: $request->tagsPayload(),
+                draftKey: $request->draftKey(),
+            );
         } catch (Throwable $e) {
-            DB::rollBack();
-
-            if ($storedThumbnailPath !== null) {
-                try {
-                    $this->tipThumbnails->deletePath($storedThumbnailPath);
-                } catch (Throwable) {
-                }
-            }
-
             report($e);
 
-            return back()
-                ->withInput()
-                ->with('error', '팁 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            return $this->tipFailureRedirect(
+                $request->submitFrom(),
+                '팁 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
         }
 
-        $this->syncEditorDraftImages($user, $tip, $draftKey);
+        if ($request->submitFrom() === 'admin') {
+            $redirect = $this->tipAdminRedirect()
+                ->with('success', '팁이 성공적으로 저장되었습니다.')
+                ->withInput();
 
-        $submitFrom = (string) $request->input('submit_from', '');
-
-        if ($submitFrom === 'admin') {
-            $redirect = redirect()->route(
-                'admin',
-                array_merge(['tab' => 'tips'], session('tips.query', []))
-            )->with('success', '팁이 성공적으로 저장되었습니다.')
-            ->withInput();
-
-            return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
+            return $this->withBlockedTagWarning($redirect, $result->warningMessage);
         }
 
-        $redirect = redirect()->route('tip.show', ['tip_id' => $tip->id])
+        $redirect = redirect()
+            ->route('tip.show', ['tip_id' => $result->tip->id])
             ->with('success', '팁이 성공적으로 저장되었습니다.');
 
-        return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
-
+        return $this->withBlockedTagWarning($redirect, $result->warningMessage);
     }
 
-    public function updateTipPost(Request $request,int $tip_id){
-        $target_tip = Tip::findOrFail($tip_id);
-        $previousContent = (string) $target_tip->content;
-
-        if (!$this->canManageTip($target_tip)) {
-            abort(403);
-        }
-
-        $validated = $request->validate($this->validatedArr);
-        $draftKey = $validated['editor_draft_key'] ?? null;
-        unset($validated['editor_draft_key']);
-        $validated['update_user_id'] = Auth::id();
-        $validated['updated_at'] = Date::now();
-        $thumbnailFile = $request->file('thumbnail');
-        $thumbnailDeleted = $request->boolean('thumbnail_delete') && $thumbnailFile === null;
-        $oldThumbnailPath = $target_tip->thumbnail;
-        $newThumbnailPath = null;
-        $blockedTagWarning = null;
-
+    public function update(UpdateTipRequest $request, Tip $tip): RedirectResponse
+    {
         try {
-            DB::beginTransaction();
-
-            unset($validated['thumbnail']);
-
-            if ($thumbnailFile !== null) {
-                $newThumbnailPath = $this->tipThumbnails->store($target_tip, $thumbnailFile);
-                $validated['thumbnail'] = $newThumbnailPath;
-            }
-
-            if ($thumbnailDeleted) {
-                $validated['thumbnail'] = null;
-            }
-
-            if ($request->has('tags')) {
-                $blockedTagWarning = $this->tipService->syncTipTagsFromPayload(
-                    $tip_id,
-                    (string) $request->input('tags', '')
-                );
-            }
-
-            $target_tip->update($validated);
-            DB::commit();
+            $result = $this->tipWriteService->update(
+                actor: $request->user(),
+                tip: $tip,
+                attributes: $request->payload(),
+                thumbnailFile: $request->thumbnailFile(),
+                deleteThumbnail: $request->shouldDeleteThumbnail(),
+                tagsPayload: $request->tagsPayload(),
+                draftKey: $request->draftKey(),
+            );
         } catch (Throwable $e) {
-            DB::rollBack();
-
-            if ($newThumbnailPath !== null) {
-                try {
-                    $this->tipThumbnails->deletePath($newThumbnailPath);
-                } catch (Throwable) {
-                }
-            }
-
             report($e);
 
-            $submitFrom = (string) $request->input('submit_from', '');
-
-            if ($submitFrom !== 'admin') {
-                return redirect()->route('tip.show', ['tip_id' => $target_tip->id])
-                    ->withInput()
-                    ->with('error', '팁 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-            }
-
-            return redirect()->route(
-                'admin',
-                array_merge(['tab' => 'tips'], session('tips.query', []))
-            )->withInput()
-            ->with('error', '팁 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            return $this->tipFailureRedirect(
+                $request->submitFrom(),
+                '팁 수정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+                $tip
+            );
         }
 
-        $this->syncEditorDraftImages($request->user(), $target_tip, $draftKey);
-        $this->cleanupRemovedEditorImages($request->user(), $target_tip, $previousContent);
-
-        if ($newThumbnailPath !== null || $thumbnailDeleted) {
-            $this->tipThumbnails->deletePath($oldThumbnailPath);
-        }
-
-        $submitFrom = (string) $request->input('submit_from', '');
-
-        if ($submitFrom !== 'admin') {
-            $redirect = redirect()->route('tip.show', ['tip_id' => $target_tip->id])
+        if ($request->submitFrom() !== 'admin') {
+            $redirect = redirect()
+                ->route('tip.show', ['tip_id' => $result->tip->id])
                 ->with('success', '팁이 성공적으로 수정되었습니다.');
 
-            return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
+            return $this->withBlockedTagWarning($redirect, $result->warningMessage);
         }
 
-        $redirect = redirect()->route(
-            'admin',
-            array_merge(['tab' => 'tips'], session('tips.query', []))
-        )->with('success', '팁이 성공적으로 수정되었습니다.')
-        ->withInput();
+        $redirect = $this->tipAdminRedirect()
+            ->with('success', '팁이 성공적으로 수정되었습니다.')
+            ->withInput();
 
-        return $this->withBlockedTagWarning($redirect, $blockedTagWarning);
-
+        return $this->withBlockedTagWarning($redirect, $result->warningMessage);
     }
 
-    public function destroy(Request $request, int $tip_id)
+    public function destroy(DestroyTipRequest $request, Tip $tip): RedirectResponse
     {
-        $submitFrom = (string) $request->input('submit_from', 'admin');
-        $target_tip = Tip::findOrFail($tip_id);
-
-        if (!$this->canManageTip($target_tip)) {
-            abort(403);
-        }
-
         try {
-            $this->editorImages->deleteAllTipImages($request->user(), $target_tip);
-            $this->tipThumbnails->remove($target_tip, false);
-            $target_tip->delete();
+            $this->tipWriteService->delete($request->user(), $tip);
 
-            if ($submitFrom !== 'admin') {
+            if ($request->submitFrom() !== 'admin') {
                 return redirect()->route('home')
                     ->with('success', '팁이 성공적으로 삭제되었습니다.');
             }
 
-            return redirect()->route(
-                'admin',
-                array_merge(['tab' => 'tips'], session('tips.query', []))
-            )->with('success', '팁이 성공적으로 삭제되었습니다.');
-        } catch (\Throwable $e) {
-            if ($submitFrom !== 'admin') {
-                return redirect()->route('home')
-                    ->with('error', '삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-            }
+            return $this->tipAdminRedirect()
+                ->with('success', '팁이 성공적으로 삭제되었습니다.');
+        } catch (Throwable $e) {
+            report($e);
 
-            return redirect()->route(
-                'admin',
-                array_merge(['tab' => 'tips'], session('tips.query', []))
-            )->with('error', '삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            return $this->tipFailureRedirect(
+                $request->submitFrom(),
+                '삭제 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+            );
         }
     }
 
@@ -338,49 +211,36 @@ class TipController extends Controller
         return $redirect->with('warning', $warningMessage);
     }
 
-    private function syncEditorDraftImages(User $actor, Tip $tip, ?string $draftKey = null): void
+    private function tipAdminRedirect(): RedirectResponse
     {
-        if (blank($draftKey)) {
-            return;
-        }
-
-        try {
-            $relocatedContent = $this->editorImages->relocateDraftImages($actor, $tip, (string) $tip->content, $draftKey);
-        } catch (Throwable $e) {
-            report($e);
-
-            return;
-        }
-
-        if ($relocatedContent === $tip->content) {
-            return;
-        }
-
-        $tip->content = $relocatedContent;
-        $tip->save();
+        return redirect()->route(
+            'admin',
+            array_merge(['tab' => 'tips'], session('tips.query', []))
+        );
     }
 
-    private function cleanupRemovedEditorImages(User $actor, Tip $tip, string $previousContent): void
+    private function tipFailureRedirect(
+        string $submitFrom,
+        string $message,
+        ?Tip $tip = null,
+    ): RedirectResponse
     {
-        try {
-            $this->editorImages->deleteRemovedTipImages($actor, $tip, $previousContent, (string) $tip->content);
-        } catch (Throwable $e) {
-            report($e);
-        }
-    }
-
-    private function canManageTip(Tip $tip): bool
-    {
-        $user = Auth::user();
-
-        if (!$user) {
-            return false;
+        if ($submitFrom === 'admin') {
+            return $this->tipAdminRedirect()
+                ->withInput()
+                ->with('error', $message);
         }
 
-        $isAdmin = $user->isAdmin();
-        $isOwner = (int) $user->id === (int) $tip->user_id;
+        if ($tip !== null) {
+            return redirect()
+                ->route('tip.show', ['tip_id' => $tip->id])
+                ->withInput()
+                ->with('error', $message);
+        }
 
-        return $isAdmin || $isOwner;
+        return back()
+            ->withInput()
+            ->with('error', $message);
     }
 
     /**

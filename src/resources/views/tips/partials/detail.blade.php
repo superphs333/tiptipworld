@@ -66,12 +66,12 @@
                     <div class="tip-wireframe__post-actions" aria-label="게시글 관리">
                         <a
                             class="tip-wireframe__post-action"
-                            href="{{ route('tip.formFront', ['tip_id' => $tip->id]) }}"
+                            href="{{ route('tip.formFront', ['tip' => $tip->id]) }}"
                         >수정</a>
 
                         <form
                             class="tip-wireframe__post-action-form"
-                            action="{{ route('tip.destroy', ['tip_id' => $tip->id]) }}"
+                            action="{{ route('tip.destroy', ['tip' => $tip->id]) }}"
                             method="POST"
                             onsubmit="return confirm('정말 삭제할까요?')"
                         >

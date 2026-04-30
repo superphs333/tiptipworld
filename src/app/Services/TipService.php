@@ -536,11 +536,11 @@ class TipService
      * - 남은 태그만 글에 저장(sync)
      * - 제외된 금지 태그가 있으면 사용자 안내 문구 반환 
      * 
-     * @param int $tipId 태그를 저장할 글 ID
+     * @param Tip $tip 태그를 저장할 글 모델
      * @param string|null $rawTags 화면에서 넘어온 태그 json 문자열
      * @return string|null 금지 태그 안내 문구(없으면 null)
      */
-    public function syncTipTagsFromPayload(int $tipId, ?string $rawTags): ?string
+    public function syncTipTagsFromPayload(Tip $tip, ?string $rawTags): ?string
     {
         // 프론트에서 넘어온 tags(JSON 문자열)를 배열로 반환
         $decoded = json_decode((string) $rawTags, true);
@@ -582,7 +582,7 @@ class TipService
             ->all();
 
         // tip_tag를 최종 목록으로 동기화 
-        Tip::findOrFail($tipId)->allTags()->sync($tagIds);
+        $tip->allTags()->sync($tagIds);
 
         // 금지 태그가 없으면 안내문구 없음(null)
         if ($blockedTagNames->isEmpty()) {
