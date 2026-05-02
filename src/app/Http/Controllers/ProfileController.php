@@ -8,27 +8,30 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use App\Models\Role;
-use App\Models\Status;
-use App\Models\User;
-use Illuminate\Support\Arr;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use App\Services\Media\ProfileImageService;
 
-
-
-
+/**
+ * 프로필 화면에서 사용하는 사용자 정보 수정/이미지 변경/계정 삭제 처리를 담당하는 컨트롤러
+ * 
+ * [역할]
+ * - 프로필 편집 화면 출력
+ * - 기본 프로필 정보 수정
+ * - 프로필 이미지 업로드/삭제
+ * - 일반 계정 삭제
+ * - 소셜 계정 연결 해제 후 탈퇴 
+ */
 class ProfileController extends Controller
 {
+
     public function __construct(
-        private SocialAccountRevoker $revoker,
-        private ProfileImageService $profileImages,
+        private SocialAccountRevoker $revoker, // 소셜 계정 해제 서비스
+        private ProfileImageService $profileImages, // 프로필 이미지 처리 서비스
     ) {
     }
 
     /**
-     * Display the user's profile form.
+     * 프로필 편집 화면 보여주기 
      */
     public function edit(Request $request): View
     {
@@ -38,7 +41,14 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * 사용자의 기본 프로필 정보 수정
+     * 
+     * [처리흐름]
+     * 1. ProfileUpdateRequest에서 검증된 값만 가져옴
+     * 2. 현재 사용자 모델에 값을 채움
+     * 3. 이메일이 변경되었으면 이메일 인증 상태를 초기화
+     * 4. 변경 내용 저장
+     * 5. 프로필 수정 완료 상태값과 함께 edit 화면으로 리다이렉트 
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
@@ -53,6 +63,14 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
+    /**
+     * 프로필 이미지를 새로 업로드해서 교체
+     * 
+     * [처리흐름]
+     * 1. profile_image 입력값을 검증
+     * 2. 현재 사용자 기준으로 프로필 이미지를 교체 
+     * 3. 완료 상태값과 함께 edit 화면으로 리다이렉트
+     */
     public function updateImage(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -65,7 +83,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * Remove the user's profile image.
+     * 사용자의 프로필 이미지 삭제 
+     * 
+     * [동작]
+     * - 현재 사용자와 연결된 프로필 이미지 제거
+     * - 성공 후 상태값과 함께 edit 화면으로 리다이렉트 
      */
     public function destroyImage(Request $request): RedirectResponse
     {
@@ -98,17 +120,30 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's social account.
+     * 소셜 로그인 계정을 해제한 뒤 회원 탈퇴 처리
+     * 
+     * [처리흐름]
+     * 1. 현재 사용자 객체를 가져옴
+     * 2. provider가 email이면 소셜 계정이 아니므로 403으로 차단
+     * 3. 소셜 연결 해제를 시도
+     * 4. 실패하면 socialDeletion 에러백에 메세지를 담아 edit 화면으로 되돌림
+     * 5. 성공하면 프로필 이미지 정리
+     * 6. 로그아웃 후 사용자 계정을 삭제 
+     * 7. 세션 무효화 및 토킅 재생성 후 홈으로 이동 
+     * 
+     * 
      */
     public function destroySocial(Request $request): RedirectResponse
     {
 
         $user = $request->user();
 
+        // 이메일 가입 계정은 소셜 연결 해제 대상이 아니므로 차단 
         if ($user->provider === 'email') {
             abort(403);
         }
 
+        // 소셜 공급자와 연결 해제 실패 시 탈퇴를 중단하고 에러 반환
         if (!$this->revoker->revoke($user)) {
             return Redirect::route('profile.edit')
                 ->withErrors(['confirmation' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'socialDeletion');
@@ -124,38 +159,5 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
-    }
-
-    /**
-     * 관리자에서 user의 정보 편집
-     */
-    public function updateUserInAdmin($user_id,Request $request): RedirectResponse
-    {
-        $allowedStatusItemValues = Status::getStatuses();
-        $allowedRoleItemValues = Role::getAllRoles()->pluck('id');
-
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'status' => ['required',Rule::in($allowedStatusItemValues)],
-            'roles' => ['nullable','array'],
-            'roles.*' => [Rule::in($allowedRoleItemValues)]
-        ]);
-
-        $user = User::findOrFail($user_id);
-
-        // users 테이블의 컬럼만 업데이트
-        $user->update(Arr::except($validated,['roles']));
-
-        // roles는 관계(pivot) => sync로 처리
-        $user->roles()->sync($validated['roles'] ?? []);
-
-        $persistedFilters = array_filter(
-            session('users.query', []),
-            static fn ($value) => !($value === null || $value === '')
-        );
-
-        return redirect()
-            ->route('admin', array_merge(['tab' => 'users'], $persistedFilters))
-            ->with('success', '유저의 정보가 수정되었습니다.');
     }
 }

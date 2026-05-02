@@ -127,11 +127,16 @@ return [
      * 팁 관련 변수들
      */
     'tip_status' => [
-        'draft','published'
+        'draft',
+        'published',
+        'archived',
+        'deleted',
     ],
     'tip_visibility' => [
-        'public','private'
-    ]
+        'public',
+        'unlisted',
+        'private',
+    ],
 
         
 

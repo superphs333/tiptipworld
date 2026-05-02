@@ -29,6 +29,9 @@ class Tag extends Model
         return $this->belongsToMany(Tip::class, 'tip_tag', 'tag_id', 'tip_id')->withTimestamps();
     }
 
+    /**
+     * 차단되지 않은 태그만 조회
+     */
     public function scopeVisible($query)
     {
         return $query->where('is_blocked', false);

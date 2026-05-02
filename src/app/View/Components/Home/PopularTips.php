@@ -3,8 +3,8 @@
 namespace App\View\Components\Home;
 
 use Closure;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Collection;
 use Illuminate\View\Component;
 
 class PopularTips extends Component

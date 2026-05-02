@@ -1,14 +1,18 @@
 <?php
 
-use App\Http\Controllers\AdminDashboard;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\TagController as AdminTagController;
+use App\Http\Controllers\Admin\TipController as AdminTipController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\MyPageController;
 use App\Http\Controllers\SummernoteController;
-use App\Http\Controllers\TagController;
-use App\Http\Controllers\TipController;
+use App\Http\Controllers\TipBrowseController;
+use App\Http\Controllers\TipManageController;
+use App\Http\Controllers\TipReactionController;
 use App\Http\Controllers\UserFollowController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -51,21 +55,21 @@ Route::get('/',[HomeController::class, 'index'])->name('home');
  * 팁관련
  */
 // 개별페이지
-Route::get('/tip/{tip_id}',[TipController::class, 'showPost'])
+Route::get('/tip/{tip_id}',[TipBrowseController::class, 'showPost'])
     ->whereNumber('tip_id')->name('tip.show');
 // 리스트 페이지
-Route::get('/tips/',[TipController::class, 'tipList'])->name('tips.list');
+Route::get('/tips/',[TipBrowseController::class, 'tipList'])->name('tips.list');
 // 검색 페이지
-Route::get('/tips/search',[TipController::class, 'tipSearch'])->name('tips.search');
+Route::get('/tips/search',[TipBrowseController::class, 'tipSearch'])->name('tips.search');
 // 사용자 피드 페이지
-Route::get('/tips/user/{user_id}',[TipController::class, 'tipUserFeed'])->name('tips.userFeed');
+Route::get('/tips/user/{user_id}',[TipBrowseController::class, 'tipUserFeed'])->name('tips.userFeed');
 // 분류별 페이지
-Route::get('/tips/category/{category_id}',[TipController::class, 'tipListBySort'])->whereNumber('category_id')->name('tips.category');
-Route::get('/tips/tag/{tag_id}',[TipController::class, 'tipListBySort'])->whereNumber('tag_id')->name('tips.tag');
+Route::get('/tips/category/{category_id}',[TipBrowseController::class, 'tipListBySort'])->whereNumber('category_id')->name('tips.category');
+Route::get('/tips/tag/{tag_id}',[TipBrowseController::class, 'tipListBySort'])->whereNumber('tag_id')->name('tips.tag');
 // 좋아요
-Route::post('/tip/like/{tip_id}', [TipController::class, 'like'])->whereNumber('tip_id')->middleware('auth')->name('tip.like');
+Route::post('/tip/like/{tip_id}', [TipReactionController::class, 'like'])->whereNumber('tip_id')->middleware('auth')->name('tip.like');
 // 북마크
-Route::post('/tip/bookmark/{tip_id}', [TipController::class, 'bookmark'])->whereNumber('tip_id')->middleware('auth')->name('tip.bookmark');
+Route::post('/tip/bookmark/{tip_id}', [TipReactionController::class, 'bookmark'])->whereNumber('tip_id')->middleware('auth')->name('tip.bookmark');
 // 댓글
 Route::post('/tip/comment/{tip_id}',[CommentController::class, 'commentAdd'])->whereNumber('tip_id')->middleware('auth')->name('tip.add.comment');
 // 댓글 리스트
@@ -77,13 +81,13 @@ Route::delete('/tip/comment/{comment_id}',[CommentController::class, 'commentDel
 // 댓글 수정
 Route::patch('/tip/comment/{comment_id}',[CommentController::class, 'commentUpdate'])->whereNumber('comment_id')->middleware('auth')->name('tip.comment.update');
 // 글 작성 
-Route::get('/tips/form/{tip?}',[TipController::class, 'formFront'])->whereNumber('tip')->middleware('auth')->name('tip.formFront');
-Route::post('/tips',[TipController::class, 'store'])->middleware('auth')->name('tip.store'); // 프론트/관리자 공통 추가
-Route::patch('/tips/{tip}',[TipController::class, 'update'])
+Route::get('/tips/form/{tip?}',[TipManageController::class, 'formFront'])->whereNumber('tip')->middleware('auth')->name('tip.formFront');
+Route::post('/tips',[TipManageController::class, 'store'])->middleware('auth')->name('tip.store'); // 프론트/관리자 공통 추가
+Route::patch('/tips/{tip}',[TipManageController::class, 'update'])
     ->whereNumber('tip')
     ->middleware('auth')
     ->name('tip.update'); // 프론트/관리자 공통 수정
-Route::delete('/tips/{tip}', [TipController::class, 'destroy'])
+Route::delete('/tips/{tip}', [TipManageController::class, 'destroy'])
     ->whereNumber('tip')
     ->middleware('auth')
     ->name('tip.destroy'); // 프론트/관리자 공통 삭제
@@ -106,31 +110,31 @@ Route::patch('/notifications/read-all', [NotificationController::class, 'markAll
  * 관리자 전용 라우트 그룹
  */
 Route::middleware(['admin', 'auth'])->group(function () {
-    Route::get('/admin/{tab?}', [AdminDashboard::class, 'index'])
+    Route::get('/admin/{tab?}', [AdminDashboardController::class, 'index'])
         ->whereIn('tab', array_keys(config('admin.tabs', [])))
         ->name('admin');                    
     
     // 카테고리 
-    Route::post('/admin/categories/save', [CategoryController::class, 'store'])->name('admin.categories.store'); // 저장 
-    Route::delete('/admin/categories/delete/{category_ids}',[CategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
-    Route::patch('/admin/category/update/{category_id}',[CategoryController::class, 'update'])->name('admin.category.update'); // 수정
-    Route::patch('/admin/categories/updateSort', [CategoryController::class, 'updateSort'])->name('admin.category.updateSort'); // 정렬 순서 변경
-    Route::patch('/admin/categories/updateIsActive/{category_ids}', [CategoryController::class, 'updateIsActive'])->name('admin.categories.updateIsActive'); // 활성화/비활성화
+    Route::post('/admin/categories/save', [AdminCategoryController::class, 'store'])->name('admin.categories.store'); // 저장
+    Route::delete('/admin/categories/delete/{category_ids}',[AdminCategoryController::class,'destroy'])->name('admin.categories.delete'); // 삭제
+    Route::patch('/admin/category/update/{category_id}',[AdminCategoryController::class, 'update'])->name('admin.category.update'); // 수정
+    Route::patch('/admin/categories/updateSort', [AdminCategoryController::class, 'updateSort'])->name('admin.category.updateSort'); // 정렬 순서 변경
+    Route::patch('/admin/categories/updateIsActive/{category_ids}', [AdminCategoryController::class, 'updateIsActive'])->name('admin.categories.updateIsActive'); // 활성화/비활성화
 
     // User
-    Route::patch('/admin/user/update/{user_id}',[ProfileController::class, 'updateUserInAdmin'])->name('admin.user.update'); // 수정 
+    Route::patch('/admin/user/update/{user_id}',[AdminUserController::class, 'update'])->name('admin.user.update'); // 수정
 
     // 태그
-    Route::post('/admin/tag/save',[TagController::class, 'store'])->name('admin.tag.store'); // 저장 
-    Route::patch('/admin/tag/update/{tag_id}',[TagController::class, 'update'])->name('admin.tag.update'); // 수정
-    Route::delete('/admin/tags/delete/{tag_ids}',[TagController::class,'destroy'])->name('admin.tags.delete'); // 삭제
-    Route::patch('/admin/tags/updateIsBlocked/{tag_ids}',[TagController::class, 'updateIsBlocked'])->name('admin.tags.updateIsBlocked'); // 금지/사용 수정
+    Route::post('/admin/tag/save',[AdminTagController::class, 'store'])->name('admin.tag.store'); // 저장
+    Route::patch('/admin/tag/update/{tag_id}',[AdminTagController::class, 'update'])->name('admin.tag.update'); // 수정
+    Route::delete('/admin/tags/delete/{tag_ids}',[AdminTagController::class,'destroy'])->name('admin.tags.delete'); // 삭제
+    Route::patch('/admin/tags/updateIsBlocked/{tag_ids}',[AdminTagController::class, 'updateIsBlocked'])->name('admin.tags.updateIsBlocked'); // 금지/사용 수정
     
     /**
      * Tips
      */
     // 팁 생성/수정 페이지
-    Route::get('/admin/tips/form/{tip?}', [TipController::class, 'form'])
+    Route::get('/admin/tips/form/{tip?}', [AdminTipController::class, 'form'])
         ->whereNumber('tip')
         ->name('admin.tip.form');
 

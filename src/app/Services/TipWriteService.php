@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Tip;
 use App\Models\User;
 use App\Services\Media\EditorImageService;
+use App\Services\Tip\TipTagService;
 use App\Services\Media\TipThumbnailService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ use Throwable;
 class TipWriteService
 {
     public function __construct(
-        private TipService $tipService, // Tip관련 보조 도메인 로직
+        private TipTagService $tipTagService, // 태그 정리/차단 정책/sync 담당
         private EditorImageService $editorImages, // 본문에디터 이미지 
         private TipThumbnailService $tipThumbnails, // 썸네일 저장/삭제 
     ) {
@@ -88,9 +89,7 @@ class TipWriteService
 
                 // 태그 데이터가 넘어온 경우, 태그 sync 수행 
                 // 차단된 태그가 있으면, 경고 메세지를 반환받아 저장 
-                if ($tagsPayload !== null) {
-                    $warningMessage = $this->tipService->syncTipTagsFromPayload($tip, $tagsPayload);
-                }
+                $warningMessage = $this->syncTagsIfProvided($tip, $tagsPayload);
 
                 // draft 이미지 이동 
                 DB::afterCommit(function () use ($actor, $tip, $draftKey): void {
@@ -185,9 +184,7 @@ class TipWriteService
                 }
 
                 // 태그 payload가 있으면 현재 글 기준으로 태그 sync 수행
-                if ($tagsPayload !== null) {
-                    $warningMessage = $this->tipService->syncTipTagsFromPayload($tip, $tagsPayload);
-                }
+                $warningMessage = $this->syncTagsIfProvided($tip, $tagsPayload);
 
                 // 최종 수정 반영 
                 $tip->update($updateAttributes);
@@ -253,6 +250,15 @@ class TipWriteService
                 $this->cleanupDeletedTipMedia($actor, $tip, $thumbnailPath);
             });
         });
+    }
+
+    private function syncTagsIfProvided(Tip $tip, ?string $tagsPayload): ?string
+    {
+        if ($tagsPayload === null) {
+            return null;
+        }
+
+        return $this->tipTagService->syncTipTagsFromPayload($tip, $tagsPayload);
     }
 
     /**

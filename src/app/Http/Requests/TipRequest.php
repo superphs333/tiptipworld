@@ -68,7 +68,7 @@ abstract class TipRequest extends FormRequest
     /**
      * 태그 원본 payload를 반환 
      * : 현재 tags는 배열이 아니라 문자열(json 형태)로 들어오기 때문에
-     * 그대로 service로 넘겨서 TipService::syncTipTagsFromPayload()가 해결하도록
+     * 그대로 service로 넘겨서 TipTagService::syncTipTagsFromPayload()가 해결하도록
      * 
      * - 반환 규칙
      *  - 요청에 tags필드가 존재하면 문자열 반환

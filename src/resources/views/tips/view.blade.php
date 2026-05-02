@@ -14,7 +14,7 @@
 
     switch ($viewMode ?? null) {
         case 'detailView':
-            $title = isset($tip) ? $tip->title : null;
+            $title = data_get($detail ?? [], 'title');
             $partial = 'tips.partials.detail';
             break;
         case 'tipListBySort':

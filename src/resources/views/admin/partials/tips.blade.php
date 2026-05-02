@@ -1,36 +1,3 @@
-@php
-    $tips = $datas ?? collect();
-    if (method_exists($tips, 'getCollection')) {
-        $tipItems = $tips->getCollection();
-    } else {
-        $tipItems = collect($tips);
-    }
-    $totalCount = method_exists($tips, 'total') ? $tips->total() : $tipItems->count();
-    $showPagination = method_exists($tips, 'links');
-    $firstItem = method_exists($tips, 'firstItem') ? $tips->firstItem() : null;
-    $lastItem = method_exists($tips, 'lastItem') ? $tips->lastItem() : null;
-    $lastUpdatedRaw = $tipItems
-        ->map(fn ($tip) => data_get($tip, 'updated_at') ?? data_get($tip, 'updatedAt'))
-        ->filter()
-        ->max();
-    $lastUpdated = $lastUpdatedRaw
-        ? \Illuminate\Support\Carbon::parse($lastUpdatedRaw)->format('Y-m-d')
-        : '-';
-    $normalizeDateTimeLocal = static function ($value) {
-        if (!filled($value)) {
-            return '';
-        }
-
-        try {
-            return \Illuminate\Support\Carbon::parse($value)->format('Y-m-d\TH:i');
-        } catch (\Throwable $e) {
-            return '';
-        }
-    };
-    $startDateInput = $normalizeDateTimeLocal(request('start_date'));
-    $endDateInput = $normalizeDateTimeLocal(request('end_date'));
-@endphp
-
 <div x-data="{ selected: [] }">
     <div class="category-panel tip-panel">
         <div class="category-panel__content">
@@ -38,8 +5,8 @@
                 <div class="tip-panel__summary-left">
                     <div class="tip-panel__title">Tips 관리</div>
                     <div class="tip-panel__meta">
-                        <span>총 {{ number_format($totalCount) }}개</span>
-                        <span>최근 수정: {{ $lastUpdated }}</span>
+                        <span>총 {{ data_get($tipsView, 'total_count_text', '0') }}개</span>
+                        <span>최근 수정: {{ data_get($tipsView, 'last_updated_text', '-') }}</span>
                     </div>
                 </div>
                 <div class="tip-panel__summary-actions">
@@ -91,8 +58,8 @@
 
             <div class="category-panel__filter tip-panel__filter">
                 <form class="category-panel__form tip-panel__form" action="" method="GET">
-                    @if (request()->has('per_page'))
-                        <input type="hidden" name="per_page" value="{{ request('per_page') }}" />
+                    @if (filled(data_get($tipsView, 'per_page')))
+                        <input type="hidden" name="per_page" value="{{ data_get($tipsView, 'per_page') }}" />
                     @endif
                     <div class="tip-panel__filters">
                         <div class="tip-panel__filters-main">
@@ -107,10 +74,10 @@
                                         @keydown.escape.stop="close()"
                                     >
                                         <select class="category-panel__select-native" name="category_id" x-ref="select" x-model="value">
-                                            <option value="all" @selected(blank(request('category_id')) || request('category_id') === 'all')>전체</option>
-                                            <option value="uncategorized" @selected(request('category_id') === 'uncategorized')>미분류</option>
+                                            <option value="all" @selected(blank(data_get($tipsView, 'category')) || data_get($tipsView, 'category') === 'all')>전체</option>
+                                            <option value="uncategorized" @selected(data_get($tipsView, 'category') === 'uncategorized')>미분류</option>
                                             @foreach($categories as $category)
-                                                <option value="{{ $category->id }}" @selected((string) request('category_id') === (string) $category->id)>{{ $category->name }}</option>
+                                                <option value="{{ $category->id }}" @selected((string) data_get($tipsView, 'category', 'all') === (string) $category->id)>{{ $category->name }}</option>
                                             @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -138,9 +105,9 @@
                                         @keydown.escape.stop="close()"
                                     >
                                         <select class="category-panel__select-native" name="visibility" x-ref="select" x-model="value">
-                                            <option value="" @selected(blank(request('visibility')))>노출</option>
-                                            @foreach(config('app.tip_visibility', []) as $visibility)
-                                                <option value="{{ $visibility }}" @selected(request('visibility') === $visibility)>{{ $visibility }}</option>
+                                            <option value="" @selected(blank(data_get($tipsView, 'visibility')))>노출</option>
+                                            @foreach(data_get($tipsView, 'visibility_options', []) as $visibility)
+                                                <option value="{{ $visibility }}" @selected(data_get($tipsView, 'visibility') === $visibility)>{{ $visibility }}</option>
                                             @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -151,7 +118,7 @@
                                         </button>
                                         <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                             <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">노출</li>
-                                            @foreach(config('app.tip_visibility', []) as $visibility)
+                                            @foreach(data_get($tipsView, 'visibility_options', []) as $visibility)
                                                 <li class="category-panel__select-option" role="option" @click="choose('{{ $visibility }}')" :class="{ 'is-active': value === '{{ $visibility }}' }" :aria-selected="value === '{{ $visibility }}'">{{ $visibility }}</li>
                                             @endforeach
                                         </ul>
@@ -167,9 +134,9 @@
                                         @keydown.escape.stop="close()"
                                     >
                                         <select class="category-panel__select-native" name="status" x-ref="select" x-model="value">
-                                            <option value="" @selected(blank(request('status')))>상태</option>
-                                            @foreach(config('app.tip_status', []) as $status)
-                                                <option value="{{ $status }}" @selected(request('status') === $status)>{{ $status }}</option>
+                                            <option value="" @selected(blank(data_get($tipsView, 'status')))>상태</option>
+                                            @foreach(data_get($tipsView, 'status_options', []) as $status)
+                                                <option value="{{ $status }}" @selected(data_get($tipsView, 'status') === $status)>{{ $status }}</option>
                                             @endforeach
                                         </select>
                                         <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
@@ -180,7 +147,7 @@
                                         </button>
                                         <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
                                             <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">상태</li>
-                                            @foreach(config('app.tip_status', []) as $status)
+                                            @foreach(data_get($tipsView, 'status_options', []) as $status)
                                                 <li class="category-panel__select-option" role="option" @click="choose('{{ $status }}')" :class="{ 'is-active': value === '{{ $status }}' }" :aria-selected="value === '{{ $status }}'">{{ $status }}</li>
                                             @endforeach
                                         </ul>
@@ -193,19 +160,16 @@
                                     <div class="tip-panel__date-range">
                                         <input
                                             class="category-panel__input tip-panel__date-input"
-                                            type="datetime-local"
+                                            type="date"
                                             name="start_date"
-                                            value="{{ $startDateInput }}"
-                                            step="60"
+                                            value="{{ data_get($tipsView, 'start_date_input', '') }}"
                                         />
                                         <span class="tip-panel__date-separator">~</span>
                                         <input
                                             class="category-panel__input tip-panel__date-input"
-                                            type="datetime-local"
+                                            type="date"
                                             name="end_date"
-                                            value="{{ $endDateInput }}"
-                                            step="60"
-                                            @change="onEndDateChange($event)"
+                                            value="{{ data_get($tipsView, 'end_date_input', '') }}"
                                         />
                                     </div>
                                 </div>
@@ -218,7 +182,7 @@
                                         type="text"
                                         name="query"
                                         placeholder="검색어 입력(제목/작성자)"
-                                        value="{{ request('query') }}"
+                                        value="{{ data_get($tipsView, 'query', '') }}"
                                     />
                                 </div>
                             </div>
@@ -234,12 +198,9 @@
             <div class="user-panel__list-header tip-panel__list-header">
                 <div class="user-panel__list-title">목록</div>
                 <form class="user-panel__display-form" action="" method="GET">
-                    @php
-                        $displayParams = ['tab', 'query', 'category_id', 'status', 'visibility', 'start_date', 'end_date'];
-                    @endphp
-                    @foreach ($displayParams as $param)
-                        @if (request()->has($param))
-                            <input type="hidden" name="{{ $param }}" value="{{ request($param) }}" />
+                    @foreach (data_get($tipsView, 'display_values', []) as $param => $value)
+                        @if (filled($value))
+                            <input type="hidden" name="{{ $param }}" value="{{ $value }}" />
                         @endif
                     @endforeach
                     <span class="user-panel__display-label">표시설정</span>
@@ -253,7 +214,7 @@
                             min="1"
                             max="100"
                             step="1"
-                            value="{{ request('per_page', 20) }}"
+                            value="{{ data_get($tipsView, 'per_page', 20) }}"
                         />
                     </label>
                     <button class="category-panel__bulk-btn" type="submit">적용</button>
@@ -288,115 +249,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($tipItems as $tip)
-                            @php
-                                $tipId = data_get($tip, 'id', '-');
-                                $editUrl = is_numeric($tipId)
-                                    ? route('admin.tip.form', ['tip' => $tipId])
-                                    : route('admin.tip.form');
-                                $deleteUrl = is_numeric($tipId)
-                                    ? route('tip.destroy', ['tip' => $tipId])
-                                    : null;
-                                $title = data_get($tip, 'title', '-');
-                                $summary = data_get($tip, 'summary', data_get($tip, 'excerpt', ''));
-                                $author = data_get($tip, 'user.name', data_get($tip, 'user', '-'));
-                                $category = data_get($tip, 'category.name', data_get($tip, 'category', '미분류'));
-                                $tags = data_get($tip, 'tags', []);
-                                $tagItems = collect($tags)
-                                    ->map(fn ($tag) => is_string($tag) ? $tag : (data_get($tag, 'name') ?? data_get($tag, 'label')))
-                                    ->filter()
-                                    ->values();
-                                $thumb = data_get($tip, 'thumbnail_url', data_get($tip, 'thumbnail', ''));
-                                $views = (int) data_get($tip, 'views', data_get($tip, 'view_count', 0));
-                                $likes = (int) data_get($tip, 'likes', data_get($tip, 'like_count', 0));
-                                $visibilityRaw = data_get($tip, 'visibility', data_get($tip, 'is_public', true));
-                                if ($visibilityRaw === 'private' || $visibilityRaw === 0 || $visibilityRaw === false) {
-                                    $visibilityKey = 'private';
-                                    $visibilityLabel = '비공개';
-                                } elseif ($visibilityRaw === 'unlisted') {
-                                    $visibilityKey = 'unlisted';
-                                    $visibilityLabel = '일부공개';
-                                } else {
-                                    $visibilityKey = 'public';
-                                    $visibilityLabel = '공개';
-                                }
-
-                                $statusRaw = (string) data_get($tip, 'status', 'draft');
-                                $statusKey = in_array($statusRaw, ['draft', 'published', 'archived', 'deleted'], true)
-                                    ? $statusRaw
-                                    : 'unknown';
-                                $statusLabel = match ($statusKey) {
-                                    'draft' => '임시저장',
-                                    'published' => '게시',
-                                    'archived' => '보관',
-                                    'deleted' => '삭제',
-                                    default => $statusRaw !== '' ? $statusRaw : '-',
-                                };
-                                $dateRaw = data_get($tip, 'created_at', data_get($tip, 'updated_at'));                                
-                                $dateLabel = $dateRaw ? \Illuminate\Support\Carbon::parse($dateRaw)->format('y-m-d A h:i') : '-';
-                            @endphp
-                            <tr>
-                                {{-- <td><input type="checkbox" name="tip_ids[]" value="{{ $tipId }}" x-model="selected" /></td> --}}
-                                <td>{{ $tipId }}</td>
-                                <td>
-                                    <div class="tip-panel__thumb">
-                                        @if ($thumb)
-                                            <img src="{{ $thumb }}" alt="" />
-                                        @else
-                                            <span class="tip-panel__thumb-placeholder">img</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="tip-panel__meta-line">
-                                        <span class="tip-panel__category">{{ $category }}</span>
-                                    </div>
-                                    <div class="tip-panel__title-line">
-                                        “{{ $title }}”
-                                    </div>
-                                    {{-- <div class="tip-panel__summary-line">{{ $summary ?: '요약이 없습니다.' }}</div> --}}
-                                    <div class="tip-panel__meta-line">
-                                        
-                                        @if ($tagItems->isNotEmpty())
-                                            <span class="tip-panel__tags">
-                                                @foreach ($tagItems as $tag)
-                                                    <span class="tip-panel__tag">#{{ $tag }}</span>
-                                                @endforeach
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="tip-panel__actions">
-                                        {{-- <button class="tip-panel__action" type="button">미리보기</button> --}}
-                                        <a class="tip-panel__action" href="{{ $editUrl }}">편집</a>
-                                        @if ($deleteUrl)
-                                            <form class="tip-panel__action-form" action="{{ $deleteUrl }}" method="POST" onsubmit="return confirm('정말 삭제할까요?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button class="tip-panel__action tip-panel__action--delete" type="submit">
-                                                    <svg class="tip-panel__action-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                                        <path d="M4 7h16" stroke="currentColor" stroke-linecap="round"/>
-                                                        <path d="M9 7V5h6v2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                                        <path d="M7 7l1 12h8l1-12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"/>
-                                                        <path d="M10 11v5M14 11v5" stroke="currentColor" stroke-linecap="round"/>
-                                                    </svg>
-                                                    <span>삭제</span>
-                                                </button>
-                                            </form>
-                                        @endif
-                                        {{-- <button class="tip-panel__action" type="button">복제</button>
-                                        <button class="tip-panel__action" type="button">⋯</button> --}}
-                                    </div>
-                                </td>
-                                <td>{{ $author }}</td>
-                                <td>
-                                    <span class="tip-panel__status tip-panel__status--visibility-{{ $visibilityKey }}">{{ $visibilityLabel }}</span>
-                                </td>
-                                <td>
-                                    <span class="tip-panel__status tip-panel__status--state-{{ $statusKey }}">{{ $statusLabel }}</span>
-                                </td>
-                                {{-- <td class="tip-panel__metrics">{{ number_format($views) }} / {{ number_format($likes) }}</td> --}}
-                                <td class="tip-panel__date">{{ $dateLabel }}</td>
-                            </tr>
+                        @forelse (data_get($tipsView, 'tip_items', []) as $tip)
+                            <x-tip.admin-row :item="$tip" />
                         @empty
                             <tr class="user-panel__empty-row">
                                 <td colspan="8" class="user-panel__empty">데이터가 없습니다.</td>
@@ -409,16 +263,16 @@
             <div class="tag-panel__pagination tip-panel__pagination">
                 <div class="tag-panel__page-meta">
                     <span class="tag-panel__page-range">
-                        @if ($firstItem !== null && $lastItem !== null)
-                            {{ $firstItem }}-{{ $lastItem }} / 총 {{ number_format($totalCount) }}개
+                        @if (data_get($tipsView, 'first_item') !== null && data_get($tipsView, 'last_item') !== null)
+                            {{ data_get($tipsView, 'first_item') }}-{{ data_get($tipsView, 'last_item') }} / 총 {{ data_get($tipsView, 'total_count_text', '0') }}개
                         @else
-                            총 {{ number_format($totalCount) }}개
+                            총 {{ data_get($tipsView, 'total_count_text', '0') }}개
                         @endif
                     </span>
                 </div>
-                @if ($showPagination)
+                @if (data_get($tipsView, 'show_pagination'))
                     <div class="app-pagination">
-                        {{ $tips->onEachSide(1)->links('vendor.pagination.app') }}
+                        {{ $datas->onEachSide(1)->links('vendor.pagination.app') }}
                     </div>
                 @endif
             </div>

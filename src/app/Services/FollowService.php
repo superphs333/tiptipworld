@@ -9,7 +9,10 @@ class FollowService
 {
 
     /**
-     *  상세용 : 단건 팔로우 여부
+     *  현재 로그인 사용자가 대상 사용자를 팔로우하고 있는지 확인
+     * 
+     * [반환 규칙]
+     * - 비로그인, 대상 없음, 자기 자신이면 false / 그 외에는 user_follows 테이블 존재 여부로 판단
      */
     public function isFollowing(?int $authUserId, ?int $targetUserId): bool
     {

@@ -63,7 +63,7 @@ class User extends Authenticatable
     }
 
     /**
-     * 프로필 이미지 URL 접근자
+     * profile_image_path를 화면에서 바로 쓸 수 있는 URL로 변환
      */
     public function getProfileImageUrlAttribute(): string
     {
@@ -268,7 +268,7 @@ class User extends Authenticatable
     }
 
     /**
-     * 팔로우 관련
+     * 이 사용자가 팔로우하고 있는 사용자 목록 관계를 반환 
      */
     public function followingUsers() : BelongsToMany{
         return $this->belongsToMany(
@@ -278,6 +278,10 @@ class User extends Authenticatable
             'followed_user_id', // 상대방'
         )->withTimeStamps();
     }
+
+    /**
+     * 이 사용자를 팔로우하고 있는 사용자 목록 관계를 반환
+     */
     public function followerUsers() : BelongsToMany{
         return $this->belongsToMany(
             User::class,

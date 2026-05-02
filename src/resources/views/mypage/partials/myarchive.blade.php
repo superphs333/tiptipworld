@@ -8,18 +8,18 @@
             <div class="bookmark-archive__identity-body">
                 <h2 class="bookmark-archive__name">보관한 게시글</h2>
                 <p class="bookmark-archive__summary">
-                    북마크 {{ number_format($bookmarkCount) }}개 · 좋아요 {{ number_format($likeCount) }}개 · 총 {{ number_format($totalCount) }}개
+                    북마크 {{ $bookmarkCountText }}개 · 좋아요 {{ $likeCountText }}개 · 총 {{ $totalCountText }}개
                 </p>
             </div>
         </div>
 
         <div class="bookmark-archive__stats">
             <div class="bookmark-archive__stat-box">
-                <strong>{{ number_format($bookmarkCount) }}</strong>
+                <strong>{{ $bookmarkCountText }}</strong>
                 <span>BOOKMARKS</span>
             </div>
             <div class="bookmark-archive__stat-box">
-                <strong>{{ number_format($likeCount) }}</strong>
+                <strong>{{ $likeCountText }}</strong>
                 <span>LIKES</span>
             </div>
             <div class="bookmark-archive__pill">아카이브</div>
@@ -36,7 +36,7 @@
                 aria-selected="{{ $loop->first ? 'true' : 'false' }}"
             >
                 <span>{{ $tab['label'] }}</span>
-                <em>{{ number_format($tab['meta']['count']) }}</em>
+                <em>{{ data_get($tab, 'meta.count_text', '0') }}</em>
             </button>
         @endforeach
     </div>
@@ -63,7 +63,7 @@
                                     aria-pressed="false"
                                 >
                                     {{ $item['name'] }}
-                                    <em>{{ number_format($item['count']) }}</em>
+                                    <em>{{ data_get($item, 'count_text', '0') }}</em>
                                 </button>
                             @empty
                                 <span class="bookmark-archive__empty-chip">카테고리 없음</span>
@@ -82,8 +82,8 @@
                                     data-filter-value="{{ (string) $item['id'] }}"
                                     aria-pressed="false"
                                 >
-                                    #{{ $item['name'] }}
-                                    <em>{{ number_format($item['count']) }}</em>
+                                    {{ data_get($item, 'label', '#' . data_get($item, 'name', '태그')) }}
+                                    <em>{{ data_get($item, 'count_text', '0') }}</em>
                                 </button>
                             @empty
                                 <span class="bookmark-archive__empty-chip">태그 없음</span>
@@ -98,7 +98,7 @@
                     <div class="bookmark-archive__feed-heading">
                         <h3 class="bookmark-archive__section-title">Feed</h3>
                         <p>
-                            <span data-bookmark-visible-count>{{ number_format($tab['meta']['count']) }}</span>개의 게시글
+                            <span data-bookmark-visible-count>{{ data_get($tab, 'meta.count_text', '0') }}</span>개의 게시글
                         </p>
                     </div>
                 </header>
@@ -106,75 +106,7 @@
                 @if ($tab['meta']['count'] > 0)
                     <div class="bookmark-archive__grid" data-bookmark-grid>
                         @foreach ($tab['items'] as $item)
-                            <a
-                                href="{{ route('tip.show', ['tip_id' => $item['id']]) }}"
-                                class="bookmark-archive__card"
-                                data-bookmark-item
-                                data-category="{{ (string) $item['category_id'] }}"
-                                data-tags="{{ implode('|', data_get($item, 'tag_ids', [])) }}"
-                                aria-label="{{ $item['title'] }} 상세 보기"
-                            >
-                                <div class="bookmark-archive__thumb bookmark-archive__thumb--cool" aria-hidden="true">
-                                    <div class="bookmark-archive__thumb-glow"></div>
-                                    <div class="bookmark-archive__thumb-icon">
-                                        <svg viewBox="0 0 120 120" fill="none" focusable="false">
-                                            <circle cx="60" cy="48" r="23" stroke="currentColor" stroke-width="6"/>
-                                            <path d="M42 74c4-9 14-15 18-15s14 6 18 15" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-                                            <path d="M51 93h18" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
-                                        </svg>
-                                    </div>
-                                </div>
-
-                                <div class="bookmark-archive__card-body">
-                                    <div class="bookmark-archive__card-top">
-                                        <span class="bookmark-archive__category">{{ data_get($item, 'category_name', '미분류') }}</span>
-                                    </div>
-
-                                    <h4 class="bookmark-archive__card-title">{{ $item['title'] }}</h4>
-
-                                    <div class="bookmark-archive__tag-row">
-                                        @foreach ($item['tags'] as $tag)
-                                            <span class="bookmark-archive__tag">#{{ data_get($tag, 'name', '태그') }}</span>
-                                        @endforeach
-                                    </div>
-
-                                    <div class="bookmark-archive__meta">
-                                        <span class="bookmark-archive__author">
-                                            <span class="bookmark-archive__author-avatar" aria-hidden="true"></span>
-                                            {{ $item['author'] }}
-                                        </span>
-
-                                        <span class="bookmark-archive__views">
-                                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
-                                                <path d="M2.4 12s3.6-6 9.6-6 9.6 6 9.6 6-3.6 6-9.6 6-9.6-6-9.6-6Z" stroke="currentColor" stroke-width="1.6"/>
-                                                <circle cx="12" cy="12" r="2.6" stroke="currentColor" stroke-width="1.6"/>
-                                            </svg>
-                                            {{ number_format($item['views']) }}
-                                        </span>
-                                    </div>
-
-                                    <div class="bookmark-archive__reactions">
-                                        <span class="bookmark-archive__reaction {{ data_get($item, 'is_liked', false) ? 'is-liked' : '' }}">
-                                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
-                                                <path d="M12 19.2c-4.3-2.83-7.2-5.53-7.2-8.69 0-2.24 1.84-4.01 4.13-4.01 1.43 0 2.72.68 3.47 1.82.75-1.14 2.04-1.82 3.47-1.82 2.29 0 4.13 1.77 4.13 4.01 0 3.16-2.9 5.86-7.2 8.69Z" stroke="currentColor" stroke-width="1.6"/>
-                                            </svg>
-                                            {{ number_format($item['likes']) }}
-                                        </span>
-                                        <span class="bookmark-archive__reaction">
-                                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
-                                                <path d="M4.75 6.5A2.25 2.25 0 0 1 7 4.25h10A2.25 2.25 0 0 1 19.25 6.5v7.25A2.25 2.25 0 0 1 17 16h-6.2l-3.95 3.35a.55.55 0 0 1-.9-.42V16H7a2.25 2.25 0 0 1-2.25-2.25V6.5Z" stroke="currentColor" stroke-width="1.6"/>
-                                            </svg>
-                                            {{ number_format($item['comments']) }}
-                                        </span>
-                                        <span class="bookmark-archive__reaction {{ data_get($item, 'is_bookmarked', false) ? 'is-bookmarked' : '' }}">
-                                            <svg viewBox="0 0 24 24" fill="none" focusable="false" aria-hidden="true">
-                                                <path d="M7 4.75h10a.75.75 0 0 1 .75.75v14.6a.65.65 0 0 1-1.08.49L12 16.54l-4.67 4.05a.65.65 0 0 1-1.08-.49V5.5A.75.75 0 0 1 7 4.75Z" stroke="currentColor" stroke-width="1.6"/>
-                                            </svg>
-                                            {{ number_format($item['bookmarks']) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
+                            <x-tip.archive-card :item="$item" />
                         @endforeach
                     </div>
                     <div class="bookmark-archive__empty" data-bookmark-filter-empty hidden>

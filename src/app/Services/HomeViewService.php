@@ -3,72 +3,35 @@
 namespace App\Services;
 
 use App\Models\Category;
-use App\Models\Tip;
 use App\Models\Tag;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 
 class HomeViewService
 {
     /**
-     * 가중치를 계산해서 최근 인기글 가져오기
-     *
-     * engagement = views * 1 + likes * 3 + comments * 5 + bookmarks * 8
+     * 홈 화면용 인기 태그 목록 조회
+     * (홈에서 지금 많이 쓰이는 태그를 보여주기 위함)
+     * 
+     * [기준]
+     * - 차단되지 않은 태그만 대상
+     * - 공개된(public) + 발행된(published) 팁에 연결된 태그만 대상
+     * - 각 태그가 몇 개의 공개 팁에 연결되어 있는지  tips_count로 집계 
+     * - 많이 사용된 태그 순으로 정렬 
      */
-    public static function getpopularList(int $limit = 10, int $days = 7): Collection
-    {
-        $limit = max(1, min($limit, 50));
-        $days = max(1, min($days, 30));
-        $authUserId = Auth::id();
-
-        $query = Tip::query()
-            ->where('tips.status', 'published')
-            ->where('tips.visibility', 'public')
-            //->where('tips.created_at', '>=', now()->subDays($days))
-            ->select('tips.*')
-            ->selectRaw("
-                (tips.view_count * 1)
-                + (tips.like_count * 3)
-                + (tips.comment_count * 5)
-                + (tips.bookmark_count * 8)
-                as engagement
-            ")
-            ->with([
-                'user:id,name,profile_image_path',
-                'category:id,name',
-            ]);
-
-        if ($authUserId) {
-            $query->withCount([
-                'likedUsers as is_liked' => function ($countQuery) use ($authUserId) {
-                    $countQuery->where('users.id', $authUserId);
-                },
-                'bookmarkedUsers as is_bookmarked' => function ($countQuery) use ($authUserId) {
-                    $countQuery->where('users.id', $authUserId);
-                },
-            ]);
-        }
-
-        $result = $query
-            ->orderByDesc('engagement')
-            ->orderByDesc('tips.id')
-            ->limit($limit)
-            ->get();
-
-        return $result;
-    }
-
-    /**
-     * 인기 태그 가져오기 
-     * tip_tag에서 가장 많이 
-     */
-    public static function getPopularTags(int $limit = 30) : Collection{
+    public static function getPopularTags(int $limit = 30) : EloquentCollection{
         $limit = max(1, min($limit, 100));
 
         $popularTags = Tag::query()
-            ->visible()
-            ->withCount('tips')
+            ->visible() // 차단되지 않은 태그만 조회 
+            ->whereHas('tips', function ($q) { // 공개된 팁에 실제로 연결된 태그만 남김 
+                $q->publicFeed();
+            })
+            ->withCount([
+                'tips as tips_count' => function ($q) {
+                    $q->publicFeed();
+                }
+            ])
             ->orderByDesc('tips_count')
             ->limit($limit)
             ->get();
@@ -81,7 +44,7 @@ class HomeViewService
      * 모든 카테고리 목록 
      * 카테고리(타이틀, 설명), 각 카테고리에 등록된 팁개수
      */
-    public static function getAllCategories() : Collection{
+    public static function getAllCategories() : EloquentCollection{
         $categories = Category::query()
            ->where('is_active', true)
            ->withCount([
@@ -98,29 +61,50 @@ class HomeViewService
     }
 
     /**
-     * 공개된 팁 기준으로 태그가 가장 많이 사용된 카테고리 1개
+     * 홈 상단 통계 데이터 조립
+     * 
+     * [목적]
+     * - 뷰에서 직접 계산하지 않도록 총 팁수 / 팁 수 1위 카테고리 / 사용량 1위 태그를 출력 전용 배열로 만들어 줌
      */
-    public static function getTopTagCategory() : ?Category
+    public static function getHeroStats(Collection $categories, Collection $popularTags): array
     {
-        $topCategory = Category::query()
-            ->where('categories.is_active', true)
-            ->leftJoin('tips', function ($join) {
-                $join->on('tips.category_id', '=', 'categories.id')
-                    ->where('tips.status', 'published')
-                    ->where('tips.visibility', 'public');
-            })
-            ->leftJoin('tip_tag', 'tip_tag.tip_id', '=', 'tips.id')
-            ->leftJoin('tags', function ($join) {
-                $join->on('tags.id', '=', 'tip_tag.tag_id')
-                    ->where('tags.is_blocked', false);
-            })
-            ->select('categories.id', 'categories.name')
-            ->selectRaw('COUNT(tags.id) as tags_count')
-            ->groupBy('categories.id', 'categories.name')
-            ->orderByDesc('tags_count')
-            ->orderBy('categories.id')
-            ->first();
+        // 전제 공개 팁 수 
+        $totalTips = (int) $categories->sum('tips_count');
 
-        return $topCategory;
+        // 팁 수가 가장 많은 카테고리 1개 
+        $topCategory = $categories->sortByDesc('tips_count')->first();
+        // 없을 수도 있으므로 기본값 처리
+        $topCategoryCount = (int) data_get($topCategory, 'tips_count', 0);
+        // 카운트가 0보다 클 때만 실제 이름 사용, 아니면 집계 중
+        $topCategoryName = $topCategoryCount > 0
+            ? (string) data_get($topCategory, 'name', '집계 중')
+            : '집계 중';
+        // 인기 태그 목록은 이미 사용량 순으로 정렬되어 있으므로 첫 번재가 1위 태그
+        $topTag = $popularTags->first();
+        // tips_count 우선 사용, 없으면 usage_count fallback
+        $topTagCount = (int) data_get($topTag, 'tips_count', data_get($topTag, 'usage_count', 0));
+        $topTagName = $topTagCount > 0
+            ? '#' . ltrim((string) data_get($topTag, 'name', '태그'), '#')
+            : '집계 중';
+
+        return [
+            // 전체 팁 수
+            'total_tips' => $totalTips, 
+            'total_tips_text' => number_format($totalTips),
+
+            // 팁 수 1위 카테고리 정보
+            'top_category' => [
+                'name' => $topCategoryName,
+                'count' => $topCategoryCount,
+                'count_text' => number_format($topCategoryCount),
+            ],
+
+            // 사용량 1위 태그 정보
+            'top_tag' => [
+                'name' => $topTagName,
+                'count' => $topTagCount,
+                'count_text' => number_format($topTagCount),
+            ],
+        ];
     }
 }

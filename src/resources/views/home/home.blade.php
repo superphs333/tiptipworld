@@ -8,14 +8,6 @@
 @section('title', 'TipTipWorld')
 
 @section('content')
-    @php
-        $totalTips = (int) $categories->sum('tips_count');
-        $topCategory = $categories->sortByDesc('tips_count')->first();
-        $topTagCategory = $top_tag_category ?? null;
-        $topTagCount = (int) data_get($topTagCategory, 'tags_count', 0);
-        $topTagCategoryName = $topTagCount > 0 ? data_get($topTagCategory, 'name', '집계 중') : '집계 중';
-    @endphp
-
     <div class="home-shell" data-home-shell>
         <section class="home-hero" aria-label="홈 소개">
             <div class="home-hero__left">
@@ -39,19 +31,19 @@
             <aside class="home-hero__stats" aria-label="홈 요약 통계">
                 <article class="home-hero__stat-card home-hero__stat-card--summary">
                     <p class="home-hero__stat-label">팁</p>
-                    <p class="home-hero__stat-value">{{ number_format($totalTips) }}</p>
+                    <p class="home-hero__stat-value">{{ data_get($hero_stats, 'total_tips_text', '0') }}</p>
                 </article>
                 <article class="home-hero__stat-card home-hero__stat-card--highlight">
                     <p class="home-hero__stat-label">팁 수 1위 카테고리</p>
-                    <p class="home-hero__stat-strong">{{ data_get($topCategory, 'name', '집계 중') }}</p>
+                    <p class="home-hero__stat-strong">{{ data_get($hero_stats, 'top_category.name', '집계 중') }}</p>
                     <p class="home-hero__stat-sub">
-                        {{ number_format((int) data_get($topCategory, 'tips_count', 0)) }}개 팁
+                        {{ data_get($hero_stats, 'top_category.count_text', '0') }}개 팁
                     </p>
                 </article>
                 <article class="home-hero__stat-card">
-                    <p class="home-hero__stat-label">태그 수 1위 카테고리</p>
-                    <p class="home-hero__stat-strong">{{ $topTagCategoryName }}</p>
-                    <p class="home-hero__stat-sub">{{ number_format($topTagCount) }}개 태그</p>
+                    <p class="home-hero__stat-label">사용량 1위 태그</p>
+                    <p class="home-hero__stat-strong">{{ data_get($hero_stats, 'top_tag.name', '집계 중') }}</p>
+                    <p class="home-hero__stat-sub">{{ data_get($hero_stats, 'top_tag.count_text', '0') }}개 팁에서 사용</p>
                 </article>
             </aside>
         </section>

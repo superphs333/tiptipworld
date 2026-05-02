@@ -1,4 +1,4 @@
-<section class="tip-wireframe" data-tip-wireframe data-tip-id="{{ $tip->id }}">
+<section class="tip-wireframe" data-tip-wireframe data-tip-id="{{ data_get($detail, 'id') }}">
     @if (session('warning'))
         <div class="tip-create__alerts" x-data="{ showWarning: true }">
             <div class="tip-create__alert tip-create__alert--error" role="alert" x-show="showWarning">
@@ -11,7 +11,15 @@
     <div class="tip-wireframe__topbar">
         {{-- <a class="tip-wireframe__back-link" href="{{ route('home') }}">← 목록</a> --}}
         <div class="tip-wireframe__topbar-right">
-            <button class="tip-wireframe__icon-btn tip-wireframe__mobile-only" type="button" aria-label="공유">공유</button>
+            <button
+                class="tip-wireframe__icon-btn tip-wireframe__mobile-only"
+                type="button"
+                aria-label="공유"
+                data-tip-action="share"
+                data-title="{{ data_get($detail, 'share.title') }}"
+                data-text="{{ data_get($detail, 'share.text') }}"
+                data-url="{{ data_get($detail, 'share.url') }}"
+            >공유</button>
             {{-- <button class="tip-wireframe__icon-btn" type="button" aria-label="더보기">⋯</button> --}}
         </div>
     </div>
@@ -30,48 +38,43 @@
         <article class="tip-wireframe__article">
             <header class="tip-wireframe__article-header">
                 <div class="tip-wireframe__header-top">
-                    @if (!blank($tip->category_id))
-                        <a target="_blank" href="{{ route('tips.category', ['category_id' => $tip->category_id]) }}">
-                            <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                    @if (data_get($detail, 'category.url'))
+                        <a target="_blank" href="{{ data_get($detail, 'category.url') }}">
+                            <span class="tip-wireframe__category-chip">{{ data_get($detail, 'category.name', '미분류') }}</span>
                         </a>
                     @else
-                        <span class="tip-wireframe__category-chip">{{ $tip->categoryName }}</span>
+                        <span class="tip-wireframe__category-chip">{{ data_get($detail, 'category.name', '미분류') }}</span>
                     @endif
                     <div class="tip-wireframe__badge-row">
-                        @if (filled($tip->status))
-                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->status) }}</span>
+                        @if (filled(data_get($detail, 'status.label')))
+                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ data_get($detail, 'status.label') }}</span>
                         @endif
-                        @if (filled($tip->visibility))
-                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ strtoupper((string) $tip->visibility) }}</span>
+                        @if (filled(data_get($detail, 'visibility.label')))
+                            <span class="tip-wireframe__badge tip-wireframe__badge--soft">{{ data_get($detail, 'visibility.label') }}</span>
                         @endif
                     </div>
                 </div>
-                <h1 class="tip-wireframe__title">{{ $tip->title }}</h1>
-                @php
-                    $authorName = data_get($tip, 'user.name', '작성자 미상');
-                    $authorImage = data_get($tip, 'user.profile_image_url', asset('images/avatar-default.svg'));
-                    $authorId = (int) data_get($tip, 'user.id', 0);
-                @endphp
+                <h1 class="tip-wireframe__title">{{ data_get($detail, 'title') }}</h1>
                 <x-author-inline
-                    :name="$authorName"
-                    :avatar="$authorImage"
-                    :author-id="$authorId"
+                    :name="data_get($detail, 'author.name', '작성자 미상')"
+                    :avatar="data_get($detail, 'author.avatar_url', asset('images/avatar-default.svg'))"
+                    :author-id="(int) data_get($detail, 'author.id', 0)"
                     variant="detail"
                     class="tip-wireframe__author"
                 />
                 <p class="tip-wireframe__meta">
-                    {{ $tip->createdDate }} · 조회 {{ number_format((int) ($tip->view_count ?? 0)) }}
+                    {{ data_get($detail, 'created_text', '-') }} · 조회 {{ data_get($detail, 'metrics.views_text', '0') }}
                 </p>
-                @if (($canManageTip ?? false) === true)
+                @if (data_get($detail, 'manage.can_manage') === true)
                     <div class="tip-wireframe__post-actions" aria-label="게시글 관리">
                         <a
                             class="tip-wireframe__post-action"
-                            href="{{ route('tip.formFront', ['tip' => $tip->id]) }}"
+                            href="{{ data_get($detail, 'manage.edit_url') }}"
                         >수정</a>
 
                         <form
                             class="tip-wireframe__post-action-form"
-                            action="{{ route('tip.destroy', ['tip' => $tip->id]) }}"
+                            action="{{ data_get($detail, 'manage.delete_url') }}"
                             method="POST"
                             onsubmit="return confirm('정말 삭제할까요?')"
                         >
@@ -85,9 +88,9 @@
             </header>
 
             {{-- 썸네일 --}}
-            @if(!blank($tip->thumbnail))
+            @if (data_get($detail, 'thumbnail_url'))
                 <figure class="tip-wireframe__thumbnail">
-                    <img src="{{ $tip->thumbnailUrl }}" alt="{{ $tip->title }}" loading="lazy">
+                    <img src="{{ data_get($detail, 'thumbnail_url') }}" alt="{{ data_get($detail, 'title') }}" loading="lazy">
                 </figure>
             @endif
 
@@ -108,8 +111,8 @@
             <hr class="tip-wireframe__divider">
 
             <section class="tip-wireframe__content" data-tip-article>
-                @if ($tip->content !== '')
-                    {!! $tip->content !!}
+                @if (data_get($detail, 'has_content'))
+                    {!! data_get($detail, 'content_html') !!}
                 @else
                     <h2>1. 문제 정의</h2>
                     <p>이 구간은 본문(Content) 와이어프레임입니다. 실제 게시글이 없을 때 구조 확인용 더미 텍스트를 보여줍니다.</p>
@@ -128,27 +131,18 @@
 
             <section class="tip-wireframe__section">
                 <h2 class="tip-wireframe__section-title">태그</h2>
-                
-                    @if(!blank($tip->displayTags))
+
+                    @if (!empty(data_get($detail, 'tags', [])))
                         <div class="tip-wireframe__tags">
-                            @foreach($tip->displayTags as $tag)
-                                <a href="{{ route('tips.tag', $tag->id) }}" target="_blank">
-                                    <span  class="tip-wireframe__tag">#{{ $tag->name }}</span>
+                            @foreach (data_get($detail, 'tags', []) as $tag)
+                                <a href="{{ data_get($tag, 'url') }}" target="_blank">
+                                    <span class="tip-wireframe__tag">{{ data_get($tag, 'label') }}</span>
                                 </a>                                
                             @endforeach
                         </div>
                     @endif
 
             </section>
-
-            @php
-                $likedUsers = $tip->relationLoaded('likedUsers') ? $tip->likedUsers : collect();
-                $bookmarkedUsers = $tip->relationLoaded('bookmarkedUsers') ? $tip->bookmarkedUsers : collect();
-                $previewUserLimit = 6;
-                $likedUsersCount = $likedUsers->count();
-                $bookmarkedUsersCount = $bookmarkedUsers->count();
-                $defaultAvatar = asset('images/avatar-default.svg');
-            @endphp
             <section class="tip-wireframe__section tip-wireframe__reactions">
                 <div class="tip-wireframe__reaction-grid">
                     <section class="tip-wireframe__reaction-panel" aria-label="좋아요한 사람">
@@ -158,28 +152,28 @@
                                 type="button"
                                 class="tip-wireframe__reaction-count tip-wireframe__reaction-count--button"
                                 data-reaction-modal-open="likes"
-                                @disabled($likedUsersCount === 0)
-                            >{{ number_format($likedUsersCount) }}</button>
+                                @disabled(data_get($detail, 'reactions.likes.count', 0) === 0)
+                            >{{ data_get($detail, 'reactions.likes.count_text', '0') }}</button>
                         </div>
-                        @if ($likedUsers->isNotEmpty())
+                        @if (data_get($detail, 'reactions.likes.has_items'))
                             <div class="tip-wireframe__reaction-users">
-                                @foreach ($likedUsers->take($previewUserLimit) as $reactionUser)
+                                @foreach (data_get($detail, 'reactions.likes.preview', []) as $reactionUser)
                                     <x-author-inline
                                         :name="data_get($reactionUser, 'name', '이름 없음')"
-                                        :avatar="data_get($reactionUser, 'profile_image_url')"
+                                        :avatar="data_get($reactionUser, 'avatar_url')"
                                         :author-id="data_get($reactionUser, 'id')"
-                                        :profile-url="route('tips.userFeed', ['user_id' => $reactionUser->id])"
+                                        :profile-url="data_get($reactionUser, 'profile_url')"
                                         variant="list"
                                         class="tip-wireframe__reaction-user"
                                     />
                                 @endforeach
                             </div>
-                            @if ($likedUsersCount > $previewUserLimit)
+                            @if (data_get($detail, 'reactions.likes.remaining_count', 0) > 0)
                                 <button
                                     type="button"
                                     class="tip-wireframe__reaction-more-btn"
                                     data-reaction-modal-open="likes"
-                                >+{{ number_format($likedUsersCount - $previewUserLimit) }}명 더보기</button>
+                                >+{{ data_get($detail, 'reactions.likes.remaining_count_text', '0') }}명 더보기</button>
                             @endif
                         @else
                             <p class="tip-wireframe__reaction-empty">아직 좋아요한 사용자가 없습니다.</p>
@@ -193,28 +187,28 @@
                                 type="button"
                                 class="tip-wireframe__reaction-count tip-wireframe__reaction-count--button"
                                 data-reaction-modal-open="bookmarks"
-                                @disabled($bookmarkedUsersCount === 0)
-                            >{{ number_format($bookmarkedUsersCount) }}</button>
+                                @disabled(data_get($detail, 'reactions.bookmarks.count', 0) === 0)
+                            >{{ data_get($detail, 'reactions.bookmarks.count_text', '0') }}</button>
                         </div>
-                        @if ($bookmarkedUsers->isNotEmpty())
+                        @if (data_get($detail, 'reactions.bookmarks.has_items'))
                             <div class="tip-wireframe__reaction-users">
-                                @foreach ($bookmarkedUsers->take($previewUserLimit) as $reactionUser)
+                                @foreach (data_get($detail, 'reactions.bookmarks.preview', []) as $reactionUser)
                                     <x-author-inline
                                         :name="data_get($reactionUser, 'name', '이름 없음')"
-                                        :avatar="data_get($reactionUser, 'profile_image_url')"
+                                        :avatar="data_get($reactionUser, 'avatar_url')"
                                         :author-id="data_get($reactionUser, 'id')"
-                                        :profile-url="route('tips.userFeed', ['user_id' => $reactionUser->id])"
+                                        :profile-url="data_get($reactionUser, 'profile_url')"
                                         variant="list"
                                         class="tip-wireframe__reaction-user"
                                     />
                                 @endforeach
                             </div>
-                            @if ($bookmarkedUsersCount > $previewUserLimit)
+                            @if (data_get($detail, 'reactions.bookmarks.remaining_count', 0) > 0)
                                 <button
                                     type="button"
                                     class="tip-wireframe__reaction-more-btn"
                                     data-reaction-modal-open="bookmarks"
-                                >+{{ number_format($bookmarkedUsersCount - $previewUserLimit) }}명 더보기</button>
+                                >+{{ data_get($detail, 'reactions.bookmarks.remaining_count_text', '0') }}명 더보기</button>
                             @endif
                         @else
                             <p class="tip-wireframe__reaction-empty">아직 북마크한 사용자가 없습니다.</p>
@@ -258,7 +252,7 @@
                             aria-selected="true"
                         >
                             좋아요
-                            <em>{{ number_format($likedUsersCount) }}</em>
+                            <em>{{ data_get($detail, 'reactions.likes.count_text', '0') }}</em>
                         </button>
                         <button
                             type="button"
@@ -268,7 +262,7 @@
                             aria-selected="false"
                         >
                             북마크
-                            <em>{{ number_format($bookmarkedUsersCount) }}</em>
+                            <em>{{ data_get($detail, 'reactions.bookmarks.count_text', '0') }}</em>
                         </button>
                     </div>
 
@@ -285,7 +279,7 @@
 
                     <div class="tip-wireframe__reaction-modal-body">
                         <ul class="tip-wireframe__reaction-modal-list" data-reaction-modal-list="likes">
-                            @foreach ($likedUsers as $reactionUser)
+                            @foreach (data_get($detail, 'reactions.likes.all', []) as $reactionUser)
                                 <li
                                     class="tip-wireframe__reaction-modal-item"
                                     data-reaction-item
@@ -293,11 +287,11 @@
                                 >
                                     <a
                                         class="tip-wireframe__reaction-modal-user"
-                                        href="{{ route('tips.userFeed', ['user_id' => $reactionUser->id]) }}"
+                                        href="{{ data_get($reactionUser, 'profile_url') }}"
                                     >
                                         <img
                                             class="tip-wireframe__reaction-modal-avatar"
-                                            src="{{ data_get($reactionUser, 'profile_image_url', $defaultAvatar) }}"
+                                            src="{{ data_get($reactionUser, 'avatar_url', asset('images/avatar-default.svg')) }}"
                                             alt="{{ data_get($reactionUser, 'name', '이름 없음') }} 프로필"
                                             loading="lazy"
                                         >
@@ -308,7 +302,7 @@
                         </ul>
 
                         <ul class="tip-wireframe__reaction-modal-list" data-reaction-modal-list="bookmarks" hidden>
-                            @foreach ($bookmarkedUsers as $reactionUser)
+                            @foreach (data_get($detail, 'reactions.bookmarks.all', []) as $reactionUser)
                                 <li
                                     class="tip-wireframe__reaction-modal-item"
                                     data-reaction-item
@@ -316,11 +310,11 @@
                                 >
                                     <a
                                         class="tip-wireframe__reaction-modal-user"
-                                        href="{{ route('tips.userFeed', ['user_id' => $reactionUser->id]) }}"
+                                        href="{{ data_get($reactionUser, 'profile_url') }}"
                                     >
                                         <img
                                             class="tip-wireframe__reaction-modal-avatar"
-                                            src="{{ data_get($reactionUser, 'profile_image_url', $defaultAvatar) }}"
+                                            src="{{ data_get($reactionUser, 'avatar_url', asset('images/avatar-default.svg')) }}"
                                             alt="{{ data_get($reactionUser, 'name', '이름 없음') }} 프로필"
                                             loading="lazy"
                                         >
@@ -355,7 +349,7 @@
                 </div>
             </section> --}}
 
-            <section class="tip-wireframe__section tip-wireframe__comments" id="tip-comments" data-tip-id="{{ $tip->id }}">
+            <section class="tip-wireframe__section tip-wireframe__comments" id="tip-comments" data-tip-id="{{ data_get($detail, 'id') }}">
                 <h2 class="tip-wireframe__section-title">댓글</h2>
                 <form class="tip-wireframe__comment-form" action="#" method="post" onsubmit="return false;">
                     <label for="tip-wireframe-comment">댓글 입력</label>
@@ -373,19 +367,14 @@
                 <ul class="tip-wireframe__comment-list" aria-live="polite"></ul>
             </section>
         </article>
-
-        @php
-            $isLiked = auth()->check() ? $tip->isLikedBy(auth()->user()) : false;
-            $isBookmarked = auth()->check() ? $tip->isBookmarkedBy(auth()->user()) : false;
-        @endphp
         <aside class="tip-wireframe__action">
             <div class="tip-wireframe__action-sticky">
                 <button type="button" 
-                class="tip-wireframe__action-btn {{ $isBookmarked ? 'is-bookmarked' : '' }}" 
+                class="tip-wireframe__action-btn {{ data_get($detail, 'reaction.is_bookmarked') ? 'is-bookmarked' : '' }}" 
                 aria-label="북마크"
                 data-tip-action="bookmark"
-                aria-pressed="{{ $isBookmarked ? 'true' : 'false' }}"
-                data-tip-id="{{ $tip->id }}"
+                aria-pressed="{{ data_get($detail, 'reaction.is_bookmarked') ? 'true' : 'false' }}"
+                data-tip-id="{{ data_get($detail, 'id') }}"
                 >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -393,15 +382,15 @@
                         </svg>
                     </span>
                     <span class="tip-wireframe__action-label">북마크</span>
-                    <span class="tip-wireframe__action-count" data-bookmark-count>{{ number_format((int) ($tip->bookmark_count ?? 0)) }}</span>
+                    <span class="tip-wireframe__action-count" data-bookmark-count>{{ data_get($detail, 'metrics.bookmarks_text', '0') }}</span>
                 </button>                
                 <button
                     type="button"
-                    class="tip-wireframe__action-btn {{ $isLiked ? 'is-liked' : '' }}"
+                    class="tip-wireframe__action-btn {{ data_get($detail, 'reaction.is_liked') ? 'is-liked' : '' }}"
                     aria-label="좋아요"
                     data-tip-action="like"
-                    aria-pressed="{{ $isLiked ? 'true' : 'false' }}"
-                    data-tip-id="{{ $tip->id }}"
+                    aria-pressed="{{ data_get($detail, 'reaction.is_liked') ? 'true' : 'false' }}"
+                    data-tip-id="{{ data_get($detail, 'id') }}"
                 >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -409,13 +398,13 @@
                         </svg>
                     </span>
                     <span class="tip-wireframe__action-label">좋아요</span>
-                    <span class="tip-wireframe__action-count" data-like-count>{{ number_format((int) ($tip->like_count ?? 0)) }}</span>
+                    <span class="tip-wireframe__action-count" data-like-count>{{ data_get($detail, 'metrics.likes_text', '0') }}</span>
                 </button>
                 <button type="button" class="share_btn tip-wireframe__action-btn" aria-label="공유"
                 data-tip-action="share"
-                data-title="{{ $tip_data_for_share['url_tip_title'] }}"
-                data-text = "{{ $tip_data_for_share['url_tip_text'] }}"
-                data-url = "{{ $tip_data_for_share['url_tip_url'] }}"
+                data-title="{{ data_get($detail, 'share.title') }}"
+                data-text = "{{ data_get($detail, 'share.text') }}"
+                data-url = "{{ data_get($detail, 'share.url') }}"
                 >
                     <span class="tip-wireframe__action-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" focusable="false">
@@ -435,7 +424,7 @@
 
                 {{-- <section class="tip-wireframe__author-card">
                     <h3>작성자 카드</h3>
-                    <p>{{ $tip->authorName }}</p>
+                    <p>{{ data_get($detail, 'author.name', '작성자 미상') }}</p>
                     <small>간단 소개 영역</small>
                 </section>
 
