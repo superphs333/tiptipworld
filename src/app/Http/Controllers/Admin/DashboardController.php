@@ -134,7 +134,7 @@ class DashboardController extends Controller
                 ->get(),
             // 사용자 탭 
             'users' => User::getUsers(
-                $request->only(['provider', 'query', 'status', 'role']),
+                $request->only(['query', 'status', 'role']),
                 $this->resolvePerPage($request),
             ),
             // 태그 탭 

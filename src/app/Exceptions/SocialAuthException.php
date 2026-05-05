@@ -42,11 +42,19 @@ class SocialAuthException extends RuntimeException
     }
 
     /**
+     * 같은 이메일의 기존 계정이 이미 존재하므로 소셜 로그인을 자동 연결 없이 중단할 때 사용
+     */
+    public static function existingAccountRequiresLogin(): self
+    {
+        return new self('같은 이메일의 기존 계정이 있습니다. 기존 로그인 방식으로 로그인해 주세요.');
+    }
+
+    /**
      * 같은 이메일이 이미 다른 소셜 계정과 연결되어 있어서 자동 연동하면 안 되는 경우 표현
      * 
      * [방지문제]
      * - 이메일만 같다고 해서 무조건 다른 provider 계정에 덮어 연결해 버리면 계정탈취 or 잘못된 연동으로 이어짐 
-     * => 기존 계정의 provider+social_id와 현재 로그인 시도 정보가 다르면 예외를 던져 차단. 
+     * => 기존 계정의 social_accounts 식별자와 현재 로그인 시도 정보가 다르면 예외를 던져 차단. 
      */
     public static function conflictingAccount(): self
     {

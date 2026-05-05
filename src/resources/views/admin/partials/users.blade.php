@@ -15,38 +15,6 @@
                     @endif
                     <div class="user-panel__filters">
                         <div class="user-panel__filter-row">
-                            {{-- 가입방식 --}}
-                            <div class="user-panel__filter-group">
-                                <span class="user-panel__filter-label">가입방식</span>
-                                <div
-                                    class="category-panel__select-wrap user-panel__select-wrap"
-                                    x-data="selectBox()"
-                                    :class="{ 'is-open': open }"
-                                    @click.outside="close()"
-                                    @keydown.escape.stop="close()"
-                                >
-                                    
-                                    <select class="category-panel__select-native" name="provider" x-ref="select" x-model="value">
-                                        <option value="" @selected(blank(request('provider')))>전체</option>
-                                        <option value="email" @selected(request('provider')==='email')>email</option>
-                                        <option value="google" @selected(request('provider')==='google')>google</option>
-                                        <option value="kakao" @selected(request('provider')==='kakao')>kakao</option>
-                                    </select>
-                                    <button class="category-panel__select-trigger" type="button" aria-haspopup="listbox" :aria-expanded="open" @click="toggle()">
-                                        <span class="category-panel__select-label" x-text="label">전체</span>
-                                        <svg class="category-panel__select-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                            <path d="M5 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </button>
-                                    <ul class="category-panel__select-menu" role="listbox" tabindex="-1" x-ref="menu">
-                                        <li class="category-panel__select-option" role="option" @click="choose('')" :class="{ 'is-active': value === '' }" :aria-selected="value === ''">전체</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('email')" :class="{ 'is-active': value === 'email' }" :aria-selected="value === 'email'">email</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('google')" :class="{ 'is-active': value === 'google' }" :aria-selected="value === 'google'">google</li>
-                                        <li class="category-panel__select-option" role="option" @click="choose('kakao')" :class="{ 'is-active': value === 'kakao' }" :aria-selected="value === 'kakao'">kakao</li>
-                                    </ul>
-                                </div>
-                            </div>
-
                             {{-- 상태 --}}
                             <div class="user-panel__filter-group">
                                 <span class="user-panel__filter-label">상태</span>
@@ -140,7 +108,7 @@
                 <div class="user-panel__list-title">목록</div>
                 <form class="user-panel__display-form" action="" method="GET">
                     @php
-                        $displayParams = ['tab', 'provider', 'status', 'role', 'query'];
+                        $displayParams = ['tab', 'status', 'role', 'query'];
                     @endphp
                     @foreach ($displayParams as $param)
                         @if (request()->has($param))
@@ -171,7 +139,7 @@
                     <thead>
                         <tr>
                             <th>사용자(이름/ID)</th>
-                            <th>가입방식</th>
+                            <th>연결된 계정</th>
                             <th>상태</th>
                             <th>역할</th>
                             <th>관리</th>
@@ -182,8 +150,21 @@
                             @php
                                 $name = data_get($user, 'name', '-') ?: '-';
                                 $email = data_get($user, 'email', '-') ?: '-';
-                                $provider = data_get($user, 'provider', 'email') ?: 'email';
-                                $socialId = data_get($user, 'social_id');
+                                $socialAccounts = collect($user->socialAccounts ?? []);
+                                $connectedAccountBadges = $socialAccounts
+                                    ->map(function ($account): array {
+                                        $provider = (string) ($account->provider ?? 'social');
+
+                                        return [
+                                            'provider' => $provider,
+                                            'label' => match ($provider) {
+                                                'google' => 'g',
+                                                'kakao' => 'k',
+                                                default => \Illuminate\Support\Str::lower(\Illuminate\Support\Str::substr($provider, 0, 1)) ?: '?',
+                                            },
+                                        ];
+                                    })
+                                    ->values();
                                 $statusRaw = data_get($user, 'status', data_get($user, 'is_active', 'active'));
                                 if ($statusRaw === false || $statusRaw === 0 || $statusRaw === '0' || $statusRaw === 'inactive') {
                                     $statusValue = 'suspended';
@@ -215,18 +196,24 @@
                                         <span class="user-panel__avatar" aria-hidden="true">{{ $initial }}</span>
                                         <div class="user-panel__user-meta">
                                             <div class="user-panel__user-name">{{ $name }}</div>
-                                            <div class="user-panel__user-sub">
-                                                @if ($provider === 'email' || $provider === '')
-                                                    {{ $email }}
-                                                @else
-                                                    {{ $provider }}: {{ \Illuminate\Support\Str::limit($socialId ?: '-', 14, '...') }}
-                                                @endif
-                                            </div>
+                                            <div class="user-panel__user-sub">{{ $email }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="user-panel__pill user-panel__pill--method">{{ $provider }}</span>
+                                    @if ($connectedAccountBadges->isNotEmpty())
+                                        <div class="user-panel__account-badges">
+                                            @foreach ($connectedAccountBadges as $badge)
+                                                <span
+                                                    class="user-panel__account-badge user-panel__account-badge--{{ $badge['provider'] }}"
+                                                    title="{{ $badge['provider'] }}"
+                                                    aria-label="{{ $badge['provider'] }}"
+                                                >{{ $badge['label'] }}</span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        -
+                                    @endif
                                 </td>
                                 <td>
                                     <span class="user-panel__pill user-panel__pill--status user-panel__pill--{{ $statusValue }}">{{ $statusLabel }}</span>
@@ -304,13 +291,26 @@
                         <label class="category-modal__label" for="user-email">이메일 </label>
                         <input class="category-modal__input user-modal__input--readonly" type="email" id="user-email" x-model="data.email" readonly />
                     </div>
-                    <div class="category-modal__field">
-                        <label class="category-modal__label" for="user-provider">가입방식</label>
-                        <input class="category-modal__input user-modal__input--readonly"  type="text" id="user-provider" x-model="data.provider" readonly />
-                    </div>
-                    <div class="category-modal__field">
-                        <label class="category-modal__label" for="user-social-id">소셜ID</label>
-                        <input class="category-modal__input user-modal__input--readonly" type="text" id="user-social-id" x-model="data.social_id" readonly />
+                    <div class="category-modal__field category-modal__field--full">
+                        <label class="category-modal__label" for="user-connected-accounts">연결된 계정</label>
+                        <div class="category-modal__input user-modal__input--readonly user-modal__account-summary" id="user-connected-accounts">
+                            <template x-if="data.connected_account_badges.length > 0">
+                                <div class="user-panel__account-badges">
+                                    <template x-for="(badge, index) in data.connected_account_badges" :key="`${badge.provider}-${index}`">
+                                        <span
+                                            class="user-panel__account-badge"
+                                            :class="`user-panel__account-badge--${badge.provider}`"
+                                            :title="badge.provider"
+                                            :aria-label="badge.provider"
+                                            x-text="badge.label"
+                                        ></span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template x-if="data.connected_account_badges.length === 0">
+                                <span>-</span>
+                            </template>
+                        </div>
                     </div>
                     <div class="category-modal__field">
                         <label class="category-modal__label" for="user-status">상태</label>
@@ -396,10 +396,10 @@
                 id: null,
                 name: "",
                 email: "",
-                provider: "email",
-                social_id: "-",
+                connected_account_badges: [],
                 status: "active",
                 roles: [],
+                social_accounts: [],
                 social_meta: "-",
                 profile_image_url: "",
             },
@@ -415,8 +415,10 @@
             },
             normalizeUser(user = null) {
                 const normalized = { ...this.initData, ...(user ?? {}) };
-                console.dir(normalized)
                 const rawStatus = normalized.status ?? normalized.is_active ?? "active";
+                const socialAccounts = Array.isArray(normalized.social_accounts)
+                    ? normalized.social_accounts
+                    : [];
 
                 if (rawStatus === false || rawStatus === 0 || rawStatus === "0" || rawStatus === "inactive") {
                     normalized.status = "suspended";
@@ -428,12 +430,35 @@
                     normalized.status = "active";
                 }
 
-                if (!normalized.provider) {
-                    normalized.provider = "email";
-                }
+                if (socialAccounts.length > 0) {
+                    normalized.connected_account_badges = socialAccounts
+                        .map((account) => {
+                            const provider = account?.provider || "social";
 
-                if (!normalized.social_id) {
-                    normalized.social_id = "-";
+                            return {
+                                provider,
+                                label: provider === "google"
+                                    ? "g"
+                                    : provider === "kakao"
+                                        ? "k"
+                                        : String(provider).slice(0, 1).toLowerCase() || "?",
+                            };
+                        });
+
+                    normalized.social_meta = JSON.stringify(
+                        socialAccounts.map((account) => ({
+                            provider: account?.provider || null,
+                            provider_user_id: account?.provider_user_id || null,
+                            meta: account?.meta || null,
+                        })),
+                        null,
+                        2,
+                    );
+                } else {
+                    normalized.connected_account_badges = Array.isArray(normalized.connected_account_badges)
+                        ? normalized.connected_account_badges
+                        : [];
+                    normalized.social_meta = normalized.social_meta || "-";
                 }
 
                 const roles = normalized.roles ?? [];

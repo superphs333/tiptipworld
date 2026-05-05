@@ -36,7 +36,7 @@ class ProfileController extends Controller
     public function edit(Request $request): View
     {
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user' => $request->user()->load('socialAccounts'),
         ]);
     }
 
@@ -138,8 +138,10 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // 이메일 가입 계정은 소셜 연결 해제 대상이 아니므로 차단 
-        if ($user->provider === 'email') {
+        $user->loadMissing('socialAccounts');
+
+        // 연결된 소셜 계정이 없는 계정은 소셜 연결 해제 대상이 아니므로 차단 
+        if ($user->socialAccounts->isEmpty()) {
             abort(403);
         }
 

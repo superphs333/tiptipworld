@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\SocialAuthException;
+use App\Models\SocialAccount;
 use App\Models\User;
 use App\Services\Media\ProfileImageService;
 use App\Services\SocialAuthService;
@@ -12,6 +13,7 @@ use Tests\TestCase;
 uses(TestCase::class);
 
 beforeEach(function () {
+    Schema::dropIfExists('social_accounts');
     Schema::dropIfExists('users');
 
     Schema::create('users', function (Blueprint $table) {
@@ -21,15 +23,24 @@ beforeEach(function () {
         $table->timestamp('email_verified_at')->nullable();
         $table->string('password');
         $table->string('profile_image_path')->nullable();
-        $table->string('provider', 20)->default('email');
-        $table->text('social_meta')->nullable();
-        $table->string('social_id')->nullable();
         $table->rememberToken();
         $table->timestamps();
+    });
+
+    Schema::create('social_accounts', function (Blueprint $table) {
+        $table->id();
+        $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+        $table->string('provider', 20);
+        $table->string('provider_user_id');
+        $table->json('meta')->nullable();
+        $table->timestamps();
+        $table->unique(['provider', 'provider_user_id'], 'social_accounts_provider_user_unique');
+        $table->unique(['user_id', 'provider'], 'social_accounts_user_provider_unique');
     });
 });
 
 afterEach(function () {
+    Schema::dropIfExists('social_accounts');
     Schema::dropIfExists('users');
     \Mockery::close();
 });
@@ -40,8 +51,7 @@ test('google social auth registers a new user and imports the remote avatar', fu
         ->once()
         ->withArgs(function (User $user, string $url, string $filename) {
             return $user->exists
-                && $user->provider === 'google'
-                && $user->social_id === 'google-123'
+                && $user->socialAccounts()->where('provider', 'google')->where('provider_user_id', 'google-123')->exists()
                 && $url === 'https://cdn.example.com/google-avatar.png'
                 && $filename === 'google-profile';
         })
@@ -59,67 +69,58 @@ test('google social auth registers a new user and imports the remote avatar', fu
     ));
 
     expect(User::count())->toBe(1);
+    expect(SocialAccount::count())->toBe(1);
     expect($user->email)->toBe('googleuser@example.com');
     expect($user->name)->toBe('Google User');
-    expect($user->provider)->toBe('google');
-    expect($user->social_id)->toBe('google-123');
     expect($user->email_verified_at)->not->toBeNull();
-    expect(json_decode((string) $user->social_meta, true))->toBe([
+    expect($user->socialAccounts()->first()?->provider)->toBe('google');
+    expect($user->socialAccounts()->first()?->provider_user_id)->toBe('google-123');
+    expect($user->socialAccounts()->first()?->meta)->toBe([
         'token' => 'google-token',
         'refreshToken' => 'google-refresh',
     ]);
 });
 
-test('kakao social auth links an existing email account without creating a duplicate user', function () {
+test('kakao social auth stops and notifies when the email already belongs to an existing account', function () {
     $existingUser = User::factory()->unverified()->create([
         'email' => 'member@example.com',
-        'provider' => 'email',
-        'social_id' => null,
-        'social_meta' => null,
         'profile_image_path' => null,
     ]);
 
     $profileImages = \Mockery::mock(ProfileImageService::class);
-    $profileImages->shouldReceive('importFromUrl')
-        ->once()
-        ->withArgs(function (User $user, string $url, string $filename) use ($existingUser) {
-            return $user->is($existingUser)
-                && $url === 'https://cdn.example.com/kakao-avatar.png'
-                && $filename === 'kakao-profile';
-        })
-        ->andReturn('media/users/1/profile/kakao-profile-uuid.png');
+    $profileImages->shouldNotReceive('importFromUrl');
 
     $this->app->instance(ProfileImageService::class, $profileImages);
 
-    $resolvedUser = app(SocialAuthService::class)->resolve('kakao', makeSocialiteUser(
+    expect(fn () => app(SocialAuthService::class)->resolve('kakao', makeSocialiteUser(
         id: 'kakao-456',
         email: 'member@example.com',
         name: 'Kakao Member',
         avatar: 'https://cdn.example.com/kakao-avatar.png',
         token: 'kakao-token',
         refreshToken: 'kakao-refresh',
-    ));
+    )))->toThrow(
+        SocialAuthException::class,
+        '같은 이메일의 기존 계정이 있습니다. 기존 로그인 방식으로 로그인해 주세요.',
+    );
 
     expect(User::count())->toBe(1);
-    expect($resolvedUser->is($existingUser->fresh()))->toBeTrue();
-    expect($resolvedUser->provider)->toBe('kakao');
-    expect($resolvedUser->social_id)->toBe('kakao-456');
-    expect($resolvedUser->email_verified_at)->toBeNull();
-    expect(json_decode((string) $resolvedUser->social_meta, true))->toBe([
-        'token' => 'kakao-token',
-        'refreshToken' => 'kakao-refresh',
-    ]);
+    expect($existingUser->fresh()?->email_verified_at)->toBeNull();
+    expect(SocialAccount::count())->toBe(0);
 });
 
-test('social auth rejects linking an email that already belongs to another provider', function () {
-    User::factory()->create([
+test('social auth stops and notifies when the email already belongs to another provider account', function () {
+    $existingUser = User::factory()->create([
         'email' => 'member@example.com',
+    ]);
+
+    $existingUser->socialAccounts()->create([
         'provider' => 'kakao',
-        'social_id' => 'kakao-999',
-        'social_meta' => json_encode([
+        'provider_user_id' => 'kakao-999',
+        'meta' => [
             'token' => 'existing-token',
             'refreshToken' => 'existing-refresh',
-        ]),
+        ],
     ]);
 
     $profileImages = \Mockery::mock(ProfileImageService::class);
@@ -136,12 +137,13 @@ test('social auth rejects linking an email that already belongs to another provi
         refreshToken: 'google-refresh',
     )))->toThrow(
         SocialAuthException::class,
-        '이미 다른 소셜 계정과 연결된 이메일입니다. 기존 로그인 방식을 사용해 주세요.',
+        '같은 이메일의 기존 계정이 있습니다. 기존 로그인 방식으로 로그인해 주세요.',
     );
 
     expect(User::count())->toBe(1);
-    expect(User::first()?->provider)->toBe('kakao');
-    expect(User::first()?->social_id)->toBe('kakao-999');
+    expect(SocialAccount::count())->toBe(1);
+    expect(SocialAccount::first()?->provider)->toBe('kakao');
+    expect(SocialAccount::first()?->provider_user_id)->toBe('kakao-999');
 });
 
 function makeSocialiteUser(

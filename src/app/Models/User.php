@@ -84,6 +84,24 @@ class User extends Authenticatable
     }
 
     /**
+     * User ↔ SocialAccount
+     */
+    public function socialAccounts(): HasMany
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
+
+    // 현재 사용자가 연결된 소셜 계정을 하나 이상 가지고 있는지 확인 
+    public function hasSocialAccounts(): bool
+    {
+        if ($this->relationLoaded('socialAccounts')) {
+            return $this->socialAccounts->isNotEmpty();
+        }
+
+        return $this->socialAccounts()->exists();
+    }
+
+    /**
      * role이 하나도 없으면 member로 간주
      */
     public function isMember(): bool
@@ -193,14 +211,10 @@ class User extends Authenticatable
 
 
     /**
-     * User 검색
+     * 관리자용 사용자 목록 조회
      */
     public static function getUsers(array $filters = [], int $perPage = 20){
-        $q = User::query()->with('roles');
-
-        if(!empty($filters['provider'])){
-            $q->where('provider', $filters['provider']);
-        }
+        $q = User::query()->with(['roles', 'socialAccounts']);
         if(!empty($filters['status'])){
             $q->where('status',$filters['status']);
         }
