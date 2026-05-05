@@ -1,6 +1,11 @@
 <?php
 
+use App\Services\SocialAccountRevoker;
 use App\Models\User;
+
+afterEach(function () {
+    \Mockery::close();
+});
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();
@@ -79,6 +84,62 @@ test('correct password must be provided to delete account', function () {
 
     $response
         ->assertSessionHasErrorsIn('userDeletion', 'password')
+        ->assertRedirect('/profile');
+
+    $this->assertNotNull($user->fresh());
+});
+
+test('social user can delete their account without password', function () {
+    $user = User::factory()->create();
+    $user->socialAccounts()->create([
+        'provider' => 'google',
+        'provider_user_id' => 'google-user-1',
+        'meta' => ['token' => 'social-token'],
+    ]);
+
+    $revoker = \Mockery::mock(SocialAccountRevoker::class);
+    $revoker->shouldReceive('revoke')
+        ->once()
+        ->with(\Mockery::type(User::class))
+        ->andReturn(true);
+
+    $this->app->instance(SocialAccountRevoker::class, $revoker);
+
+    $response = $this
+        ->actingAs($user)
+        ->delete('/profile');
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/');
+
+    $this->assertGuest();
+    $this->assertNull($user->fresh());
+});
+
+test('social user account deletion is blocked when social unlink fails', function () {
+    $user = User::factory()->create();
+    $user->socialAccounts()->create([
+        'provider' => 'google',
+        'provider_user_id' => 'google-user-1',
+        'meta' => ['token' => 'social-token'],
+    ]);
+
+    $revoker = \Mockery::mock(SocialAccountRevoker::class);
+    $revoker->shouldReceive('revoke')
+        ->once()
+        ->with(\Mockery::type(User::class))
+        ->andReturn(false);
+
+    $this->app->instance(SocialAccountRevoker::class, $revoker);
+
+    $response = $this
+        ->actingAs($user)
+        ->from('/profile')
+        ->delete('/profile');
+
+    $response
+        ->assertSessionHasErrorsIn('userDeletion', 'account')
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());

@@ -9,7 +9,6 @@
     "Confirm Password": "새 비밀번호 확인",
     "Current Password": "현재 비밀번호",
     "Delete Account": "계정 삭제",
-    "Delete Social Account": "소셜 계정 삭제",
     "Deleting your account will permanently remove your data and unlink your social account. Please back up any important information first.": "계정을 삭제하면 서비스 데이터와 소셜 연동 정보가 함께 정리됩니다. 필요한 정보는 삭제 전에 백업해 주세요.",
     "Email": "이메일",
     "Ensure your account is using a long, random password to stay secure.": "보안을 위해 충분히 길고 예측하기 어려운 비밀번호를 사용해 주세요.",

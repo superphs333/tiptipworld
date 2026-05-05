@@ -18,8 +18,7 @@ use App\Services\Media\ProfileImageService;
  * - 프로필 편집 화면 출력
  * - 기본 프로필 정보 수정
  * - 프로필 이미지 업로드/삭제
- * - 일반 계정 삭제
- * - 소셜 계정 연결 해제 후 탈퇴 
+ * - 회원 탈퇴
  */
 class ProfileController extends Controller
 {
@@ -96,59 +95,20 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-image-removed');
     }
 
-    /**
-     * Delete the user's account.
-     */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
         $user = $request->user();
-
-        $this->profileImages->remove($user, false);
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
-    }
-
-    /**
-     * 소셜 로그인 계정을 해제한 뒤 회원 탈퇴 처리
-     * 
-     * [처리흐름]
-     * 1. 현재 사용자 객체를 가져옴
-     * 2. provider가 email이면 소셜 계정이 아니므로 403으로 차단
-     * 3. 소셜 연결 해제를 시도
-     * 4. 실패하면 socialDeletion 에러백에 메세지를 담아 edit 화면으로 되돌림
-     * 5. 성공하면 프로필 이미지 정리
-     * 6. 로그아웃 후 사용자 계정을 삭제 
-     * 7. 세션 무효화 및 토킅 재생성 후 홈으로 이동 
-     * 
-     * 
-     */
-    public function destroySocial(Request $request): RedirectResponse
-    {
-
-        $user = $request->user();
-
         $user->loadMissing('socialAccounts');
 
-        // 연결된 소셜 계정이 없는 계정은 소셜 연결 해제 대상이 아니므로 차단 
-        if ($user->socialAccounts->isEmpty()) {
-            abort(403);
-        }
-
-        // 소셜 공급자와 연결 해제 실패 시 탈퇴를 중단하고 에러 반환
-        if (!$this->revoker->revoke($user)) {
-            return Redirect::route('profile.edit')
-                ->withErrors(['confirmation' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'socialDeletion');
+        if ($user->hasSocialAccounts()) {
+            if (! $this->revoker->revoke($user)) {
+                return Redirect::route('profile.edit')
+                    ->withErrors(['account' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'userDeletion');
+            }
+        } else {
+            $request->validateWithBag('userDeletion', [
+                'password' => ['required', 'current_password'],
+            ]);
         }
 
         $this->profileImages->remove($user, false);
