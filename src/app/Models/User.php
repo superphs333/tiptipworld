@@ -26,6 +26,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'password_set_at',
         'status',
 
     ];
@@ -59,6 +60,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'password_set_at' => 'datetime',
         ];
     }
 
@@ -99,6 +101,14 @@ class User extends Authenticatable
         }
 
         return $this->socialAccounts()->exists();
+    }
+
+    /**
+     * 사용자가 직접 설정한 로컬 비밀번호 로그인 수단이 있는지 확인
+     */
+    public function hasUsablePasswordLogin(): bool
+    {
+        return $this->password_set_at !== null;
     }
 
     /**

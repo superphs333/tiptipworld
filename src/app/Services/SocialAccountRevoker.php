@@ -50,6 +50,16 @@ final class SocialAccountRevoker
     }
 
     /**
+     * 프로필 화면의 "연결 해제"는 로컬 연동 제거가 우선이므로 revoke는 최선을 다해 시도만 한다.
+     */
+    public function disconnect(SocialAccount $socialAccount): bool
+    {
+        $this->attemptRevokeAccount($socialAccount);
+
+        return (bool) $socialAccount->delete();
+    }
+
+    /**
      * 개별 소셜 계정 하나에 대해 provider별 revoke 처리를 수행 
      */
     private function revokeAccount(SocialAccount $socialAccount): bool
@@ -88,6 +98,31 @@ final class SocialAccountRevoker
         $socialAccount->saveQuietly();
 
         return true;
+    }
+
+    /**
+     * 개별 연결 해제용
+     */
+    private function attemptRevokeAccount(SocialAccount $socialAccount): void
+    {
+        $provider = $socialAccount->provider;
+        $metadata = $socialAccount->meta;
+
+        if (! is_array($metadata) || $metadata === []) {
+            Log::info('소셜 메타데이터가 없어 로컬 연결 해제만 진행합니다.', [
+                'social_account_id' => $socialAccount->id,
+                'user_id' => $socialAccount->user_id,
+                'provider' => $provider,
+            ]);
+
+            return;
+        }
+
+        match ($provider) {
+            'google' => $this->revokeGoogle($metadata),
+            'kakao' => $this->revokeKakao($metadata),
+            default => $this->unsupportedProvider($provider, $socialAccount->user_id),
+        };
     }
 
     /**

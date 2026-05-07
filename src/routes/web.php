@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
 use App\Http\Controllers\Admin\TipController as AdminTipController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CommentController;
@@ -32,6 +33,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/image', [ProfileController::class, 'updateImage'])->name('profile.image.update');
     Route::delete('/profile/image', [ProfileController::class, 'destroyImage'])->name('profile.image.destroy');
+    Route::get('/profile/social/{provider}', [SocialLoginController::class, 'redirectForLink'])
+        ->whereIn('provider', array_keys(config('social-auth.providers', [])))
+        ->name('profile.social.redirect');
+    Route::delete('/profile/social/{provider}', [ProfileController::class, 'destroySocial'])
+        ->whereIn('provider', array_keys(config('social-auth.providers', [])))
+        ->name('profile.social.destroy');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
     // 마이페이지

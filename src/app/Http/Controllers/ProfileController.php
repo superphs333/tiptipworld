@@ -95,31 +95,107 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-image-removed');
     }
 
+    /**
+     * 사용자가 연결한 특정 소셜 계정을 해제 
+     * 
+     * - 현재 로그인 사용자의 소셜 계정 목록에서 요청한 provider를 찾음
+     * - 마지막 소셜 연동인지 확인
+     * - 마지막 소설이라도 로컬 비밀번호 로그인 수단이 있으면 해제 허용
+     * - 반대로 마지막 소셜이고 비밀번호 로그인도 불가능하면 해제 차단
+     * - 실제 해제 SocialAccountRevoker에 위임
+     * - 완료 후 현재 보고 있던 화면으로 다시 이동
+     */
+    public function destroySocial(Request $request, string $provider): RedirectResponse
+    {
+        // 사용자가 어느 화면에서 해제 버튼을 눌렀는지에 따라 작업 후 다시 돌아갈 경로를 계산 
+        $returnPath = $this->resolveProfileReturnPath((string) $request->input('return_to', 'mypage'));
+        // 현재 로그인 사용자와 연결된 socialAccounts 준비 
+        $user = $request->user()->loadMissing('socialAccounts');
+        // URL의 {provider} 값으로 실제 연결된 소셜 계정 조회 (ex google, kakao)
+        $socialAccount = $user->socialAccounts
+            ->firstWhere('provider', strtolower(trim($provider)));
+
+        // 연결된 provider가 없으면 잘못된 요청이므로 종료
+        if ($socialAccount === null) {
+            return Redirect::to($returnPath)
+                ->withErrors(['provider' => '연결된 소셜 계정을 찾을 수 없습니다.'], 'socialConnections');
+        }
+
+        // 현재 이 provider을 끊으면 마지막 소셜 연동이 되는지 계산 
+        $isLastSocialConnection = $user->socialAccounts->count() <= 1;
+
+        // 사요자가 로컬 비밀번호 수단 갖고 있으면, 해제 가능 
+        if ($isLastSocialConnection && ! $user->hasUsablePasswordLogin()) {
+            return Redirect::to($returnPath)
+                ->withErrors(['provider' => '비밀번호 로그인 또는 다른 소셜 연동이 없어 해제할 수 없습니다.'], 'socialConnections');
+        }
+
+        // disconnect 
+        if (! $this->revoker->disconnect($socialAccount)) {
+            return Redirect::to($returnPath)
+                ->withErrors(['provider' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'socialConnections');
+        }
+
+        // 성공 시 상태값을 세션에 담아 원래 화면으로 되림
+        return Redirect::to($returnPath)
+            ->with('status', 'social-disconnected');
+    }
+
+    /**
+     * 계정 삭제 처리
+     * 
+     * [역할]
+     * - 현재 로그인 사용자의 계정을 영구 삭제 
+     * - 비밀번호 로그인 가능한 사용자는 현재 비밀번호 확인을 요구
+     * - 소셜 계정이 연결돼 있으면 삭제 전에 unlink/revoke 시도
+     * - 사용자 데이터 정리 후 로그아웃 및 세션 무효화 
+     */
     public function destroy(Request $request): RedirectResponse
     {
         $user = $request->user();
         $user->loadMissing('socialAccounts');
 
-        if ($user->hasSocialAccounts()) {
-            if (! $this->revoker->revoke($user)) {
-                return Redirect::route('profile.edit')
-                    ->withErrors(['account' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'userDeletion');
-            }
-        } else {
+        // 사용자가 실제로 로컬 비밀번호 로그인 가능한 상태면, 소셜 연결했는지 여부 상관없이
+        // 계정 삭제 전에 비밀번호 확인 요구
+        if ($user->hasUsablePasswordLogin()) {
             $request->validateWithBag('userDeletion', [
                 'password' => ['required', 'current_password'],
             ]);
         }
 
+        // 소셜 계정이 연결돼 있으면 삭제 전에 revoke/unlink 시도 
+        if ($user->hasSocialAccounts() && ! $this->revoker->revoke($user)) {
+            return Redirect::route('profile.edit')
+                ->withErrors(['account' => '소셜 연결 해제에 실패했습니다. 다시 시도해 주세요.'], 'userDeletion');
+        }
+
+        // 사용자 프로필 이미지 정리 
         $this->profileImages->remove($user, false);
 
+        // 현재 인증 세션 로그아웃
         Auth::logout();
 
+        // usrs 레코드 삭제
         $user->delete();
 
+        // 세션 무효화 및 새 CSRF 토큰 발급 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+
+    /**
+     * 프로필 관련 작업 후 사용자를 어느 화면으로 돌려보낼지 결정
+     * 
+     * [용도]
+     * - /profile 화면에서 소셜 연결 해제를 눌렀는지 
+     * - /mypage/profile 화면에서 눌렀는지
+     */
+    private function resolveProfileReturnPath(string $returnTo): string
+    {
+        return $returnTo === 'profile.edit'
+            ? route('profile.edit')
+            : route('mypage', ['tab' => 'profile']);
     }
 }

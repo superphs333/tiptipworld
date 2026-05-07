@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Auth;
 use App\Exceptions\SocialAuthException;
 use App\Http\Controllers\Controller;
 use App\Services\SocialAuthService;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 /**
  * 소셜 로그인 진입점과 콜백 완료 처리를 담당
@@ -37,6 +39,22 @@ class SocialLoginController extends Controller
     }
 
     /**
+     * 기존 로그인 사용자 계정에 소셜 연결 시작
+     */
+    public function redirectForLink(Request $request, string $provider): RedirectResponse
+    {
+        $returnTo = $this->resolveReturnRouteName((string) $request->query('return_to', 'mypage'));
+
+        $request->session()->put('social_auth_intent', [
+            'action' => 'link',
+            'provider' => $provider,
+            'return_to' => $returnTo,
+        ]);
+
+        return $this->socialAuth->redirect($provider);
+    }
+
+    /**
      * provider 인증 완료 후 돌아온 callback 요청을 처리
      * 
      * @param string $provider : 현재 callback을 처리할 provider 이름
@@ -53,8 +71,28 @@ class SocialLoginController extends Controller
      *  - SocialAuthException은 사용자에게 안내 가능한 소셜 로그인 실패  (ex. provider 응답 실패, 이메일 누락, 다른 소셜 계정과 충돌)
      *  - 이 경우 로그인 화면으로 돌려보내고 메세지를 errors에 담아 전달 
      */
-    public function callback(string $provider): RedirectResponse
+    public function callback(Request $request, string $provider): RedirectResponse
     {
+        $intent = $request->session()->pull('social_auth_intent');
+        $returnRoute = $this->resolveProfileReturnPath(is_array($intent) ? (string) ($intent['return_to'] ?? 'mypage') : 'mypage');
+
+        if (
+            is_array($intent)
+            && ($intent['action'] ?? null) === 'link'
+            && ($intent['provider'] ?? null) === $provider
+            && $request->user() !== null
+        ) {
+            try {
+                $this->socialAuth->linkFromCallback($request->user(), $provider);
+            } catch (SocialAuthException $e) {
+                return Redirect::to($returnRoute)
+                    ->withErrors(['provider' => $e->getMessage()], 'socialConnections');
+            }
+
+            return Redirect::to($returnRoute)
+                ->with('status', 'social-connected');
+        }
+
         try {
             $user = $this->socialAuth->resolveFromCallback($provider);
         } catch (SocialAuthException $e) {
@@ -67,5 +105,27 @@ class SocialLoginController extends Controller
         request()->session()->regenerate();
 
         return redirect()->intended(route('home', absolute: false));
+    }
+
+    /**
+     * return_to 입력값을 허용된 라우트 이름으로 정규화
+     * 
+     * - 임의 문자열이 세션에 들어가지 않도록
+     * - profile.edit 아니면 mypage로 단순화 
+     */
+    private function resolveReturnRouteName(string $returnTo): string
+    {
+        return $returnTo === 'profile.edit' ? 'profile.edit' : 'mypage';
+    }
+
+    /**
+     * 저장된 return_to 값을 실제 URL로 변환
+     * (소셜 연결 성공/실패 후 사용자를 원래 보던 화면으로 돌려보내기 위함)
+     */
+    private function resolveProfileReturnPath(string $returnTo): string
+    {
+        return $returnTo === 'profile.edit'
+            ? route('profile.edit')
+            : route('mypage', ['tab' => 'profile']);
     }
 }

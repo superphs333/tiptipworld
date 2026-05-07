@@ -29,6 +29,7 @@ final class SocialAuthService
 {
     public function __construct(
         private ProfileImageService $profileImages,
+        private SocialProviderRegistry $providers,
     ) {
     }
 
@@ -65,6 +66,8 @@ final class SocialAuthService
     }
 
     /**
+     * 소셜 로그인 callback 진입점
+     * 
      * provider callback에서 실제 Socialite 사용자 정보를 받아 User 모델로 해석
      * 
      * @param string $provider : callback을 처리할 provider 이름
@@ -81,16 +84,120 @@ final class SocialAuthService
     public function resolveFromCallback(string $provider): User
     {
         $provider = Str::lower(trim($provider));
+        $socialUser = $this->socialUserFor($provider);
+
+        return $this->resolve($provider, $socialUser);
+    }
+
+    /**
+     * 기존 로그인 사용자에게 소셜 계정 연결
+     * 
+     * [역할]
+     * - 로그인 중인 User과 provider callback 결과를 연결
+     * - 이미 다른 사용자에게 연결된 소셜 계정이면 차단
+     * - 이미 현재 사용자에게 연결된 계정이면 메타데이터만 최신화
+     * - 처음 연결이면 social_accounts 레코드 생성 
+     * 
+     * [처리순서]
+     * 1. provider 정규화
+     * 2. provider 설정 조회
+     * 3. Socialite 사용자 정보 읽기
+     * 4. provider 고유 id / email 추출
+     * 5. provider ID 없으면 실패 
+     * 6. email이 필수인데 없으면 실패 
+     * 7. 같은 provider/provider_user_id가 이미 다른 사용자에게 연결돼 있으면 차단
+     * 8. 현재 사용자에게 같은 provider가 이미 연결되어 있으면
+     *  - 같은 외부 계정인지 확인
+     *  - 맞으면 메타데이터 최신화 후 반환
+     *  - 다르면 "이미 다른 계정으로 연결됨" 예외
+     * 9.  처음 연결이면 trasaction 안에서 social_accounts 생성/갱신
+     * 10. provider 정책상 신뢰 가능하면 email_verifed_at 반영
+     * 11. 사요자 프로필 이미지가 비어 있으면 외부 아바타 import       
+     */
+    public function linkFromCallback(User $user, string $provider): SocialAccount
+    {
+        $provider = Str::lower(trim($provider));
+        $settings = $this->settingsFor($provider);
+        $socialUser = $this->socialUserFor($provider);
+        $providerId = trim((string) $socialUser->getId());
+        $email = $this->normalizeEmail($socialUser->getEmail());
+        $providerName = (string) ($settings['name'] ?? Str::headline($provider));
+
+        if ($providerId === '') {
+            throw SocialAuthException::loginFailed($settings['login_error']);
+        }
+
+        if ($settings['requires_email'] && $email === null) {
+            throw SocialAuthException::missingEmail($settings['missing_email_error']);
+        }
+
+        // 이미 다른 사용자 계정에 연결된 외부 계정인지 검사
+        $existingAccount = SocialAccount::query()
+            ->where('provider', $provider)
+            ->where('provider_user_id', $providerId)
+            ->first();
+
+        if ($existingAccount !== null && $existingAccount->user_id !== $user->id) {
+            throw SocialAuthException::providerAlreadyLinkedToAnotherAccount($providerName);
+        }
+
+        // 현재 사용자에게 같은 provider가 이미 연결되어 있는지 확인 
+        $currentAccount = $user->socialAccounts()
+            ->where('provider', $provider)
+            ->first();
+
+        // 같은 provider가 이미 연결돼 있는데 외부 계정 ID가 다르면, 구글 연결은 되어 있지만 다른 구글 계정으로 바꾸려는 시도이므로 차단
+        if (
+            $currentAccount !== null
+            && $currentAccount->provider_user_id !== $providerId
+        ) {
+            throw SocialAuthException::providerAlreadyConnected($providerName);
+        }
+
+        // 이미 현재 사용자에게 동일한 외부 계정이 연결 => 새 레코드 만들지 않고 TOKEN/META만 최신화
+        if ($currentAccount !== null) {
+            $this->refreshExistingUser($currentAccount, $socialUser, $settings);
+
+            return $currentAccount->fresh() ?? $currentAccount;
+        }
+
+        // 처음 연결하는 경우에만 => social_couunts 레코드를 생성 
+        $socialAccount = DB::transaction(function () use ($user, $provider, $providerId, $socialUser, $settings): SocialAccount {
+            $socialAccount = $this->upsertSocialAccount($user, $provider, $providerId, $socialUser);
+            
+            // provider 정책상 email을 신뢰할 수 있으면 사용자 email_verifed_at 반영
+            $this->markEmailAsVerified($user, $settings);
+
+            if ($user->isDirty('email_verified_at')) {
+                $user->save();
+            }
+
+            return $socialAccount;
+        });
+
+        // 계정에 프로필 이미지가 비어 있을 때만 외부 아바타 import
+        $this->importAvatarIfMissing($user, $socialUser->getAvatar(), $settings['avatar_filename']);
+
+        return $socialAccount;
+    }
+
+    /**
+     * Socialte 사용자 조회 공통화 
+     * 
+     * [역할]
+     * - settingFor()에서 provider별 실패 메세지 조회 
+     * - Socialte::driver(...)->user() 실행
+     * - 실패 시 SocialAuthException::loginFailed(...)로 감싸서 던짐 
+     */
+    private function socialUserFor(string $provider): SocialiteUser
+    {
         $settings = $this->settingsFor($provider);
 
         try {
-            // 사용자 정보
-            $socialUser = Socialite::driver($provider)->user();
+            return Socialite::driver($provider)->user();
         } catch (Throwable $e) {
             throw SocialAuthException::loginFailed($settings['login_error'], $e);
         }
-
-        return $this->resolve($provider, $socialUser);
     }
 
     /**
@@ -221,6 +328,7 @@ final class SocialAuthService
             $user = new User();
             $user->email = (string) $email;
             $user->password = Hash::make(Str::random(32));
+            $user->password_set_at = null;
             $user->name = $socialUser->getName() ?: $socialUser->getNickname() ?: (string) $email;
             $this->markEmailAsVerified($user, $settings);
             $user->save();
@@ -358,28 +466,6 @@ final class SocialAuthService
      */
     private function settingsFor(string $provider): array
     {
-        return match ($provider) {
-            'google' => [
-                'avatar_filename' => 'google-profile',
-                'login_error' => '구글 로그인에 실패했습니다. 다시 시도해 주세요.',
-                'lookup_by_email' => true,
-                'missing_email_error' => '구글 계정 이메일을 가져올 수 없습니다.',
-                'requires_email' => true,
-                'scopes' => ['openid', 'email', 'profile'],
-                'verify_email' => true,
-                'with' => ['access_type' => 'offline'],
-            ],
-            'kakao' => [
-                'avatar_filename' => 'kakao-profile',
-                'login_error' => '카카오 로그인에 실패했습니다. 다시 시도해 주세요.',
-                'lookup_by_email' => true,
-                'missing_email_error' => '카카오 계정 이메일을 가져올 수 없습니다.',
-                'requires_email' => true,
-                'scopes' => ['account_email', 'profile_nickname', 'profile_image'],
-                'verify_email' => false,
-                'with' => [],
-            ],
-            default => throw SocialAuthException::unsupportedProvider($provider),
-        };
+        return $this->providers->provider($provider);
     }
 }

@@ -62,6 +62,22 @@ class SocialAuthException extends RuntimeException
     }
 
     /**
+     * 이미 다른 사용자에게 연결된 소셜 계정을 현재 계정에 다시 연결하려 할 때 사용
+     */
+    public static function providerAlreadyLinkedToAnotherAccount(string $providerName): self
+    {
+        return new self(sprintf('이미 다른 계정에 연결된 %s 계정입니다.', $providerName));
+    }
+
+    /**
+     * 현재 사용자에게 같은 공급자가 이미 연결돼 있지만 다른 외부 계정으로 교체하려 할 때 사용
+     */
+    public static function providerAlreadyConnected(string $providerName): self
+    {
+        return new self(sprintf('현재 계정에는 이미 %s 연동이 있습니다. 변경하려면 기존 연결을 먼저 해제해 주세요.', $providerName));
+    }
+
+    /**
      * 서비스가 지원하지 않은 provider 문자열이 들러온 경우 
      * 
      * @param string $provider : 현재 요청에 들어온 provider 값 

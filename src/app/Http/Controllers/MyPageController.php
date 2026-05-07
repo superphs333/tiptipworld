@@ -67,7 +67,7 @@ class MyPageController extends Controller
             'tab' => $tab, // 현재 활성 탭 이름 
             'headerTitle' => $tabs[$tab] ?? 'My Page', // 헤더제목
             'tabView' => 'mypage.partials.' . $tab, // 실제 탭 내용 partial 경로 
-            'user' => $request->user(), // 현재 로그인 한 사용자 
+            'user' => $request->user()?->loadMissing('socialAccounts'), // 현재 로그인 한 사용자 
         ];
 
         switch ($tab) {
