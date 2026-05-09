@@ -107,34 +107,15 @@ class TipBrowseController extends Controller
             $this->searchKeywordService->record($request, $filters->query);
         }
 
-        // 정규화된 검색 조건으로 공개 팁 목록을 조회 
-        $tipItems = $this->tipReadService->searchPublicList($filters, Auth::id());
+        $pageData = $this->tipReadService->getListData('public_search', [
+            'filters' => $filters,
+            'viewer_id' => Auth::id(),
+        ]);
 
-        // 검색 결과 자체와는 별개로, 사용자가 검색 조건을 다시 조정할 수 있도록 선택지 데이터를 함께 내려줌. 
-        $categories = $this->tipReadService->getTipFormCategories();
-
-        return view('tips.view', [            
+        return view('tips.view', array_merge([
             'viewMode' => 'tipSearch', // 하나의 공통 뷰에서 어떤 화면 모드로 렌더링할지 ㄱ구분하는 값
             'title' => '팁 검색 결과',  // 브라우저 제목 또는 화면 상단 타이틀용 텍스트
-            'categories' => $categories, // 카테고리 필터 드롭다운/탭 등에 사용할 목록
-            'tipItems' => $tipItems,    // 실제 검색 결과 목록 
-            'searchView' => [   // 검색 화면 전용 상태 묶음 
-                'category' => $filters->category !== '' ? $filters->category : 'all', // 현재 선택된 카테고리 
-                'sort' => $filters->sort->value,    // 현재 정렬 ㅣ준의 실제 값
-                'query' => $filters->query, // 사용자가 입력한 검색어 원문
-                'tags' => $filters->tagNames,   // 현재 검색 조건에 포함된 태그명 목록
-                'sort_options' => [ // 정렬 선택 ui에 표시할 옵션 목록
-                    'latest' => '최신순',
-                    'popular' => '조회순',
-                    'likes' => '좋아요순',
-                    'bookmarks' => '북마크순',
-                ],
-                'total_count' => (int) $tipItems->total(), // 검색 결과 전체 건수
-                'total_count_text' => number_format((int) $tipItems->total()),  // 화면 표시용 포맷된 전체 건수 
-                'first_item' => $tipItems->firstItem(), // 현재 페이지에서 보여주는 시작 항목 번호
-                'last_item' => $tipItems->lastItem(),  // 현재 페이지에서 ㅗ여주는 마지막 항목 번호
-            ],
-        ]);
+        ], $pageData));
     }
 
     /**
@@ -148,42 +129,32 @@ class TipBrowseController extends Controller
 
         if ($request->routeIs('tips.category')) {
             $category = Category::findOrFail($sort_id);
-            $pageData = $this->tipReadService->getCategoryPageData($sort_id, $filters, $viewerId);
+            $pageData = $this->tipReadService->getListData('category', [
+                'filters' => $filters,
+                'viewer_id' => $viewerId,
+                'scope_id' => $sort_id,
+            ]);
 
             return view('tips.view', array_merge([
                 'sort' => 'category',
                 'viewMode' => 'tipListBySort',
                 'site_title' => $category->name,
                 'description' => $category->description,
-                'listView' => $this->buildSortListViewData(
-                    'category',
-                    $filters,
-                    $pageData['tipItems'],
-                    (int) $pageData['allCount'],
-                    (int) $pageData['todayTipCount'],
-                    (float) $pageData['avgLikeCount'],
-                    (float) $pageData['avgBookmarkCount'],
-                ),
             ], $pageData));
         }
 
         $tag = Tag::query()->visible()->findOrFail($sort_id);
-        $pageData = $this->tipReadService->getTagPageData($sort_id, $filters, $viewerId);
+        $pageData = $this->tipReadService->getListData('tag', [
+            'filters' => $filters,
+            'viewer_id' => $viewerId,
+            'scope_id' => $sort_id,
+        ]);
 
         return view('tips.view', array_merge([
             'sort' => 'tag',
             'viewMode' => 'tipListBySort',
             'site_title' => $tag->name,
             'description' => $tag->description,
-            'listView' => $this->buildSortListViewData(
-                'tag',
-                $filters,
-                $pageData['tipItems'],
-                (int) $pageData['allCount'],
-                (int) $pageData['todayTipCount'],
-                (float) $pageData['avgLikeCount'],
-                (float) $pageData['avgBookmarkCount'],
-            ),
         ], $pageData));
     }
 
@@ -207,17 +178,23 @@ class TipBrowseController extends Controller
         $filters = TipListFilters::forFeed($request);
         $viewerId = Auth::id(); // 현재 로그인 사용자 ID (비로그인 상태면 null)
         $user = User::findOrFail($user_id); // 피드 주인이 없으면 404 발생
-        // 조회자 기준으로 실제 보이는 팁 개수를 계산 
-        $tipsCount = $this->tipReadService->countUserVisibleTips($user, $viewerId); 
+        $feedTitle = filled(trim((string) $user->name))
+            ? sprintf('%s님의 Feed', trim((string) $user->name))
+            : '사용자 Feed';
+        $feedPageData = $this->tipReadService->getListData('user_feed', [
+            'filters' => $filters,
+            'viewer_id' => $viewerId,
+            'user' => $user,
+        ]);
         // 프로필 헤더에 표시할 팔로워/팔로잉 수를 구함
         $followersCount = (int) $user->followerUsers()->count();
         $followingCount = (int) $user->followingUsers()->count();
 
         return view('tips.view', [
             'viewMode' => 'tipUserFeed',
-            'site_title' => "User {$user_id}'s Feed",
+            'site_title' => $feedTitle,
             'myFeed' => $user_id === $viewerId, // 내 피드인지 여부
-            'currentSort' => $filters->sort->value, // 현재 선택된 정렬 옵션
+            'currentSort' => data_get($feedPageData, 'currentSort', $filters->sort->value), // 현재 선택된 정렬 옵션
             // 프로필 영역에 필요한 최소 사용자 정보만 전달 
             'profileUser' => [
                 'id' => (int) $user->id,
@@ -234,59 +211,13 @@ class TipBrowseController extends Controller
             // 현재 로그인 사용자가 이 피드 주인을 팔로우 중인지 확인
             'isFollowing' => (bool) $this->followService->isFollowing($viewerId, $user_id),
 
-            // 피드에서 실제 노출 가능한 팁 개수 
-            'tipsCount' => (int) $tipsCount,
-            'tipsCountText' => number_format((int) $tipsCount),
-
-            // 노출 가능한 팁만 기준으로 상위 카테고리/태그를 집계 
-            'topCategories' => $this->tipReadService->getUserTipCategories($user, 5, $viewerId),
-            'topTags' => $this->tipReadService->getUserTipTags($user, 5, $viewerId),
-
-            // 카트 목록도 같은 공개 규칙을 적용해 가져옴 
-            'tipItems' => $this->tipReadService->getUserFeedCards($user_id, $viewerId, $filters),
-            'totalCount' => (int) $tipsCount,
-            'totalCountText' => number_format((int) $tipsCount),
+            'tipsCount' => (int) data_get($feedPageData, 'tipsCount', 0),
+            'tipsCountText' => data_get($feedPageData, 'tipsCountText', '0'),
+            'topCategories' => data_get($feedPageData, 'topCategories', []),
+            'topTags' => data_get($feedPageData, 'topTags', []),
+            'tipItems' => data_get($feedPageData, 'tipItems', collect()),
+            'totalCount' => (int) data_get($feedPageData, 'totalCount', 0),
+            'totalCountText' => data_get($feedPageData, 'totalCountText', '0'),
         ]);
-    }
-
-    /**
-     * 카테고리별/태그별 목록 화면에서 공통으로 사용하는 뷰 데이터를 조립
-     * 
-     * [역할]
-     * - 현재 목록이 category인지 tag인지 식별할 수 있는 텍스트 제공
-     * - 현재 정렬 상태와 전체/오늘 등록 건수 제공
-     * - 평균 좋아요/북마크 통계 제공
-     * - 페이지네이션 객체인 경우 현재 페이지의 시작/끝 항목 번호 제공
-     * 
-     * [주의]
-     * - $tipItems는 paginator일 수 있고 단순 컬렉션일 수 있으므로 firstItem(), lastItem() 메서드 존재 여부를 확인한 뒤 호출.
-     */
-    private function buildSortListViewData(
-        string $sort,
-        TipListFilters $filters,
-        mixed $tipItems,
-        int $allCount,
-        int $todayTipCount,
-        float $avgLikeCount,
-        float $avgBookmarkCount,
-    ): array {
-        return [
-            'sort_mode_text' => strtoupper($sort), // 현재 목록 모드(category/tag)를 화면 표시용 대문자 텍스트로 변환
-            'current_sort' => $filters->sort->value, // 현재 사용자가 선택한 정렬 옵션
-            'total_count' => $allCount, // 전체 목록 건수
-            'total_count_text' => number_format($allCount), // 화면 표시용 포맷 문자열
-
-            // 오늘 등록된 팁 ㅅ와 화면 표시용 포맷 문자열 
-            'today_tip_count' => $todayTipCount,
-            'today_tip_count_text' => number_format($todayTipCount),
-
-            // 해당 분류의 평균 좋아요/북마크 수
-            'avg_like_count' => $avgLikeCount,
-            'avg_bookmark_count' => $avgBookmarkCount,
-
-            // paginator의 경우 현재 페이지 시작/끝 번호를 제공, 단순 컬렉션이면 null 
-            'first_item' => method_exists($tipItems, 'firstItem') ? $tipItems->firstItem() : null,
-            'last_item' => method_exists($tipItems, 'lastItem') ? $tipItems->lastItem() : null,
-        ];
     }
 }

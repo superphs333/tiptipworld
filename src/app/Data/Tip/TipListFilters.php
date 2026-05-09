@@ -5,6 +5,10 @@ namespace App\Data\Tip;
 use App\Enums\TipSort;
 use Illuminate\Http\Request;
 
+/**
+ * 팁 목록 화면에서 사용하는 검색/필터/정렬/페이지네이션 조건을 하나의 객체로 묶어주는 DTO 클래스.
+ * (요청값 정규화)
+ */
 final class TipListFilters
 {
     public function __construct(

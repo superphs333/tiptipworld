@@ -74,25 +74,13 @@ class MyPageController extends Controller
             // 내 팁 화면에서 사용할 필터 객체 생성 
             case 'mytips':
                 $filters = TipListFilters::forOwner($request);
-                $viewData['tips'] = $this->tipReadService->getMyTipRows((int) $user_id, $filters); // 내 팁 목록 행 데이터 
-                $viewData['myTipcategories'] = $this->tipReadService->getUserTipCategories($tipOwner, null, (int) $user_id); // 내 팁 기준 카테고리별 개수 집계
-                $viewData['myTipTags'] = $this->tipReadService->getUserTipTags($tipOwner, null, (int) $user_id); // 내 팁 기준 태그별 개수 집계
-                $viewData['myTipsFilters'] = [ // 화면에서 필터 UI를 다시 그릴 때 사용할 값들 
-                    'category' => $filters->category,
-                    'query' => $filters->query,
-                    'status' => $filters->status,
-                    'visibility' => $filters->visibility,
-                    'sort' => $filters->sort->value, // enum 객체가 아니라 실제 query string 값으로 다시 내려줌 
-                    'per_page' => $filters->perPage,
-                    'selected_tag_ids' => $filters->tagIds, // 선택된 태그 ID 목록 
-                    'selected_tag_ids_map' => array_flip($filters->tagIds),
-                    'sort_options' => [
-                        'latest' => '최신순',
-                        'popular' => '조회순',
-                        'likes' => '좋아요순',
-                        'bookmarks' => '북마크순',
-                    ],
-                ];
+                $viewData = array_merge(
+                    $viewData,
+                    $this->tipReadService->getListData('my_tips', [
+                        'filters' => $filters,
+                        'user' => $tipOwner,
+                    ])
+                );
 
                 break;
             

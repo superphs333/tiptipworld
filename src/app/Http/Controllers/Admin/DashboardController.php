@@ -11,7 +11,6 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Services\Tip\TipReadService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 /**
  * 관리자 대시보드의 탭별 목록 화면을 조립하는 컨트롤러 
@@ -52,8 +51,16 @@ class DashboardController extends Controller
         $defaultTab = array_key_first($tabs) ?? 'users';
         // 라우트/쿼리스트링을 기준으로 최종 활성 탭 결정 
         $tab = $this->resolveTab($request, $tab, $tabs, $defaultTab);
+        $tipPageData = null;
         // 현재 탭에 필요한 필요한 실제 목록 데이터 조회 
-        $datas = $this->getDatas($tab, $request);
+        if ($tab === 'tips') {
+            $tipPageData = $this->tipReadService->getListData('admin_tips', [
+                'filters' => TipListFilters::forAdmin($request),
+            ]);
+            $datas = $tipPageData['tips'];
+        } else {
+            $datas = $this->getDatas($tab, $request);
+        }
 
         /**
          * 각 탭별로 현재 query string을 세션에 저장 
@@ -90,13 +97,8 @@ class DashboardController extends Controller
 
         // TIPS탭 : + 필터 UI 복원용 데이터 
         if ($tab === 'tips') {
-            // 팁 작성/수정/필터용 카테고리 목록 
-            $viewArray['categories'] = $this->tipReadService->getTipFormCategories();
-            // tips 목록 렌더링/필터 UI 표시용 추가 데이터 
-            $viewArray['tipsView'] = $this->buildTipAdminViewData(
-                $datas,
-                TipListFilters::forAdmin($request),
-            );
+            $viewArray['categories'] = data_get($tipPageData, 'categories', collect());
+            $viewArray['tipsView'] = data_get($tipPageData, 'tipsView', []);
         }
 
         return view('admin.dashboard', $viewArray);
@@ -142,10 +144,6 @@ class DashboardController extends Controller
                 $request->only(['is_blocked', 'query']),
                 $this->resolvePerPage($request),
             ),
-            // 팁 탭 
-            'tips' => $this->tipReadService->getAdminTipRows(
-                TipListFilters::forAdmin($request)
-            ),
             default => null,
         };
     }
@@ -166,95 +164,5 @@ class DashboardController extends Controller
         }
 
         return min($perPage, 100);
-    }
-
-    /**
-     * 관리자 팁 탭 화면에서 사용할 추가 표시용 데이터를 조립 
-     * 
-     * - paginator 또는 collection에서 실제 아이템 목록 추출
-     * - 전체 건수/페이지 범위 계산
-     * - 마지막 수정일 텍스트 계산
-     * - 현재 필터값 복원용 데이터 구성
-     * - 상태/노출 옵션 목록 준비 
-     */
-    private function buildTipAdminViewData(mixed $tips, TipListFilters $filters): array
-    {
-        // paginator면 내부 collection을 꺼내고, 아니면 일반 collection 처럼 감싼다.
-        $tipItems = method_exists($tips, 'getCollection')
-            ? $tips->getCollection()
-            : collect($tips);
-        // paginator면 total()을 사용하고, 아니면 현재 아이템 개수를 사용 
-        $totalCount = method_exists($tips, 'total') ? (int) $tips->total() : $tipItems->count();
-        // 각 아이템에 담긴 updated_at_raw 중 가장 최근 값을 찾아, 관리 화면 상단의 최근 수정일 표시용으로 사용 
-        $lastUpdatedRaw = $tipItems
-            ->map(fn ($tip) => data_get($tip, 'updated_at_raw'))
-            ->filter()
-            ->max();
-
-        return [
-            'tip_items' => $tipItems, // 실제 아이템 목록
-            'total_count' => $totalCount, // 전체 개수 숫자
-            'total_count_text' => number_format($totalCount), // 표시용 문자열 
-            
-            // paginator 여부에 따라 페이지네이션 UI 표시 여부 결정
-            'show_pagination' => method_exists($tips, 'links'),
-
-            // paginator에서 현재 페이지 첫 번째/마지막 항목 순번 
-            'first_item' => method_exists($tips, 'firstItem') ? $tips->firstItem() : null,
-            'last_item' => method_exists($tips, 'lastItem') ? $tips->lastItem() : null,
-
-            // 가장 최근 수정일을 Y-m-d 형식으로 표시 
-            'last_updated_text' => $lastUpdatedRaw
-                ? Carbon::parse($lastUpdatedRaw)->format('Y-m-d')
-                : '-',
-            
-            // 현재 선택된 필터 값들 
-            'category' => $filters->category,
-            'visibility' => $filters->visibility ?? '',
-            'status' => $filters->status ?? '',
-
-            // data input에 다시 채울 값  
-            'start_date_input' => $this->normalizeDateInput($filters->startDate),
-            'end_date_input' => $this->normalizeDateInput($filters->endDate),
-
-            'query' => $filters->query,
-            'per_page' => $filters->perPage,
-
-            // from/query string 복원용 원본 값 묶음 
-            'display_values' => [
-                'tab' => 'tips',
-                'query' => $filters->query,
-                'category_id' => $filters->category,
-                'status' => $filters->status ?? '',
-                'visibility' => $filters->visibility ?? '',
-                'start_date' => $filters->startDate ?? '',
-                'end_date' => $filters->endDate ?? '',
-            ],
-
-            // 드롭다운 옵션 목록
-            'visibility_options' => config('app.tip_visibility', []),
-            'status_options' => config('app.tip_status', []),
-        ];
-    }
-
-    /**
-     * 날짜 입력값을 HTML date input에 맞는 문자열(Y-m-d)로 정규화 
-     * 
-     * 규칙
-     * - 값이 비어 있으면 빈 문자열 반환
-     * - 파싱 가능하면 Y-m-d 형식으로 변환
-     * - 파싱 실패 시도에도 빈 문자열 반환
-     */
-    private function normalizeDateInput(?string $value): string
-    {
-        if (! filled($value)) {
-            return '';
-        }
-
-        try {
-            return Carbon::parse($value)->format('Y-m-d');
-        } catch (\Throwable $e) {
-            return '';
-        }
     }
 }
