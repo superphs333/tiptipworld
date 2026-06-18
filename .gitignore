@@ -26,3 +26,5 @@ src/storage/framework/sessions/.gitignore
 src/storage/framework/testing/.gitignore
 src/storage/framework/views/.gitignore
 src/storage/logs/.gitignore
+.codex/
+AGENTS.md
