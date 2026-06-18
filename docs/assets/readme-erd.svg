@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="820" viewBox="0 0 1180 820" role="img" aria-labelledby="title desc">
+  <title id="title">TipTipWorld data model diagram</title>
+  <desc id="desc">Entity relationship diagram for users, roles, social accounts, tips, categories, tags, comments, follows, reactions and notifications.</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .entity { fill: #ffffff; stroke: #334155; stroke-width: 2; }
+      .entity-core { fill: #ecfdf5; stroke: #047857; stroke-width: 2; }
+      .entity-user { fill: #eff6ff; stroke: #2563eb; stroke-width: 2; }
+      .entity-join { fill: #fff7ed; stroke: #c2410c; stroke-width: 2; }
+      .entity-meta { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 2; }
+      .title { font: 700 28px Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 14px Arial, sans-serif; fill: #475569; }
+      .name { font: 700 15px Arial, sans-serif; fill: #0f172a; }
+      .field { font: 400 12px Arial, sans-serif; fill: #334155; }
+      .hint { font: 400 11px Arial, sans-serif; fill: #64748b; }
+      .line { stroke: #475569; stroke-width: 2; fill: none; }
+      .line-soft { stroke: #64748b; stroke-width: 1.8; fill: none; stroke-dasharray: 5 5; }
+      .card-head { fill: rgba(15, 23, 42, 0.06); }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1180" height="820" />
+  <text class="title" x="50" y="56">TipTipWorld ERD</text>
+  <text class="subtitle" x="50" y="82">핵심 엔티티와 pivot 테이블 중심의 데이터 관계</text>
+
+  <g transform="translate(60 130)">
+    <rect class="entity-user" width="210" height="136" rx="12" />
+    <rect class="card-head" width="210" height="34" rx="12" />
+    <text class="name" x="18" y="23">users</text>
+    <text class="field" x="18" y="56">id, name, email</text>
+    <text class="field" x="18" y="76">password, password_set_at</text>
+    <text class="field" x="18" y="96">status, point</text>
+    <text class="field" x="18" y="116">profile_image_path</text>
+  </g>
+
+  <g transform="translate(60 330)">
+    <rect class="entity-meta" width="210" height="112" rx="12" />
+    <rect class="card-head" width="210" height="34" rx="12" />
+    <text class="name" x="18" y="23">roles</text>
+    <text class="field" x="18" y="56">id, key, name</text>
+    <text class="field" x="18" y="76">description</text>
+  </g>
+
+  <g transform="translate(310 330)">
+    <rect class="entity-join" width="190" height="112" rx="12" />
+    <rect class="card-head" width="190" height="34" rx="12" />
+    <text class="name" x="18" y="23">role_user</text>
+    <text class="field" x="18" y="56">role_id</text>
+    <text class="field" x="18" y="76">user_id</text>
+    <text class="hint" x="18" y="96">unique(role_id, user_id)</text>
+  </g>
+
+  <g transform="translate(310 130)">
+    <rect class="entity-meta" width="230" height="136" rx="12" />
+    <rect class="card-head" width="230" height="34" rx="12" />
+    <text class="name" x="18" y="23">social_accounts</text>
+    <text class="field" x="18" y="56">user_id</text>
+    <text class="field" x="18" y="76">provider</text>
+    <text class="field" x="18" y="96">provider_user_id</text>
+    <text class="field" x="18" y="116">meta</text>
+  </g>
+
+  <g transform="translate(620 120)">
+    <rect class="entity-core" width="250" height="176" rx="12" />
+    <rect class="card-head" width="250" height="34" rx="12" />
+    <text class="name" x="18" y="23">tips</text>
+    <text class="field" x="18" y="56">id, user_id, update_user_id</text>
+    <text class="field" x="18" y="76">category_id, title, content</text>
+    <text class="field" x="18" y="96">thumbnail, excerpt</text>
+    <text class="field" x="18" y="116">status, visibility, published_at</text>
+    <text class="field" x="18" y="136">view_count, like_count</text>
+    <text class="field" x="18" y="156">bookmark_count, comment_count</text>
+  </g>
+
+  <g transform="translate(930 120)">
+    <rect class="entity" width="200" height="112" rx="12" />
+    <rect class="card-head" width="200" height="34" rx="12" />
+    <text class="name" x="18" y="23">categories</text>
+    <text class="field" x="18" y="56">id, name</text>
+    <text class="field" x="18" y="76">description</text>
+    <text class="field" x="18" y="96">sort_order, is_active</text>
+  </g>
+
+  <g transform="translate(930 292)">
+    <rect class="entity" width="200" height="118" rx="12" />
+    <rect class="card-head" width="200" height="34" rx="12" />
+    <text class="name" x="18" y="23">tags</text>
+    <text class="field" x="18" y="56">id, name</text>
+    <text class="field" x="18" y="76">usage_count</text>
+    <text class="field" x="18" y="96">is_blocked</text>
+  </g>
+
+  <g transform="translate(640 350)">
+    <rect class="entity-join" width="190" height="98" rx="12" />
+    <rect class="card-head" width="190" height="34" rx="12" />
+    <text class="name" x="18" y="23">tip_tag</text>
+    <text class="field" x="18" y="56">tip_id</text>
+    <text class="field" x="18" y="76">tag_id</text>
+  </g>
+
+  <g transform="translate(620 520)">
+    <rect class="entity" width="250" height="144" rx="12" />
+    <rect class="card-head" width="250" height="34" rx="12" />
+    <text class="name" x="18" y="23">comments</text>
+    <text class="field" x="18" y="56">id, tip_id, user_id</text>
+    <text class="field" x="18" y="76">parent_id, reply_to_id</text>
+    <text class="field" x="18" y="96">depth, body, status</text>
+    <text class="field" x="18" y="116">like_count, reply_count</text>
+  </g>
+
+  <g transform="translate(930 520)">
+    <rect class="entity-join" width="200" height="112" rx="12" />
+    <rect class="card-head" width="200" height="34" rx="12" />
+    <text class="name" x="18" y="23">comment_likes</text>
+    <text class="field" x="18" y="56">comment_id</text>
+    <text class="field" x="18" y="76">user_id</text>
+    <text class="hint" x="18" y="96">unique(comment_id, user_id)</text>
+  </g>
+
+  <g transform="translate(310 520)">
+    <rect class="entity-join" width="210" height="126" rx="12" />
+    <rect class="card-head" width="210" height="34" rx="12" />
+    <text class="name" x="18" y="23">tip_likes / tip_bookmark</text>
+    <text class="field" x="18" y="56">tip_id</text>
+    <text class="field" x="18" y="76">user_id</text>
+    <text class="hint" x="18" y="100">unique(tip_id, user_id)</text>
+  </g>
+
+  <g transform="translate(60 520)">
+    <rect class="entity-join" width="210" height="126" rx="12" />
+    <rect class="card-head" width="210" height="34" rx="12" />
+    <text class="name" x="18" y="23">user_follows</text>
+    <text class="field" x="18" y="56">follower_user_id</text>
+    <text class="field" x="18" y="76">followed_user_id</text>
+    <text class="hint" x="18" y="100">unique(follower, followed)</text>
+  </g>
+
+  <g transform="translate(60 690)">
+    <rect class="entity-meta" width="250" height="92" rx="12" />
+    <rect class="card-head" width="250" height="34" rx="12" />
+    <text class="name" x="18" y="23">notifications</text>
+    <text class="field" x="18" y="56">notifiable_id, type</text>
+    <text class="field" x="18" y="76">data, read_at</text>
+  </g>
+
+  <path class="line" d="M270 198 L310 198" />
+  <path class="line" d="M270 386 L310 386" />
+  <path class="line" d="M500 386 L590 386 L590 198 L620 198" />
+  <path class="line" d="M540 198 L620 198" />
+  <path class="line" d="M870 176 L930 176" />
+  <path class="line" d="M870 246 L900 246 L900 350 L930 350" />
+  <path class="line" d="M745 296 L745 350" />
+  <path class="line" d="M830 399 L930 350" />
+  <path class="line" d="M745 448 L745 520" />
+  <path class="line" d="M870 592 L930 576" />
+  <path class="line" d="M520 583 L620 592" />
+  <path class="line" d="M270 583 L310 583" />
+  <path class="line-soft" d="M165 266 L165 520" />
+  <path class="line-soft" d="M185 266 C185 470, 90 480, 90 690" />
+
+  <text class="hint" x="278" y="190">1:N</text>
+  <text class="hint" x="278" y="378">M:N</text>
+  <text class="hint" x="878" y="168">N:1</text>
+  <text class="hint" x="878" y="342">M:N</text>
+  <text class="hint" x="874" y="584">M:N</text>
+</svg>
