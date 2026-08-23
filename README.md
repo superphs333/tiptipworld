@@ -4,7 +4,7 @@ TipTipWorld는 Laravel 12 기반의 팁 공유 커뮤니티 애플리케이션�
 
 ## 시스템 구조
 
-![TipTipWorld 아키텍처](docs/assets/readme-architecture.svg)
+![TipTipWorld Service Flow](docs/assets/service-flow.svg)
 
 ## 문서 안내
 

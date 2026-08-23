@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="920" viewBox="0 0 1500 920" role="img" aria-labelledby="title desc">
+  <title id="title">TipTipWorld Service Flow</title>
+  <desc id="desc">TipTipWorld의 사용자 이용 흐름, 작성자 콘텐츠 흐름, 관리자 운영 흐름, Laravel 처리 계층과 외부 연동을 한 장으로 요약한 다이어그램</desc>
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .lane { fill: #ffffff; stroke: #d9e2ec; stroke-width: 1.6; }
+      .lane-soft { fill: #f1f5f9; stroke: #d9e2ec; stroke-width: 1.6; }
+      .box { fill: #ffffff; stroke: #334155; stroke-width: 1.8; }
+      .blue { fill: #eff6ff; stroke: #2563eb; }
+      .green { fill: #ecfdf5; stroke: #047857; }
+      .amber { fill: #fffbeb; stroke: #b45309; }
+      .purple { fill: #f5f3ff; stroke: #7c3aed; }
+      .rose { fill: #fff1f2; stroke: #be123c; }
+      .slate { fill: #f8fafc; stroke: #475569; }
+      .title { font: 700 34px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 16px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #475569; }
+      .lane-title { font: 700 17px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #334155; }
+      .label { font: 700 20px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #0f172a; }
+      .text { font: 400 15px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #334155; }
+      .small { font: 400 13px "Malgun Gothic", "Apple SD Gothic Neo", "Noto Sans KR", Arial, sans-serif; fill: #64748b; }
+      .arrow { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .arrow-soft { stroke: #64748b; stroke-width: 1.9; fill: none; marker-end: url(#arrow-soft); stroke-dasharray: 7 6; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155" />
+    </marker>
+    <marker id="arrow-soft" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1500" height="920" />
+
+  <text class="title" x="70" y="68">TipTipWorld Service Flow</text>
+  <text class="subtitle" x="70" y="99">사용자 탐색과 콘텐츠 작성, 활동 알림, 관리자 운영, 데이터/외부 연동의 전체 흐름</text>
+
+  <rect class="lane" x="60" y="132" width="1380" height="250" rx="18" />
+  <text class="lane-title" x="88" y="167">사용자 이용 흐름</text>
+
+  <rect class="box blue" x="100" y="205" width="180" height="102" rx="14" />
+  <text class="label" x="139" y="242">인증/계정</text>
+  <text class="text" x="136" y="271">이메일 기본 인증</text>
+  <text class="text" x="133" y="294">Google/Kakao 연동</text>
+
+  <rect class="box green" x="350" y="205" width="180" height="102" rx="14" />
+  <text class="label" x="399" y="242">홈/검색</text>
+  <text class="text" x="390" y="271">인기 팁/태그</text>
+  <text class="text" x="388" y="294">검색/필터/정렬</text>
+
+  <rect class="box amber" x="600" y="205" width="180" height="102" rx="14" />
+  <text class="label" x="640" y="242">팁 상세</text>
+  <text class="text" x="629" y="271">본문/이미지 조회</text>
+  <text class="text" x="640" y="294">조회수 집계</text>
+
+  <rect class="box purple" x="850" y="205" width="180" height="102" rx="14" />
+  <text class="label" x="895" y="242">사용자 활동</text>
+  <text class="text" x="888" y="271">좋아요/북마크</text>
+  <text class="text" x="899" y="294">댓글/팔로우</text>
+
+  <rect class="box rose" x="1100" y="205" width="180" height="102" rx="14" />
+  <text class="label" x="1149" y="242">알림</text>
+  <text class="text" x="1137" y="271">활동 알림 생성</text>
+  <text class="text" x="1135" y="294">읽음/필터 처리</text>
+
+  <rect class="box blue" x="1285" y="205" width="115" height="102" rx="14" />
+  <text class="label" x="1306" y="242">마이페이지</text>
+  <text class="text" x="1306" y="271">내 팁</text>
+  <text class="text" x="1300" y="294">보관함/알림</text>
+
+  <path class="arrow" d="M280 256 L345 256" />
+  <path class="arrow" d="M530 256 L595 256" />
+  <path class="arrow" d="M780 256 L845 256" />
+  <path class="arrow" d="M1030 256 L1095 256" />
+  <path class="arrow" d="M1280 256 L1282 256" />
+
+  <rect class="lane" x="60" y="420" width="670" height="235" rx="18" />
+  <text class="lane-title" x="88" y="455">작성자 콘텐츠 흐름</text>
+
+  <rect class="box blue" x="100" y="495" width="170" height="96" rx="14" />
+  <text class="label" x="137" y="532">팁 작성</text>
+  <text class="text" x="131" y="560">등록/수정/삭제</text>
+  <text class="text" x="126" y="583">공개 범위 설정</text>
+
+  <rect class="box green" x="315" y="495" width="170" height="96" rx="14" />
+  <text class="label" x="354" y="532">분류 관리</text>
+  <text class="text" x="350" y="560">카테고리 지정</text>
+  <text class="text" x="360" y="583">태그 동기화</text>
+
+  <rect class="box amber" x="530" y="495" width="160" height="96" rx="14" />
+  <text class="label" x="571" y="532">미디어</text>
+  <text class="text" x="555" y="560">Summernote 이미지</text>
+  <text class="text" x="557" y="583">썸네일/R2 저장</text>
+
+  <path class="arrow" d="M270 543 L310 543" />
+  <path class="arrow" d="M485 543 L525 543" />
+  <path class="arrow-soft" d="M610 495 C652 418, 670 365, 688 310" />
+
+  <rect class="lane" x="770" y="420" width="670" height="235" rx="18" />
+  <text class="lane-title" x="798" y="455">관리자 운영 흐름</text>
+
+  <rect class="box purple" x="815" y="495" width="170" height="96" rx="14" />
+  <text class="label" x="849" y="532">관리자 화면</text>
+  <text class="text" x="854" y="560">전용 접근 제어</text>
+  <text class="text" x="861" y="583">검색/필터 유지</text>
+
+  <rect class="box blue" x="1030" y="495" width="160" height="96" rx="14" />
+  <text class="label" x="1072" y="532">회원 관리</text>
+  <text class="text" x="1075" y="560">상태 관리</text>
+  <text class="text" x="1075" y="583">역할 관리</text>
+
+  <rect class="box green" x="1235" y="495" width="160" height="96" rx="14" />
+  <text class="label" x="1276" y="532">콘텐츠 운영</text>
+  <text class="text" x="1271" y="560">팁/카테고리</text>
+  <text class="text" x="1283" y="583">태그 차단</text>
+
+  <path class="arrow" d="M985 543 L1025 543" />
+  <path class="arrow" d="M1190 543 L1230 543" />
+
+  <rect class="lane-soft" x="60" y="690" width="1380" height="88" rx="18" />
+  <text class="lane-title" x="88" y="724">Laravel 처리 계층</text>
+  <rect class="box slate" x="250" y="715" width="170" height="40" rx="10" />
+  <text class="text" x="292" y="741">Route / Controller</text>
+  <rect class="box slate" x="475" y="715" width="170" height="40" rx="10" />
+  <text class="text" x="517" y="741">Request / Policy</text>
+  <rect class="box slate" x="700" y="715" width="170" height="40" rx="10" />
+  <text class="text" x="740" y="741">Service Layer</text>
+  <rect class="box slate" x="925" y="715" width="170" height="40" rx="10" />
+  <text class="text" x="972" y="741">Eloquent Model</text>
+  <rect class="box slate" x="1150" y="715" width="170" height="40" rx="10" />
+  <text class="text" x="1193" y="741">Notification</text>
+
+  <path class="arrow-soft" d="M690 591 C720 640, 735 675, 780 711" />
+  <path class="arrow-soft" d="M1110 591 C1088 640, 1055 675, 1018 711" />
+
+  <rect class="lane" x="60" y="805" width="1380" height="70" rx="18" />
+  <text class="lane-title" x="88" y="848">데이터/외부 연동</text>
+
+  <rect class="box" x="260" y="824" width="170" height="34" rx="10" />
+  <text class="text" x="301" y="847">MariaDB</text>
+
+  <rect class="box" x="500" y="824" width="170" height="34" rx="10" />
+  <text class="text" x="549" y="847">Redis</text>
+
+  <rect class="box" x="740" y="824" width="170" height="34" rx="10" />
+  <text class="text" x="775" y="847">Cloudflare R2</text>
+
+  <rect class="box" x="980" y="824" width="170" height="34" rx="10" />
+  <text class="text" x="1014" y="847">Google/Kakao OAuth</text>
+
+  <rect class="box" x="1220" y="824" width="170" height="34" rx="10" />
+  <text class="text" x="1262" y="847">GitHub Actions</text>
+
+  <path class="arrow-soft" d="M335 755 L342 819" />
+  <path class="arrow-soft" d="M785 755 C700 795, 625 801, 585 819" />
+  <path class="arrow-soft" d="M785 755 L825 819" />
+  <path class="arrow-soft" d="M335 715 C390 600, 150 395, 188 311" />
+  <path class="arrow-soft" d="M1240 755 L1305 819" />
+
+  <text class="small" x="70" y="902">요약: 사용자는 인증 후 홈/검색에서 팁을 탐색하고, 상세 화면에서 반응한다. 작성자는 팁과 이미지를 등록하며, 관리자는 회원/분류/콘텐츠를 운영한다.</text>
+</svg>
