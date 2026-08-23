@@ -4,7 +4,7 @@
 
 ## 구조 이미지
 
-![TipTipWorld Service Flow](assets/service-flow.svg)
+![TipTipWorld 아키텍처](assets/readme-architecture.svg)
 
 ## 컨테이너 구조
 
