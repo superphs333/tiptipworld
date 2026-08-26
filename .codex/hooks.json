@@ -1,0 +1,54 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_logger.py\"",
+            "timeout": 30,
+            "statusMessage": "Recording harness prompt log"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_logger.py\"",
+            "timeout": 30,
+            "statusMessage": "Recording harness tool request"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_logger.py\"",
+            "timeout": 30,
+            "statusMessage": "Recording harness tool result"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/harness_logger.py\"",
+            "timeout": 30,
+            "statusMessage": "Finalizing harness log"
+          }
+        ]
+      }
+    ]
+  }
+}

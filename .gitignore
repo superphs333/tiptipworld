@@ -26,5 +26,11 @@ src/storage/framework/sessions/.gitignore
 src/storage/framework/testing/.gitignore
 src/storage/framework/views/.gitignore
 src/storage/logs/.gitignore
-.codex/
+
 AGENTS.md
+개발자를_위한_이력서_포트폴리오_완벽_가이드.pdf
+기술면접_예상질문_이소연_답변안.md
+기술면접_예상질문_이소연.md.pdf
+이력서_이소연.pdf
+docs/assets/service-flow.svg
+.codex/harness/_workspace/

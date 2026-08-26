@@ -1,0 +1,18 @@
+# 사용할 기본 모델
+model = "gpt-5.5"
+
+# 코드 분석을 깊게 하도록 설정
+model_reasoning_effort = "high"
+
+# 답변 길이 설정
+model_verbosity = "medium"
+
+# 명령 실행이나 위험한 작업 전에 승인 요청
+approval_policy = "on-request"
+
+# 현재 작업 폴더 안에서는 파일 읽기/수정 허용
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+# Codex가 임의로 인터넷 접근하지 못하게 제한
+network_access = false
