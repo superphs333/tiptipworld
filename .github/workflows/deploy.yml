@@ -38,7 +38,8 @@ jobs:
                       # 5. 프론트엔드 빌드 (src 폴더로 이동하여 실행)
                       # 빌드 대상 파일(package.json 등)이 src 안에 있으므로 경로 주의
                       cd src
-                      docker run --rm -v $(pwd):/app -w /app node:20 sh -c "npm ci && npm run build"
+                      docker run --rm -v "$(pwd)":/app -v /app/node_modules -w /app node:20 sh -c "npm ci && npm run build"
+                      sudo chown -R 1000:1000 public/build
                       
                       # 6. 권한 부여 (라라벨 쓰기 권한)
                       sudo chown -R 1000:1000 storage bootstrap/cache
