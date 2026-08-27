@@ -29,7 +29,7 @@ services:
     volumes:
       - ./src:/var/www/html
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-    depends_on:
+  depends_on:
       - app
     networks:
       - proxy-nw
@@ -69,5 +69,6 @@ volumes:
 networks:
   proxy-nw:
     external: true
+  # 이 Compose 프로젝트에서 사용할 내부용 Bridge Network 
   tiptip-internal:
     driver: bridge
