@@ -1,4 +1,4 @@
-# 시스템 구조, 요청 흐름, 네트워크, 데이터 구조
+# 시스템 구조, 요청 흐름, 네트워크
 
 [README로 돌아가기](../README.md)
 
@@ -56,31 +56,3 @@ Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않
 | `src/routes/web.php` | 공개 화면, 인증 사용자 기능, 관리자 기능 라우트 |
 | `src/routes/auth.php` | Breeze 인증, Google/Kakao 소셜 로그인 라우트 |
 | `src/database/migrations` | 데이터베이스 스키마 |
-
-## 주요 기능 흐름
-
-| 영역 | 주요 흐름 |
-| --- | --- |
-| 인증 | 회원가입, 로그인, 이메일 인증, 비밀번호 재설정, Google/Kakao 로그인 |
-| 팁 | 목록, 검색, 상세, 작성, 수정, 삭제, 카테고리/태그별 조회 |
-| 상호작용 | 좋아요, 북마크, 댓글, 댓글 좋아요, 팔로우 |
-| 사용자 | 프로필 수정, 프로필 이미지 관리, 마이페이지, 알림 |
-| 관리자 | 사용자, 카테고리, 태그, 팁 관리 |
-| 업로드 | 프로필 이미지, Summernote 이미지, public 또는 R2/S3 호환 디스크 저장 |
-
-## 데이터 구조
-
-마이그레이션 기준 주요 테이블:
-
-| 데이터 | 관련 테이블 |
-| --- | --- |
-| 사용자/인증 | `users`, `password_reset_tokens`, `sessions` |
-| 권한 | `roles`, `role_user` |
-| 팁 콘텐츠 | `tips`, `categories`, `tags`, `tip_tag`, `statuses` |
-| 반응/보관 | `tip_likes`, `tip_bookmark`, `comment_likes` |
-| 댓글 | `comments` |
-| 팔로우 | `user_follows` |
-| 알림 | `notifications` |
-| Laravel 런타임 | `cache`, `jobs`, `job_batches`, `failed_jobs` |
-
-개발 기본값은 `src/.env.example` 기준 SQLite지만, Docker Compose 스택은 MariaDB 컨테이너를 포함함. Docker 환경에서는 `src/.env`의 DB 연결 정보를 Compose 서비스명 `db`에 맞춰 설정함.
