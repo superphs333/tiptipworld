@@ -14,7 +14,7 @@ services:
       - ./src:/var/www/html
       - ./docker/php/conf.d/uploads.ini:/usr/local/etc/php/conf.d/90-uploads.ini
     ports:
-      - "5174:5173"
+      - "127.0.0.1:5174:5173"
     networks:
       - tiptip-internal # 전용 네트워크 이름 변경함
 
