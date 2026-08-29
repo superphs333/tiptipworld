@@ -6,8 +6,6 @@ services:
       dockerfile: ./docker/php/Dockerfile
       args:
         INSTALL_XDEBUG: ${INSTALL_XDEBUG:-false}
-    # 모든 이름을 tiptipworld로 통일함
-    container_name: tiptipworld-php
     restart: unless-stopped
     user: "${APP_UID:-1000}:${APP_GID:-1000}"
     volumes:
@@ -34,7 +32,6 @@ services:
   # 2) 웹 서버: Nginx 환경임
   web:
     image: nginx:1.24-alpine
-    container_name: tiptipworld-web
     restart: unless-stopped
     volumes:
       - ./src:/var/www/html
@@ -43,13 +40,14 @@ services:
       app:
         condition: service_healthy
     networks:
-      - proxy-nw
-      - tiptip-internal
+      proxy-nw:
+        aliases:
+          - tiptipworld-web
+      tiptip-internal:
 
   # 3) 데이터베이스: MariaDB 환경임
   db:
     image: mariadb:10.11
-    container_name: tiptipworld-db
     restart: always
     environment:
       # .env 파일의 변수들도 tiptipworld 기준으로 매칭될 것임
@@ -73,7 +71,6 @@ services:
   # 4) Redis: 캐시 관리임
   redis:
     image: redis:7.2-alpine
-    container_name: tiptipworld-redis
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]

@@ -32,6 +32,9 @@ jobs:
                       
                       # 2. 최신 코드 가져오기
                       git pull origin main
+
+                      # 2.1 Compose 설정 반영 및 서비스 실행 상태 보장
+                      docker compose up -d
                       
                       # 3. Laravel 쓰기 경로를 PHP 컨테이너 실행 UID/GID에 맞춤
                       sudo mkdir -p src/vendor src/storage src/bootstrap/cache
@@ -40,7 +43,7 @@ jobs:
                       
                       # 4. PHP 라이브러리 설치 (컨테이너 내부 경로는 /var/www/html임)
                       # -w /var/www/html 설정을 통해 artisan 파일이 있는 곳에서 실행함
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
                       
                       # 5. 프론트엔드 빌드 (src 폴더로 이동하여 실행)
                       # 빌드 대상 파일(package.json 등)이 src 안에 있으므로 경로 주의
@@ -53,11 +56,11 @@ jobs:
                       sudo chmod -R u+rwX,g+rwX storage bootstrap/cache
                       
                       # 7. 데이터베이스 마이그레이션, 시드 및 캐시 최적화
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan migrate --force
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan db:seed --force
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan config:cache
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan route:cache
-                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan view:cache
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app php artisan migrate --force
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app php artisan db:seed --force
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app php artisan config:cache
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app php artisan route:cache
+                      docker compose exec -T -u "$APP_RUN_USER" -w /var/www/html app php artisan view:cache
 
                       # 8. 권한 최종 확인
                       sudo chmod -R u+rwX,g+rwX storage bootstrap/cache
