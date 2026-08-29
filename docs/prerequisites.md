@@ -7,7 +7,7 @@
 - Docker와 Docker Compose
 - Git
 - 로컬에서 직접 앱 명령을 실행할 경우 PHP, Composer, Node.js, npm
-- Docker 컨테이너 안에서 앱 명령을 실행할 경우 로컬 PHP/Composer/Node.js 설치는 필수는 아닙니다.
+- Docker 컨테이너 안에서 앱 명령을 실행할 경우 로컬 PHP/Composer/Node.js 설치는 필수는 아님.
 
 ## 저장소 구조
 
@@ -21,7 +21,7 @@
 
 ## 루트 환경변수 준비
 
-루트의 `.env`는 Docker Compose가 PHP 컨테이너 실행 사용자와 MariaDB 컨테이너 초기화 값을 정할 때 사용합니다. 실제 값은 커밋하지 말고 로컬에서만 관리합니다.
+루트의 `.env`는 Docker Compose가 PHP 컨테이너 실행 사용자와 MariaDB 컨테이너 초기화 값을 정할 때 사용함. 실제 값은 커밋하지 말고 로컬에서만 관리함.
 
 필요한 키:
 
@@ -35,7 +35,7 @@ MYSQL_USER=
 MYSQL_PASSWORD=
 ```
 
-`APP_UID`와 `APP_GID`는 각 개발자의 호스트 사용자 ID와 그룹 ID에 맞춥니다.
+`APP_UID`와 `APP_GID`는 각 개발자의 호스트 사용자 ID와 그룹 ID에 맞춤.
 
 ```bash
 id -u
@@ -44,7 +44,7 @@ id -g
 
 ## Laravel 환경변수 준비
 
-Laravel 앱 환경변수는 `src/.env`에서 관리합니다. 최초 설치 전 `src/.env.example`을 기준으로 `src/.env`를 준비합니다.
+Laravel 앱 환경변수는 `src/.env`에서 관리함. 최초 설치 전 `src/.env.example`을 기준으로 `src/.env`를 준비함.
 
 Docker Compose의 MariaDB를 사용할 때 확인할 주요 키:
 
@@ -65,11 +65,11 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 ```
 
-파일 업로드 또는 외부 스토리지를 사용할 경우 `FILESYSTEM_DISK`, `AWS_*`, `R2_*` 키를 설정합니다. Google/Kakao 로그인 사용 시 `GOOGLE_*`, `KAKAO_*` 키를 설정합니다.
+파일 업로드 또는 외부 스토리지를 사용할 경우 `FILESYSTEM_DISK`, `AWS_*`, `R2_*` 키를 설정함. Google/Kakao 로그인 사용 시 `GOOGLE_*`, `KAKAO_*` 키를 설정함.
 
 ## 로컬 도메인
 
-Nginx 설정의 `server_name`은 `tiptipworld.com`입니다. 로컬 브라우저에서 이 도메인으로 접속하려면 hosts 파일에 개발 서버 주소를 등록합니다.
+Nginx 설정의 `server_name`은 `tiptipworld.com`임. 로컬 브라우저에서 이 도메인으로 접속하려면 hosts 파일에 개발 서버 주소를 등록함.
 
 예시:
 
@@ -77,20 +77,20 @@ Nginx 설정의 `server_name`은 `tiptipworld.com`입니다. 로컬 브라우저
 127.0.0.1 tiptipworld.com
 ```
 
-프록시 컨테이너 또는 외부 reverse proxy를 사용하는 환경에서는 `proxy-nw` Docker 네트워크가 먼저 존재해야 합니다.
+프록시 컨테이너 또는 외부 reverse proxy를 사용하는 환경에서는 `proxy-nw` Docker 네트워크가 먼저 존재해야 함.
 
 ```bash
 docker network create proxy-nw
 ```
 
-이미 존재하는 네트워크라면 위 명령은 생략합니다.
+이미 존재하는 네트워크라면 위 명령은 생략함.
 
 ## 권한 준비
 
-Laravel은 `src/storage`와 `src/bootstrap/cache`에 쓸 수 있어야 합니다. Docker Compose의 `app` 서비스는 루트 `.env`의 `APP_UID:APP_GID` 사용자로 실행되므로 호스트 파일 소유자와 쓰기 권한을 맞춰야 합니다.
+Laravel은 `src/storage`와 `src/bootstrap/cache`에 쓸 수 있어야 함. Docker Compose의 `app` 서비스는 루트 `.env`의 `APP_UID:APP_GID` 사용자로 실행되므로 호스트 파일 소유자와 쓰기 권한을 맞춰야 함.
 
 ```bash
 chmod -R 775 src/storage src/bootstrap/cache
 ```
 
-권한 문제가 계속되면 로컬 사용자에 맞게 소유자를 조정합니다.
+권한 문제가 계속되면 로컬 사용자에 맞게 소유자를 조정함.

@@ -1,6 +1,6 @@
 # TipTipWorld
 
-TipTipWorld는 Laravel 12 기반의 팁 공유 커뮤니티 애플리케이션입니다. Docker Compose로 PHP-FPM, Nginx, MariaDB, Redis를 함께 실행하며, Laravel Breeze 인증, 소셜 로그인, 팁 작성/검색/댓글/좋아요/북마크/팔로우, 관리자 기능을 포함합니다.
+TipTipWorld는 Laravel 12 기반의 팁 공유 커뮤니티 애플리케이션임. Docker Compose로 PHP-FPM, Nginx, MariaDB, Redis를 함께 실행하며, Laravel Breeze 인증, 소셜 로그인, 팁 작성/검색/댓글/좋아요/북마크/팔로우, 관리자 기능을 포함함.
 
 ## 시스템 구조
 

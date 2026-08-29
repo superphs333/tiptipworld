@@ -8,7 +8,7 @@
 
 ## 컨테이너 구조
 
-TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됩니다.
+TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됨.
 
 | 계층 | 구성 | 역할 |
 | --- | --- | --- |
@@ -19,13 +19,13 @@ TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됩니다.
 
 ## 요청 흐름
 
-1. 브라우저가 `tiptipworld.com`으로 HTTP 요청을 보냅니다.
-2. 외부 reverse proxy가 있는 환경에서는 요청이 `proxy-nw` 네트워크의 `web` 컨테이너로 전달됩니다.
-3. Nginx는 `src/public`을 document root로 사용합니다.
-4. 정적 파일은 Nginx가 직접 응답하고, PHP 요청은 `app:9000`의 PHP-FPM으로 전달합니다.
-5. Laravel 라우터가 `src/routes/web.php`와 `src/routes/auth.php`의 정의에 따라 컨트롤러를 호출합니다.
-6. 컨트롤러는 모델, 서비스, Form Request, Policy, Blade 뷰와 협력해 응답을 생성합니다.
-7. 데이터는 MariaDB, Laravel storage, 필요한 경우 Redis 또는 외부 S3/R2 호환 스토리지에 저장됩니다.
+1. 브라우저가 `tiptipworld.com`으로 HTTP 요청을 보냄.
+2. 외부 reverse proxy가 있는 환경에서는 요청이 `proxy-nw` 네트워크의 `web` 컨테이너로 전달됨.
+3. Nginx는 `src/public`을 document root로 사용함.
+4. 정적 파일은 Nginx가 직접 응답하고, PHP 요청은 `app:9000`의 PHP-FPM으로 전달함.
+5. Laravel 라우터가 `src/routes/web.php`와 `src/routes/auth.php`의 정의에 따라 컨트롤러를 호출함.
+6. 컨트롤러는 모델, 서비스, Form Request, Policy, Blade 뷰와 협력해 응답을 생성함.
+7. 데이터는 MariaDB, Laravel storage, 필요한 경우 Redis 또는 외부 S3/R2 호환 스토리지에 저장됨.
 
 ## 네트워크
 
@@ -41,7 +41,7 @@ TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됩니다.
 | `5174:5173` | `app` | Vite 개발 서버 접근용 |
 | `127.0.0.1:3307:3306` | `db` | 호스트 로컬에서 MariaDB 접속용 |
 
-Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않습니다. 운영 환경에서는 `proxy-nw`에 연결된 reverse proxy 구성을 함께 확인해야 합니다.
+Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않음. 운영 환경에서는 `proxy-nw`에 연결된 reverse proxy 구성을 함께 확인해야 함.
 
 ## Laravel 애플리케이션 구조
 
@@ -83,4 +83,4 @@ Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않
 | 알림 | `notifications` |
 | Laravel 런타임 | `cache`, `jobs`, `job_batches`, `failed_jobs` |
 
-개발 기본값은 `src/.env.example` 기준 SQLite지만, Docker Compose 스택은 MariaDB 컨테이너를 포함합니다. Docker 환경에서는 `src/.env`의 DB 연결 정보를 Compose 서비스명 `db`에 맞춰 설정합니다.
+개발 기본값은 `src/.env.example` 기준 SQLite지만, Docker Compose 스택은 MariaDB 컨테이너를 포함함. Docker 환경에서는 `src/.env`의 DB 연결 정보를 Compose 서비스명 `db`에 맞춰 설정함.

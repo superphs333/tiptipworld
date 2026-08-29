@@ -4,13 +4,13 @@
 
 ## 1. 환경 파일 생성
 
-루트에서 Docker용 `.env`를 준비합니다.
+루트에서 Docker용 `.env`를 준비함.
 
 ```bash
 cp .env.example .env
 ```
 
-루트 `.env`에 로컬 사용자 UID/GID와 MariaDB 초기화 키를 채웁니다.
+루트 `.env`에 로컬 사용자 UID/GID와 MariaDB 초기화 키를 채움.
 
 ```dotenv
 APP_UID=1000
@@ -22,31 +22,31 @@ MYSQL_USER=
 MYSQL_PASSWORD=
 ```
 
-`APP_UID`와 `APP_GID`는 다음 명령으로 확인한 값을 사용합니다.
+`APP_UID`와 `APP_GID`는 다음 명령으로 확인한 값을 사용함.
 
 ```bash
 id -u
 id -g
 ```
 
-Laravel 환경 파일을 준비합니다.
+Laravel 환경 파일을 준비함.
 
 ```bash
 cp src/.env.example src/.env
 ```
 
-`src/.env`에서 앱 URL, DB, Redis, 스토리지, 소셜 로그인 설정을 개발 환경에 맞게 수정합니다.
+`src/.env`에서 앱 URL, DB, Redis, 스토리지, 소셜 로그인 설정을 개발 환경에 맞게 수정함.
 
 ## 2. Docker 이미지 빌드와 컨테이너 실행
 
-저장소 루트에서 실행합니다.
+저장소 루트에서 실행함.
 
 ```bash
 docker compose build --no-cache
 docker compose up -d
 ```
 
-일반적인 재빌드가 필요할 때는 캐시를 유지해도 됩니다.
+일반적인 재빌드가 필요할 때는 캐시를 유지해도 됨.
 
 ```bash
 docker compose build
@@ -55,13 +55,13 @@ docker compose up -d
 
 ## 3. PHP 의존성 설치
 
-컨테이너를 통해 설치합니다.
+컨테이너를 통해 설치함.
 
 ```bash
 docker compose exec -u root app composer install
 ```
 
-호스트에서 권한이 꼬이면 설치 후 소유자와 쓰기 권한을 정리합니다.
+호스트에서 권한이 꼬이면 설치 후 소유자와 쓰기 권한을 정리함.
 
 ```bash
 sudo chown -R "$USER:$USER" src/vendor
@@ -81,7 +81,7 @@ docker compose exec -u root app npm install
 docker compose exec -u root app npm run build
 ```
 
-필요하면 호스트 권한을 정리합니다.
+필요하면 호스트 권한을 정리함.
 
 ```bash
 sudo chown -R "$USER:$USER" src/node_modules src/public/build
@@ -93,7 +93,7 @@ sudo chown -R "$USER:$USER" src/node_modules src/public/build
 docker compose exec app php artisan migrate
 ```
 
-초기 데이터가 필요한 경우 시더를 함께 실행합니다.
+초기 데이터가 필요한 경우 시더를 함께 실행함.
 
 ```bash
 docker compose exec app php artisan db:seed
@@ -101,21 +101,21 @@ docker compose exec app php artisan db:seed
 
 ## 7. 개발 서버
 
-Docker Compose의 Nginx를 통해 접속하는 경우 로컬 hosts 설정과 reverse proxy 설정을 확인한 뒤 `http://tiptipworld.com`으로 접속합니다.
+Docker Compose의 Nginx를 통해 접속하는 경우 로컬 hosts 설정과 reverse proxy 설정을 확인한 뒤 `http://tiptipworld.com`으로 접속함.
 
-Vite 개발 서버만 별도로 실행하려면 다음 명령을 사용합니다.
+Vite 개발 서버만 별도로 실행하려면 다음 명령을 사용함.
 
 ```bash
 docker compose exec app npm run dev
 ```
 
-Laravel, queue, logs, Vite를 함께 실행하는 로컬 개발 명령은 `src/` 기준입니다.
+Laravel, queue, logs, Vite를 함께 실행하는 로컬 개발 명령은 `src/` 기준임.
 
 ```bash
 composer run dev
 ```
 
-컨테이너 안에서 실행하려면 다음처럼 호출합니다.
+컨테이너 안에서 실행하려면 다음처럼 호출함.
 
 ```bash
 docker compose exec app composer run dev
@@ -123,13 +123,13 @@ docker compose exec app composer run dev
 
 ## 8. 설치 확인
 
-컨테이너 상태를 확인합니다.
+컨테이너 상태를 확인함.
 
 ```bash
 docker compose ps
 ```
 
-Laravel 라우트가 로드되는지 확인합니다.
+Laravel 라우트가 로드되는지 확인함.
 
 ```bash
 docker compose exec app php artisan route:list
