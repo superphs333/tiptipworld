@@ -33,10 +33,10 @@ TipTipWorld는 Docker Compose 기준으로 Web, App, Data, Cache 계층을 함�
 | 외부 프록시 네트워크 | Web | 외부 reverse proxy와 Nginx 연결 |
 | 내부 애플리케이션 네트워크 | App, Web, Data, Cache | 애플리케이션 내부 통신 |
 
-주요 마운트는 `./src`, `docker/nginx/default.conf`, `docker/php/conf.d/uploads.ini`, MariaDB 영속 볼륨임. Xdebug 설정은 기본 Compose가 아니라 `docker-compose.debug.yml`을 함께 사용할 때만 추가됨.
+주요 마운트는 `./src`, `docker/nginx/default.conf`, `docker/php/conf.d/uploads.ini`, MariaDB 영속 볼륨임. Xdebug 설정은 `APP_ENV=local`로 빌드할 때만 이미지에 포함됨.
 
 Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않음. 앱 개발 서버와 로컬 DB 접근용 포트만 호스트 로컬로 제한해 노출함.
 
 ## 런타임
 
-`app` 이미지는 PHP 8.4 FPM 기반이며 `pdo_mysql`, `gd`, `zip`, `bcmath`, `redis` 확장과 Node.js 22.x, Composer를 포함함. Xdebug는 `INSTALL_XDEBUG=true` 빌드 인자를 사용할 때만 설치함.
+`app` 이미지는 PHP 8.4 FPM 기반이며 `pdo_mysql`, `gd`, `zip`, `bcmath`, `redis` 확장과 Node.js 22.x, Composer를 포함함. Xdebug는 루트 `.env`의 `APP_ENV=local` 값으로 빌드할 때만 설치함.

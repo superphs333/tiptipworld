@@ -2,7 +2,8 @@
 FROM php:8.4-fpm
 
 # Xdebug는 개발 디버깅 시에만 설치함
-ARG INSTALL_XDEBUG=false
+ARG APP_ENV=production
+COPY docker/php/conf.d/xdebug.ini /tmp/xdebug.ini
 
 # 시스템 패키지 및 PHP 확장 도구 설치
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -11,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install pdo_mysql gd zip bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis \
-    && if [ "$INSTALL_XDEBUG" = "true" ]; then pecl install xdebug && docker-php-ext-enable xdebug; fi \
+    && if [ "$APP_ENV" = "local" ]; then pecl install xdebug && docker-php-ext-enable xdebug && cp /tmp/xdebug.ini /usr/local/etc/php/conf.d/99-xdebug.ini; fi \
     && rm -rf /var/lib/apt/lists/*
 
 # Node.js 및 npm 설치함 (2026년 기준 안정적인 22.x 버전 권장함)

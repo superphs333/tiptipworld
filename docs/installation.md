@@ -23,6 +23,7 @@ cp .env.example .env
 ```dotenv
 APP_UID=1000
 APP_GID=1000
+APP_ENV=local
 
 # 데이터베이스 초기화 값은 .env.example의 항목을 기준으로 채움
 ```
@@ -67,15 +68,13 @@ docker network create <external-proxy-network>
 저장소 루트에서 실행함.
 
 ```bash
-docker compose build --no-cache
-docker compose up -d
+docker compose up -d --build
 ```
 
-일반적인 재빌드가 필요할 때는 캐시를 유지해도 됨.
+Xdebug 설치 여부는 루트 `.env`의 `APP_ENV` 값으로 결정함. `APP_ENV=local`이면 Xdebug가 설치되고, `APP_ENV=production`이면 설치되지 않음. `APP_ENV`를 바꾼 뒤에는 같은 명령으로 다시 빌드함.
 
 ```bash
-docker compose build
-docker compose up -d
+docker compose up -d --build
 ```
 
 ## 5. PHP 의존성 설치
