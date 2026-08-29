@@ -21,7 +21,7 @@
 
 ## 루트 환경변수 준비
 
-루트의 `.env`는 Docker Compose가 PHP 컨테이너 실행 사용자와 MariaDB 컨테이너 초기화 값을 정할 때 사용함. 실제 값은 커밋하지 말고 로컬에서만 관리함.
+루트의 `.env`는 Docker Compose가 PHP 컨테이너 실행 사용자와 데이터베이스 초기화 값을 정할 때 사용함. 실제 값은 커밋하지 말고 로컬에서만 관리함.
 
 필요한 키:
 
@@ -29,10 +29,7 @@
 APP_UID=1000
 APP_GID=1000
 
-MYSQL_ROOT_PASSWORD=
-MYSQL_DATABASE=
-MYSQL_USER=
-MYSQL_PASSWORD=
+# 데이터베이스 초기화 값은 .env.example의 항목을 기준으로 채움
 ```
 
 `APP_UID`와 `APP_GID`는 각 개발자의 호스트 사용자 ID와 그룹 ID에 맞춤.
@@ -46,41 +43,24 @@ id -g
 
 Laravel 앱 환경변수는 `src/.env`에서 관리함. 최초 설치 전 `src/.env.example`을 기준으로 `src/.env`를 준비함.
 
-Docker Compose의 MariaDB를 사용할 때 확인할 주요 키:
+Docker Compose의 MariaDB를 사용할 때는 `src/.env.example`의 DB/Redis 관련 항목을 기준으로 로컬 값을 채움.
 
-```dotenv
-APP_NAME=TipTipWorld
-APP_ENV=local
-APP_DEBUG=true
-APP_URL=http://tiptipworld.com
-
-DB_CONNECTION=mariadb
-DB_HOST=db
-DB_PORT=3306
-DB_DATABASE=
-DB_USERNAME=
-DB_PASSWORD=
-
-REDIS_HOST=redis
-REDIS_PORT=6379
-```
-
-파일 업로드 또는 외부 스토리지를 사용할 경우 `FILESYSTEM_DISK`, `AWS_*`, `R2_*` 키를 설정함. Google/Kakao 로그인 사용 시 `GOOGLE_*`, `KAKAO_*` 키를 설정함.
+파일 업로드, 외부 스토리지, 소셜 로그인 사용 시 관련 환경변수를 로컬에서만 설정함.
 
 ## 로컬 도메인
 
-Nginx 설정의 `server_name`은 `tiptipworld.com`임. 로컬 브라우저에서 이 도메인으로 접속하려면 hosts 파일에 개발 서버 주소를 등록함.
+Nginx 설정의 `server_name`은 환경별 개발 도메인에 맞춤. 로컬 브라우저에서 이 도메인으로 접속하려면 hosts 파일에 개발 서버 주소를 등록함.
 
 예시:
 
 ```text
-127.0.0.1 tiptipworld.com
+127.0.0.1 your-local-domain.test
 ```
 
-프록시 컨테이너 또는 외부 reverse proxy를 사용하는 환경에서는 `proxy-nw` Docker 네트워크가 먼저 존재해야 함.
+프록시 컨테이너 또는 외부 reverse proxy를 사용하는 환경에서는 Compose 설정에 맞는 external Docker 네트워크가 먼저 존재해야 함.
 
 ```bash
-docker network create proxy-nw
+docker network create <external-proxy-network>
 ```
 
 이미 존재하는 네트워크라면 위 명령은 생략함.

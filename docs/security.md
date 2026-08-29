@@ -5,30 +5,23 @@
 ## Secret 관리
 
 - 루트 `.env`와 `src/.env`의 실제 값을 커밋하지 않음.
-- 문서, 로그, 이슈, PR 설명에는 secret 값을 적지 않고 key 이름과 설정 위치만 적음.
+- 문서, 로그, 이슈, PR 설명에는 secret 값이나 운영 식별자를 적지 않고 설정 위치만 적음.
 - 새 필수 환경변수를 추가할 때는 Docker Compose용 값은 루트 `.env.example`, Laravel 앱 값은 `src/.env.example`에 예시 값만 반영함.
 
 주요 secret 또는 민감 설정 위치:
 
-| 영역 | 키 |
+| 영역 | 설정 위치 |
 | --- | --- |
-| Docker 컨테이너 사용자 | `APP_UID`, `APP_GID` |
-| Docker MariaDB 초기화 | `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` |
-| Laravel 앱 | `APP_KEY` |
-| DB 연결 | `DB_PASSWORD` |
-| AWS/R2 스토리지 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` |
-| Google 로그인 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` |
-| Kakao 로그인 | `KAKAO_CLIENT_ID`, `KAKAO_CLIENT_SECRET`, `KAKAO_REDIRECT_URI` |
+| Docker 컨테이너 사용자 | 루트 `.env` |
+| Docker 데이터베이스 초기화 | 루트 `.env` |
+| Laravel 앱 키 | `src/.env` |
+| DB 연결 | `src/.env` |
+| 외부 스토리지 | `src/.env` |
+| 소셜 로그인 provider | `src/.env`, provider 콘솔 |
 
 ## 환경 설정
 
-운영 환경에서는 다음 값을 개발 기본값으로 두지 않음.
-
-```dotenv
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://your-domain.example
-```
+운영 환경에서는 앱 실행 환경, 디버그 옵션, 서비스 URL을 개발 기본값으로 두지 않음.
 
 운영 배포 전 설정 캐시를 갱신하고, 값이 잘못 캐시된 경우 `php artisan optimize:clear`로 비운 뒤 다시 캐시함.
 
@@ -57,29 +50,29 @@ Docker Compose의 PHP 컨테이너는 루트 `.env`의 `APP_UID:APP_GID` 값으�
 - PHP: `docker/php/conf.d/uploads.ini`
 - Laravel disk: `src/config/filesystems.php`
 
-R2/S3 호환 스토리지를 사용할 경우 public URL, bucket 권한, path-style endpoint, 공개 파일 삭제 정책을 함께 확인함. 사용자 업로드 파일은 MIME 검증, 확장자 검증, 저장 경로 정규화가 필요함.
+외부 스토리지를 사용할 경우 공개 URL 정책, 버킷 권한, 공개 파일 삭제 정책을 함께 확인함. 사용자 업로드 파일은 MIME 검증, 확장자 검증, 저장 경로 정규화가 필요함.
 
 ## 인증과 권한
 
 관리자 화면은 `auth`와 `admin` 미들웨어를 통과해야 함.
 
-소셜 로그인은 `src/config/services.php`의 Google/Kakao 설정을 사용함. redirect URI는 provider 콘솔에 등록된 값과 `src/.env` 값이 일치해야 함.
+소셜 로그인은 `src/config/services.php`의 provider 설정을 사용함. redirect URI는 provider 콘솔에 등록된 값과 `src/.env` 값이 일치해야 함.
 
 계정 삭제 또는 소셜 연결 해제 기능을 변경할 때는 세션 무효화, 연결 provider 메타데이터, 재로그인 흐름을 함께 검증함.
 
 ## 네트워크 노출
 
-- MariaDB는 호스트의 `127.0.0.1:3307`에만 publish됨.
+- MariaDB는 호스트 로컬 접근으로만 제한함.
 - Redis는 Compose 파일에서 호스트에 publish하지 않음.
-- Nginx는 external `proxy-nw` 네트워크를 통해 reverse proxy와 연결됨.
+- Nginx는 external 네트워크를 통해 reverse proxy와 연결됨.
 
 운영에서 DB나 Redis를 외부에 직접 노출하지 않음. reverse proxy에는 TLS, 보안 헤더, 업로드 크기 제한, 요청 로그 정책을 별도로 적용함.
 
 ## 배포 전 확인
 
-- `APP_DEBUG=false`인지 확인함.
+- 디버그 모드가 운영 값인지 확인함.
 - `.env` 파일이 이미지나 Git에 포함되지 않는지 확인함.
-- `APP_KEY`가 설정되어 있는지 확인함.
-- DB, Redis, R2/S3, 소셜 로그인 secret이 운영 값인지 확인함.
+- Laravel 앱 키가 설정되어 있는지 확인함.
+- DB, Redis, 외부 스토리지, 소셜 로그인 secret이 운영 값인지 확인함.
 - `storage`와 `bootstrap/cache` 권한이 Laravel 실행 사용자와 맞는지 확인함.
 - 마이그레이션, 큐 worker 재시작, 캐시 갱신이 배포 절차에 포함되어 있는지 확인함.

@@ -4,12 +4,12 @@
 
 ## Docker Compose 서비스
 
-| 서비스 | 컨테이너 | 이미지/빌드 | 역할 | 포트/네트워크 | 상세 문서 |
-| --- | --- | --- | --- | --- | --- |
-| `app` | `tiptipworld-php` | `docker/php/Dockerfile` | Laravel PHP-FPM 실행, Composer/NPM/Artisan 명령 실행 | `5174:5173`, `tiptip-internal` | [src/README.md](../src/README.md) |
-| `web` | `tiptipworld-web` | `nginx:1.24-alpine` | HTTP 요청 처리, `/var/www/html/public` 제공, PHP-FPM 프록시 | `proxy-nw`, `tiptip-internal` | - |
-| `db` | `tiptipworld-db` | `mariadb:10.11` | MariaDB 데이터 저장 | `127.0.0.1:3307:3306`, `tiptip-internal` | - |
-| `redis` | `tiptipworld-redis` | `redis:7.2-alpine` | Redis 캐시/세션/큐 백엔드로 사용 가능 | `tiptip-internal` | - |
+| 서비스 | 이미지/빌드 | 역할 | 포트/네트워크 | 상세 문서 |
+| --- | --- | --- | --- | --- |
+| `app` | `docker/php/Dockerfile` | Laravel PHP-FPM 실행, Composer/NPM/Artisan 명령 실행 | 개발 서버 포트, 내부 네트워크 | [src/README.md](../src/README.md) |
+| `web` | `nginx:1.24-alpine` | HTTP 요청 처리, public 디렉터리 제공, PHP-FPM 프록시 | 외부 프록시 네트워크, 내부 네트워크 | - |
+| `db` | `mariadb:10.11` | MariaDB 데이터 저장 | 로컬 DB 포트, 내부 네트워크 | - |
+| `redis` | `redis:7.2-alpine` | Redis 캐시/세션/큐 백엔드로 사용 가능 | 내부 네트워크 | - |
 
 서비스별 README 링크는 실제 파일이 존재하는 `src/README.md`에만 연결했음.
 
@@ -37,4 +37,4 @@
 
 Vite가 `src/resources/css`와 `src/resources/js` 자산을 빌드함. 주요 프론트엔드 의존성은 Tailwind CSS, Alpine.js, Axios, Tiptap, jQuery, Summernote임.
 
-개발 서버 포트는 컨테이너 내부 `5173`, 호스트 `5174`임.
+개발 서버 포트는 Docker Compose 설정을 따름.

@@ -10,16 +10,13 @@
 cp .env.example .env
 ```
 
-루트 `.env`에 로컬 사용자 UID/GID와 MariaDB 초기화 키를 채움.
+루트 `.env`에 로컬 사용자 UID/GID와 데이터베이스 초기화 값을 채움.
 
 ```dotenv
 APP_UID=1000
 APP_GID=1000
 
-MYSQL_ROOT_PASSWORD=
-MYSQL_DATABASE=
-MYSQL_USER=
-MYSQL_PASSWORD=
+# 데이터베이스 초기화 값은 .env.example의 항목을 기준으로 채움
 ```
 
 `APP_UID`와 `APP_GID`는 다음 명령으로 확인한 값을 사용함.
@@ -101,7 +98,7 @@ docker compose exec app php artisan db:seed
 
 ## 7. 개발 서버
 
-Docker Compose의 Nginx를 통해 접속하는 경우 로컬 hosts 설정과 reverse proxy 설정을 확인한 뒤 `http://tiptipworld.com`으로 접속함.
+Docker Compose의 Nginx를 통해 접속하는 경우 로컬 hosts 설정과 reverse proxy 설정을 확인한 뒤 설정한 개발 도메인으로 접속함.
 
 Vite 개발 서버만 별도로 실행하려면 다음 명령을 사용함.
 

@@ -1,4 +1,4 @@
-# 운영, 관리 UI 접속, 상태 확인
+# 운영, 상태 확인
 
 [README로 돌아가기](../README.md)
 
@@ -40,9 +40,9 @@ MariaDB 데이터 볼륨까지 삭제하면 데이터가 사라짐. 운영 또�
 | 회원가입 | `/register` | guest |
 | 프로필 | `/profile` | 인증 필요 |
 | 마이페이지 | `/mypage/{tab?}` | 인증 필요 |
-| 관리자 | `/admin/{tab?}` | `auth`, `admin` 미들웨어 필요 |
+| 관리자 | 설정된 관리자 라우트 | 관리자 권한 필요 |
 
-Nginx 설정의 로컬 도메인은 `tiptipworld.com`임. reverse proxy를 사용하지 않는 로컬 구성에서는 Nginx 80 포트 publish 설정이 별도로 필요할 수 있음.
+로컬 도메인은 환경별 Nginx 설정을 따름. reverse proxy를 사용하지 않는 로컬 구성에서는 Nginx 포트 publish 설정이 별도로 필요할 수 있음.
 
 ## Laravel 상태 확인
 
@@ -100,7 +100,7 @@ docker compose exec app php artisan migrate:status
 docker compose exec app php artisan db:seed
 ```
 
-호스트에서 MariaDB에 접속할 때는 `127.0.0.1:3307`을 사용함.
+호스트에서 MariaDB에 접속할 때는 Docker Compose에 설정된 로컬 DB 포트를 사용함.
 
 ## 큐
 
