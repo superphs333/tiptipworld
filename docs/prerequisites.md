@@ -21,15 +21,25 @@
 
 ## 루트 환경변수 준비
 
-루트의 `.env`는 Docker Compose가 MariaDB 컨테이너를 초기화할 때 사용합니다. 실제 값은 커밋하지 말고 로컬에서만 관리합니다.
+루트의 `.env`는 Docker Compose가 PHP 컨테이너 실행 사용자와 MariaDB 컨테이너 초기화 값을 정할 때 사용합니다. 실제 값은 커밋하지 말고 로컬에서만 관리합니다.
 
 필요한 키:
 
 ```dotenv
+APP_UID=1000
+APP_GID=1000
+
 MYSQL_ROOT_PASSWORD=
 MYSQL_DATABASE=
 MYSQL_USER=
 MYSQL_PASSWORD=
+```
+
+`APP_UID`와 `APP_GID`는 각 개발자의 호스트 사용자 ID와 그룹 ID에 맞춥니다.
+
+```bash
+id -u
+id -g
 ```
 
 ## Laravel 환경변수 준비
@@ -77,7 +87,7 @@ docker network create proxy-nw
 
 ## 권한 준비
 
-Laravel은 `src/storage`와 `src/bootstrap/cache`에 쓸 수 있어야 합니다. Docker Compose의 `app` 서비스는 `1000:1000` 사용자로 실행되므로 호스트 파일 소유자와 쓰기 권한을 맞춰야 합니다.
+Laravel은 `src/storage`와 `src/bootstrap/cache`에 쓸 수 있어야 합니다. Docker Compose의 `app` 서비스는 루트 `.env`의 `APP_UID:APP_GID` 사용자로 실행되므로 호스트 파일 소유자와 쓰기 권한을 맞춰야 합니다.
 
 ```bash
 chmod -R 775 src/storage src/bootstrap/cache

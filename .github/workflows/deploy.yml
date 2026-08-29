@@ -22,35 +22,42 @@ jobs:
 
                       # 1. 프로젝트 루트 폴더 이동 (docker-compose.yml이 있는 위치)
                       cd ~/infrastructure/services/tiptipworld
+
+                      # 1.1 PHP 컨테이너 실행 UID/GID 확인
+                      APP_UID=$(grep -E '^APP_UID=' .env 2>/dev/null | tail -n 1 | cut -d= -f2-)
+                      APP_GID=$(grep -E '^APP_GID=' .env 2>/dev/null | tail -n 1 | cut -d= -f2-)
+                      APP_UID=${APP_UID:-1000}
+                      APP_GID=${APP_GID:-1000}
+                      APP_RUN_USER="${APP_UID}:${APP_GID}"
                       
                       # 2. 최신 코드 가져오기
                       git pull origin main
                       
                       # 3. Laravel 쓰기 경로를 PHP 컨테이너 실행 UID/GID에 맞춤
                       sudo mkdir -p src/vendor src/storage src/bootstrap/cache
-                      sudo chown -R 1000:1000 src/vendor src/storage src/bootstrap/cache
+                      sudo chown -R "$APP_RUN_USER" src/vendor src/storage src/bootstrap/cache
                       sudo chmod -R u+rwX,g+rwX src/vendor src/storage src/bootstrap/cache
                       
                       # 4. PHP 라이브러리 설치 (컨테이너 내부 경로는 /var/www/html임)
                       # -w /var/www/html 설정을 통해 artisan 파일이 있는 곳에서 실행함
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
                       
                       # 5. 프론트엔드 빌드 (src 폴더로 이동하여 실행)
                       # 빌드 대상 파일(package.json 등)이 src 안에 있으므로 경로 주의
                       cd src
                       docker run --rm -v "$(pwd)":/app -v /app/node_modules -w /app node:20 sh -c "npm ci && npm run build"
-                      sudo chown -R 1000:1000 public/build
+                      sudo chown -R "$APP_RUN_USER" public/build
                       
                       # 6. 권한 부여 (라라벨 쓰기 권한)
-                      sudo chown -R 1000:1000 storage bootstrap/cache
+                      sudo chown -R "$APP_RUN_USER" storage bootstrap/cache
                       sudo chmod -R u+rwX,g+rwX storage bootstrap/cache
                       
                       # 7. 데이터베이스 마이그레이션, 시드 및 캐시 최적화
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php php artisan migrate --force
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php php artisan db:seed --force
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php php artisan config:cache
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php php artisan route:cache
-                      docker exec -u 1000:1000 -w /var/www/html tiptipworld-php php artisan view:cache
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan migrate --force
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan db:seed --force
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan config:cache
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan route:cache
+                      docker exec -u "$APP_RUN_USER" -w /var/www/html tiptipworld-php php artisan view:cache
 
                       # 8. 권한 최종 확인
                       sudo chmod -R u+rwX,g+rwX storage bootstrap/cache

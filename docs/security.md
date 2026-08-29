@@ -6,12 +6,13 @@
 
 - 루트 `.env`와 `src/.env`의 실제 값을 커밋하지 않습니다.
 - 문서, 로그, 이슈, PR 설명에는 secret 값을 적지 않고 key 이름과 설정 위치만 적습니다.
-- 새 필수 환경변수를 추가할 때는 예시 값만 `src/.env.example`에 반영합니다.
+- 새 필수 환경변수를 추가할 때는 Docker Compose용 값은 루트 `.env.example`, Laravel 앱 값은 `src/.env.example`에 예시 값만 반영합니다.
 
 주요 secret 또는 민감 설정 위치:
 
 | 영역 | 키 |
 | --- | --- |
+| Docker 컨테이너 사용자 | `APP_UID`, `APP_GID` |
 | Docker MariaDB 초기화 | `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` |
 | Laravel 앱 | `APP_KEY` |
 | DB 연결 | `DB_PASSWORD` |
@@ -45,6 +46,8 @@ chmod -R 775 src/storage src/bootstrap/cache
 ```
 
 문제가 생겨도 전체 애플리케이션 디렉터리에 무조건 `777`을 적용하지 않습니다. 쓰기가 필요한 경로만 제한적으로 조정합니다.
+
+Docker Compose의 PHP 컨테이너는 루트 `.env`의 `APP_UID:APP_GID` 값으로 실행됩니다. 여러 개발자가 같은 저장소를 사용할 때는 각자 `id -u`, `id -g` 결과를 루트 `.env`에 설정해 호스트 파일 소유권과 컨테이너 실행 사용자를 맞춥니다.
 
 ## 업로드와 스토리지
 

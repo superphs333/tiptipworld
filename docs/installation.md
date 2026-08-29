@@ -7,16 +7,26 @@
 루트에서 Docker용 `.env`를 준비합니다.
 
 ```bash
-touch .env
+cp .env.example .env
 ```
 
-루트 `.env`에 MariaDB 초기화 키를 채웁니다.
+루트 `.env`에 로컬 사용자 UID/GID와 MariaDB 초기화 키를 채웁니다.
 
 ```dotenv
+APP_UID=1000
+APP_GID=1000
+
 MYSQL_ROOT_PASSWORD=
 MYSQL_DATABASE=
 MYSQL_USER=
 MYSQL_PASSWORD=
+```
+
+`APP_UID`와 `APP_GID`는 다음 명령으로 확인한 값을 사용합니다.
+
+```bash
+id -u
+id -g
 ```
 
 Laravel 환경 파일을 준비합니다.

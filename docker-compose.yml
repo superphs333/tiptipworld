@@ -7,7 +7,7 @@ services:
     # 모든 이름을 tiptipworld로 통일함
     container_name: tiptipworld-php
     restart: unless-stopped
-    user: "1000:1000"
+    user: "${APP_UID:-1000}:${APP_GID:-1000}"
     volumes:
       - ./src:/var/www/html
       - ./docker/php/conf.d/xdebug.ini:/usr/local/etc/php/conf.d/99-xdebug.ini
