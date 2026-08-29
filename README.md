@@ -2,6 +2,14 @@
 
 TipTipWorld는 Laravel 12 기반의 팁 공유 커뮤니티 애플리케이션임. Docker Compose로 PHP-FPM, Nginx, MariaDB, Redis를 함께 실행하며, Laravel Breeze 인증, 소셜 로그인, 팁 작성/검색/댓글/좋아요/북마크/팔로우, 관리자 기능을 포함함.
 
+## 목차
+
+| 구분 | README 위치 | 상세 문서 |
+| --- | --- | --- |
+| 설치 | [설치](#설치) | [설치 문서](docs/installation.md) |
+| 구조(서버) | [구조(서버)](#구조서버) | [시스템 구조](docs/architecture.md), [운영 문서](docs/operations.md) |
+| 기능 | [기능](#기능) | [기능 목록](docs/features/README.md) |
+
 ## 설치
 
 로컬 실행은 Docker Compose 기준으로 진행함.
@@ -20,8 +28,6 @@ docker compose exec app php artisan migrate
 
 루트 `.env`에는 Docker용 `APP_UID`, `APP_GID`, DB 초기화 값을 채우고, `src/.env`에는 Laravel 앱 URL, DB, Redis, 스토리지, 소셜 로그인 설정을 채움. 실제 secret 값은 커밋하지 않음.
 
-상세 절차는 [설치 전 준비](docs/prerequisites.md)와 [최초 설치](docs/installation.md)를 참고함.
-
 ## 구조(서버)
 
 ![TipTipWorld Service Flow](docs/assets/service-flow.svg)
@@ -35,8 +41,6 @@ docker compose exec app php artisan migrate
 
 Laravel 애플리케이션 코드는 `src/`에 있고, 주요 코드는 `src/app`, Blade 뷰는 `src/resources/views`, 라우트는 `src/routes`, 마이그레이션은 `src/database`에 둠.
 
-상세 구조는 [시스템 구조](docs/architecture.md), 서비스 구성은 [서비스 문서](docs/services.md), 운영 명령은 [운영 문서](docs/operations.md)를 참고함.
-
 ## 기능
 
 | 기능 | 주요 내용 |
@@ -49,5 +53,3 @@ Laravel 애플리케이션 코드는 `src/`에 있고, 주요 코드는 `src/app
 | 마이페이지/알림 | 프로필, 내 팁, 보관함, 댓글/좋아요/팔로우 알림 |
 | 관리자 | 사용자, 카테고리, 태그, 팁 관리 |
 | 이미지/미디어 | 프로필 이미지, 에디터 이미지, 썸네일, R2/S3 저장 |
-
-기능별 상세 내용은 [기능 목록](docs/features/README.md)을 참고함.

@@ -1,4 +1,4 @@
-# 시스템 구조, 요청 흐름, 네트워크
+# 시스템 구조
 
 [README로 돌아가기](../README.md)
 
@@ -6,16 +6,16 @@
 
 ![TipTipWorld Service Flow](assets/service-flow.svg)
 
-## 컨테이너 구조
+## Docker Compose 구성
 
-TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됨.
+TipTipWorld는 Docker Compose 기준으로 Web, App, Data, Cache 계층을 함께 실행함.
 
-| 계층 | 구성 | 역할 |
+| 서비스 | 구성 | 역할 |
 | --- | --- | --- |
-| Web | Nginx 컨테이너 | HTTP 요청 수신, 정적 파일 제공, PHP 요청을 PHP-FPM으로 전달 |
-| App | `app` PHP-FPM 컨테이너 | Laravel 애플리케이션 실행, Composer/NPM/Artisan 명령 실행 |
-| Data | `db` MariaDB 컨테이너 | 애플리케이션 영속 데이터 저장 |
-| Cache | `redis` Redis 컨테이너 | Redis 기반 캐시/세션/큐 선택 시 사용 가능한 인메모리 저장소 |
+| `web` | `nginx:1.24-alpine` | HTTP 요청 처리, `src/public` 정적 파일 제공, PHP 요청을 `app`으로 전달 |
+| `app` | `docker/php/Dockerfile` | Laravel PHP-FPM 실행, Composer/NPM/Artisan 명령 실행 |
+| `db` | `mariadb:10.11` | MariaDB 데이터 저장 |
+| `redis` | `redis:7.2-alpine` | Redis 기반 캐시, 세션, 큐 백엔드로 사용 가능 |
 
 ## 요청 흐름
 
@@ -27,21 +27,22 @@ TipTipWorld는 Docker Compose 기준으로 다음 계층으로 실행됨.
 6. 컨트롤러는 모델, 서비스, Form Request, Policy, Blade 뷰와 협력해 응답을 생성함.
 7. 데이터는 MariaDB, Laravel storage, 필요한 경우 Redis 또는 외부 S3/R2 호환 스토리지에 저장됨.
 
-## 네트워크
+## 네트워크와 볼륨
 
 | 네트워크 | 연결 서비스 | 용도 |
 | --- | --- | --- |
 | 외부 프록시 네트워크 | Web | 외부 reverse proxy와 Nginx 연결 |
 | 내부 애플리케이션 네트워크 | App, Web, Data, Cache | 애플리케이션 내부 통신 |
 
-포트 노출:
+주요 마운트는 `./src`, `docker/nginx/default.conf`, `docker/php/conf.d/uploads.ini`, MariaDB 영속 볼륨임. Xdebug 설정은 기본 Compose가 아니라 `docker-compose.debug.yml`을 함께 사용할 때만 추가됨.
 
-| 포트 | 서비스 | 설명 |
-| --- | --- | --- |
-| 개발 서버 포트 | App | Vite 개발 서버 접근용 |
-| 로컬 DB 포트 | Data | 호스트 로컬에서 MariaDB 접속용 |
+Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않음. 앱 개발 서버와 로컬 DB 접근용 포트만 호스트 로컬로 제한해 노출함.
 
-Nginx의 80 포트는 Compose 파일에서 직접 호스트에 publish하지 않음. 운영 환경에서는 reverse proxy 구성을 함께 확인해야 함.
+## 런타임
+
+`app` 이미지는 PHP 8.4 FPM 기반이며 `pdo_mysql`, `gd`, `zip`, `bcmath`, `redis` 확장과 Node.js 22.x, Composer를 포함함. Xdebug는 `INSTALL_XDEBUG=true` 빌드 인자를 사용할 때만 설치함.
+
+Vite가 `src/resources/css`와 `src/resources/js` 자산을 빌드함. 주요 프론트엔드 의존성은 Tailwind CSS, Alpine.js, Axios, Tiptap, jQuery, Summernote임.
 
 ## Laravel 애플리케이션 구조
 
