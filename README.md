@@ -27,3 +27,15 @@ TipTipWorld는 Laravel 12 기반으로 개발된 팁 공유 커뮤니티 애플�
 | [애플리케이션 구조](docs/application.md) | Laravel 디렉터리, 라우트, 뷰/자산, 테스트 위치 |
 | [운영 문서](docs/operations.md) | 상태 확인, 로그, 캐시, 큐, 마이그레이션 운영 명령 |
 | [기능 목록](docs/features/README.md) | 기능별 상세 문서 진입점 |
+
+## 라이선스
+
+TipTipWorld 애플리케이션 코드는 `src/composer.json`에 선언된 MIT License를 따릅니다. 외부 라이브러리는 각 패키지가 제공하는 라이선스 조건을 함께 따릅니다.
+
+| 구분 | 주요 라이브러리 | 라이선스 |
+| --- | --- | --- |
+| PHP | Laravel Framework, Laravel Socialite, Laravel Tinker | MIT |
+| PHP | League Flysystem AWS S3, SocialiteProviders Kakao | MIT |
+| JavaScript | Tiptap, jQuery, Summernote | MIT |
+
+전체 의존성의 라이선스는 `src/composer.lock`과 `src/package-lock.json`에 기록된 패키지별 라이선스 정보를 기준으로 확인합니다.
