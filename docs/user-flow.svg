@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1180" viewBox="0 0 1600 1180" role="img" aria-labelledby="title desc">
+  <title id="title">TipTipWorld 사용자 Flow</title>
+  <desc id="desc">TipTipWorld의 공개 탐색, 로그인 사용자, 관리자 사용자 흐름을 구획한 플로우 차트</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#344054"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#147a5a"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1d5f99"/>
+    </marker>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#101828" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f8fa; }
+      .title { font: 800 36px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .subtitle { font: 500 18px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #667085; }
+      .lane-title { font: 800 22px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .lane-subtitle { font: 500 14px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #667085; }
+      .label { font: 700 17px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #101828; }
+      .small { font: 500 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #667085; }
+      .tiny { font: 700 12px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475467; }
+      .pill-text { font: 800 13px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; }
+      .node { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.5; filter: url(#shadow); }
+      .node-public { fill: #ffffff; stroke: #9cc8ff; }
+      .node-auth { fill: #ffffff; stroke: #8fd8be; }
+      .node-admin { fill: #ffffff; stroke: #e7a0a0; }
+      .decision { fill: #fff8e5; stroke: #f2bd4b; stroke-width: 1.5; filter: url(#shadow); }
+      .lane-public { fill: #eef6ff; stroke: #bddbff; stroke-width: 1.5; }
+      .lane-auth { fill: #edf9f4; stroke: #b9e6d3; stroke-width: 1.5; }
+      .lane-admin { fill: #fff1f1; stroke: #ffc9c9; stroke-width: 1.5; }
+      .route { font: 700 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; fill: #344054; }
+      .arrow { fill: none; stroke: #344054; stroke-width: 2.2; marker-end: url(#arrow); }
+      .arrow-auth { fill: none; stroke: #147a5a; stroke-width: 2.2; marker-end: url(#arrow-green); }
+      .arrow-admin { fill: none; stroke: #1d5f99; stroke-width: 2.2; marker-end: url(#arrow-blue); }
+      .soft-line { fill: none; stroke: #98a2b3; stroke-width: 1.8; stroke-dasharray: 7 7; marker-end: url(#arrow); }
+      .legend { fill: #ffffff; stroke: #d0d5dd; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="1180"/>
+
+  <text class="title" x="80" y="76">TipTipWorld 사용자 Flow</text>
+  <text class="subtitle" x="80" y="108">공개 탐색에서 팁 상세로 진입하고, 로그인 후 작성 · 반응 · 마이페이지 · 관리자 관리로 이어지는 흐름</text>
+
+  <rect class="legend" x="1110" y="50" width="410" height="86" rx="10"/>
+  <circle cx="1140" cy="80" r="8" fill="#5aa7ff"/>
+  <text class="tiny" x="1160" y="84">공개 사용자도 접근 가능</text>
+  <circle cx="1140" cy="110" r="8" fill="#32b483"/>
+  <text class="tiny" x="1160" y="114">로그인 필요 액션</text>
+  <circle cx="1330" cy="80" r="8" fill="#e66b6b"/>
+  <text class="tiny" x="1350" y="84">관리자 전용</text>
+  <circle cx="1330" cy="110" r="8" fill="#f2bd4b"/>
+  <text class="tiny" x="1350" y="114">분기 / 권한 판단</text>
+
+  <rect class="lane-public" x="60" y="170" width="1480" height="310" rx="18"/>
+  <text class="lane-title" x="90" y="215">1. 공개 탐색 Flow</text>
+  <text class="lane-subtitle" x="90" y="240">비로그인 사용자도 홈, 목록, 검색, 카테고리, 태그, 사용자 피드, 상세 조회까지 접근</text>
+
+  <rect class="node node-public" x="110" y="290" width="180" height="86" rx="10"/>
+  <text class="label" x="200" y="324" text-anchor="middle">Home</text>
+  <text class="route" x="200" y="350" text-anchor="middle">/</text>
+
+  <rect class="node node-public" x="360" y="250" width="190" height="72" rx="10"/>
+  <text class="label" x="455" y="281" text-anchor="middle">팁 목록</text>
+  <text class="route" x="455" y="304" text-anchor="middle">/tips</text>
+
+  <rect class="node node-public" x="360" y="350" width="190" height="72" rx="10"/>
+  <text class="label" x="455" y="381" text-anchor="middle">검색</text>
+  <text class="route" x="455" y="404" text-anchor="middle">/tips/search</text>
+
+  <rect class="node node-public" x="620" y="220" width="210" height="72" rx="10"/>
+  <text class="label" x="725" y="251" text-anchor="middle">카테고리별</text>
+  <text class="route" x="725" y="274" text-anchor="middle">/tips/category/{id}</text>
+
+  <rect class="node node-public" x="620" y="320" width="210" height="72" rx="10"/>
+  <text class="label" x="725" y="351" text-anchor="middle">태그별</text>
+  <text class="route" x="725" y="374" text-anchor="middle">/tips/tag/{id}</text>
+
+  <rect class="node node-public" x="620" y="420" width="210" height="72" rx="10"/>
+  <text class="label" x="725" y="451" text-anchor="middle">사용자 피드</text>
+  <text class="route" x="725" y="474" text-anchor="middle">/tips/user/{id}</text>
+
+  <rect class="node node-public" x="940" y="300" width="210" height="86" rx="10"/>
+  <text class="label" x="1045" y="334" text-anchor="middle">팁 상세</text>
+  <text class="route" x="1045" y="360" text-anchor="middle">/tip/{id}</text>
+
+  <polygon class="decision" points="1290,287 1398,343 1290,399 1182,343"/>
+  <text class="label" x="1290" y="337" text-anchor="middle">로그인?</text>
+  <text class="small" x="1290" y="359" text-anchor="middle">액션 권한 판단</text>
+
+  <path class="arrow" d="M 290 333 C 320 333, 326 286, 358 286"/>
+  <path class="arrow" d="M 290 333 C 320 333, 326 386, 358 386"/>
+  <path class="arrow" d="M 550 286 C 580 286, 588 256, 618 256"/>
+  <path class="arrow" d="M 550 386 C 582 386, 587 356, 618 356"/>
+  <path class="arrow" d="M 550 386 C 582 386, 587 456, 618 456"/>
+  <path class="arrow" d="M 830 256 C 900 256, 900 330, 938 330"/>
+  <path class="arrow" d="M 830 356 C 870 356, 895 343, 938 343"/>
+  <path class="arrow" d="M 830 456 C 900 456, 900 357, 938 357"/>
+  <path class="arrow" d="M 1150 343 L 1178 343"/>
+
+  <rect class="lane-auth" x="60" y="520" width="1480" height="395" rx="18"/>
+  <text class="lane-title" x="90" y="565">2. 로그인 사용자 Flow</text>
+  <text class="lane-subtitle" x="90" y="590">팁 상세에서 반응하고, 글을 작성 · 수정 · 삭제하며, 마이페이지에서 개인 데이터를 관리</text>
+
+  <rect class="node node-auth" x="110" y="650" width="190" height="84" rx="10"/>
+  <text class="label" x="205" y="683" text-anchor="middle">회원가입 / 로그인</text>
+  <text class="route" x="205" y="709" text-anchor="middle">/register, /login</text>
+
+  <rect class="node node-auth" x="385" y="625" width="190" height="72" rx="10"/>
+  <text class="label" x="480" y="656" text-anchor="middle">좋아요</text>
+  <text class="route" x="480" y="679" text-anchor="middle">POST /tip/like/{id}</text>
+
+  <rect class="node node-auth" x="385" y="720" width="190" height="72" rx="10"/>
+  <text class="label" x="480" y="751" text-anchor="middle">북마크</text>
+  <text class="route" x="480" y="774" text-anchor="middle">POST /tip/bookmark/{id}</text>
+
+  <rect class="node node-auth" x="650" y="625" width="220" height="72" rx="10"/>
+  <text class="label" x="760" y="656" text-anchor="middle">댓글 / 답글</text>
+  <text class="route" x="760" y="679" text-anchor="middle">POST /tip/comment/{id}</text>
+
+  <rect class="node node-auth" x="650" y="720" width="220" height="72" rx="10"/>
+  <text class="label" x="760" y="751" text-anchor="middle">댓글 수정 / 삭제</text>
+  <text class="route" x="760" y="774" text-anchor="middle">PATCH/DELETE comment</text>
+
+  <rect class="node node-auth" x="945" y="625" width="210" height="72" rx="10"/>
+  <text class="label" x="1050" y="656" text-anchor="middle">팔로우</text>
+  <text class="route" x="1050" y="679" text-anchor="middle">POST /user/follow/{id}</text>
+
+  <rect class="node node-auth" x="945" y="735" width="210" height="88" rx="10"/>
+  <text class="label" x="1050" y="766" text-anchor="middle">글작성 / 수정</text>
+  <text class="route" x="1050" y="791" text-anchor="middle">/tips/form/{tip?}</text>
+
+  <rect class="node node-auth" x="1225" y="610" width="230" height="72" rx="10"/>
+  <text class="label" x="1340" y="641" text-anchor="middle">마이페이지</text>
+  <text class="route" x="1340" y="664" text-anchor="middle">/mypage/{tab}</text>
+
+  <rect class="node node-auth" x="1225" y="715" width="230" height="150" rx="10"/>
+  <text class="label" x="1340" y="750" text-anchor="middle">내 관리 탭</text>
+  <text class="small" x="1340" y="779" text-anchor="middle">Profile · My Tips</text>
+  <text class="small" x="1340" y="804" text-anchor="middle">Archive · Notifications</text>
+  <text class="small" x="1340" y="829" text-anchor="middle">Activity</text>
+
+  <path class="arrow-auth" d="M 1290 399 C 1290 505, 205 505, 205 648"/>
+  <path class="arrow-auth" d="M 300 692 C 335 692, 343 661, 383 661"/>
+  <path class="arrow-auth" d="M 300 692 C 338 692, 342 756, 383 756"/>
+  <path class="arrow-auth" d="M 575 661 L 648 661"/>
+  <path class="arrow-auth" d="M 575 756 L 648 756"/>
+  <path class="arrow-auth" d="M 870 661 L 943 661"/>
+  <path class="arrow-auth" d="M 870 756 L 943 779"/>
+  <path class="arrow-auth" d="M 1155 661 L 1223 646"/>
+  <path class="arrow-auth" d="M 1155 779 L 1223 790"/>
+  <path class="arrow-auth" d="M 1050 823 C 1050 880, 1045 930, 1045 930 C 1045 975, 1045 390, 1045 390" opacity="0.7"/>
+  <text class="tiny" x="940" y="890">저장 / 수정 성공 후 상세로 이동</text>
+
+  <rect class="lane-admin" x="60" y="955" width="1480" height="170" rx="18"/>
+  <text class="lane-title" x="90" y="1000">3. 관리자 Flow</text>
+  <text class="lane-subtitle" x="90" y="1025">admin + auth 미들웨어 통과 후 사용자, 카테고리, 태그, 팁을 탭 기반으로 관리</text>
+
+  <rect class="node node-admin" x="145" y="1055" width="190" height="56" rx="10"/>
+  <text class="label" x="240" y="1089" text-anchor="middle">Admin Home</text>
+
+  <rect class="node node-admin" x="430" y="1055" width="160" height="56" rx="10"/>
+  <text class="label" x="510" y="1089" text-anchor="middle">Users</text>
+
+  <rect class="node node-admin" x="665" y="1055" width="190" height="56" rx="10"/>
+  <text class="label" x="760" y="1089" text-anchor="middle">Categories</text>
+
+  <rect class="node node-admin" x="930" y="1055" width="160" height="56" rx="10"/>
+  <text class="label" x="1010" y="1089" text-anchor="middle">Tags</text>
+
+  <rect class="node node-admin" x="1165" y="1055" width="190" height="56" rx="10"/>
+  <text class="label" x="1260" y="1089" text-anchor="middle">Tips</text>
+
+  <rect fill="#ffffff" stroke="#f2b5b5" stroke-width="1.5" x="1390" y="1055" width="105" height="56" rx="10"/>
+  <text class="label" x="1442" y="1078" text-anchor="middle">관리</text>
+  <text class="small" x="1442" y="1100" text-anchor="middle">CRUD</text>
+
+  <path class="soft-line" d="M 1290 399 C 1505 510, 1505 870, 1355 975"/>
+  <path class="arrow-admin" d="M 335 1083 L 428 1083"/>
+  <path class="arrow-admin" d="M 590 1083 L 663 1083"/>
+  <path class="arrow-admin" d="M 855 1083 L 928 1083"/>
+  <path class="arrow-admin" d="M 1090 1083 L 1163 1083"/>
+  <path class="arrow-admin" d="M 1355 1083 L 1388 1083"/>
+
+  <rect x="83" y="1138" width="1434" height="1" fill="#d0d5dd"/>
+  <text class="small" x="80" y="1165">기준: src/routes/web.php, src/routes/auth.php, src/config/mypage.php, src/config/admin.php, site-header.blade.php</text>
+</svg>
